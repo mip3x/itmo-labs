@@ -1,4 +1,4 @@
-import task1, task2, task3
+import task1, task2
 
 PATTERN: str = r'=-{\('
 
