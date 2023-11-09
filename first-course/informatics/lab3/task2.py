@@ -1,8 +1,13 @@
 import re
 
 
-def task2Testing():
-    pattern: str = r'(?<!:)(([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?)(?!:)'
+def displayAnswer(string: str, result: str, correctAnswer: str, match: bool):
+    print(f"Строка: {string}\nОтвет программы: {result}")
+    print(f"Правильный ответ: {correctAnswer}\nСовпадение: {'да' if match else 'нет'}\n")
+
+
+def taskSecondTesting(pattern: str):
+    testNumber: int = 1
 
     print('### ВТОРОЕ ЗАДАНИЕ ###\n')
 
@@ -12,27 +17,60 @@ def task2Testing():
     часа. То есть в 17:00:01 оно уже точно 
     кончится'''
 
-    print(f"Строка: {string}\nОтвет: {replace(pattern, string)}\n")
+    result: str = replace(pattern, string)
+
+    correctAnswer: str
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+    displayAnswer(string, result, correctAnswer, match)
+
+    testNumber += 1
 
     print('## Второй тест ##')
     string: str = '''Сегодня в 29:5849:938475 состоится...'''
 
-    print(f"Строка: {string}\nОтвет: {replace(pattern, string)}\n")
+    result: str = replace(pattern, string)
+
+    correctAnswer: str
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+    displayAnswer(string, result, correctAnswer, match)
+
+    testNumber += 1
 
     print('## Третий тест ##')
     string: str = '''Сегодня в 23:7 состоится...'''
 
-    print(f"Строка: {string}\nОтвет: {replace(pattern, string)}\n")
+    result: str = replace(pattern, string)
+
+    correctAnswer: str
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+    displayAnswer(string, result, correctAnswer, match)
+
+    testNumber += 1
 
     print('## Четвертый тест ##')
     string: str = '''Сегодня в 07:00 будет занятие в аудитории 235'''
 
-    print(f"Строка: {string}\nОтвет: {replace(pattern, string)}\n")
+    result: str = replace(pattern, string)
+
+    correctAnswer: str
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+    displayAnswer(string, result, correctAnswer, match)
+
+    testNumber += 1
 
     print('## Пятый тест ##')
     string: str = '''Сегодня в 00:00 будет занятие в аудитории 235, а в 00:01:70 всем спать. В 0:07:10 ничего не планируется'''
 
-    print(f"Строка: {string}\nОтвет: {replace(pattern, string)}")
+    result: str = replace(pattern, string)
+
+    correctAnswer: str
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+    displayAnswer(string, result, correctAnswer, match)
 
 
 def replace(pattern: str, string: str) -> str:
@@ -40,3 +78,18 @@ def replace(pattern: str, string: str) -> str:
     result: str = re.sub(pattern, replacement, string)
 
     return result
+
+
+def checking(result: str, testNumber: int) -> (str, bool):
+    correctAnswers: dict = {
+        1: '''Уважаемые студенты! В эту субботу в 
+    (TBD) планируется доп. занятие на 2 
+    часа. То есть в (TBD) оно уже точно 
+    кончится''',
+        2: 'Сегодня в 29:5849:938475 состоится...',
+        3: 'Сегодня в 23:7 состоится...',
+        4: 'Сегодня в (TBD) будет занятие в аудитории 235',
+        5: 'Сегодня в (TBD) будет занятие в аудитории 235, а в 00:01:70 всем спать. В 0:07:10 ничего не планируется'
+    }
+
+    return correctAnswers[testNumber], result == correctAnswers[testNumber]
