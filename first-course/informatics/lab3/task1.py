@@ -6,6 +6,16 @@ def displayAnswer(string: str, result: int, correctAnswer: int, match: bool):
     print(f"Правильный ответ: {correctAnswer}\nСовпадение: {'да' if match else 'нет'}\n")
 
 
+def getData(pattern: str, string: str, testNumber: int) -> (int, int, bool):
+    result: int = test(pattern, string)
+
+    correctAnswer: int
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+
+    return result, correctAnswer, match
+
+
 def taskFirstTesting(pattern: str):
     testNumber: int = 1
     print('### ПЕРВОЕ ЗАДАНИЕ ###\n')
@@ -13,11 +23,11 @@ def taskFirstTesting(pattern: str):
     print('## Первый тест ##')
     string: str = '=-{(sldf=-{(=-{sdf(=sdf-{(===-{('
 
-    result: int = test(pattern, string)
-
+    result: int
     correctAnswer: int
     match: bool
-    correctAnswer, match = checking(result, testNumber)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
+
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -25,11 +35,8 @@ def taskFirstTesting(pattern: str):
     print('## Второй тест ##')
     string: str = 'Здесь нет никаких смайликов'
 
-    result: int = test(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: int
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -37,11 +44,8 @@ def taskFirstTesting(pattern: str):
     print('## Третий тест ##')
     string: str = '=-{('
 
-    result: int = test(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: int
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -49,11 +53,8 @@ def taskFirstTesting(pattern: str):
     print('## Четвертый тест ##')
     string: str = '=-{(=-{(=-{(=-{(=-{(=-{(=-{('
 
-    result: int = test(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: int
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -61,12 +62,8 @@ def taskFirstTesting(pattern: str):
     print('## Пятый тест ##')
     string: str = '=-{( =  -{ (  =-    {(f;lsjdf    ={(   {(=- {( =-{('
 
-    result: int = test(pattern, string)
-    print(f"Строка: {string}\nОтвет: {result}")
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: int
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
 
@@ -84,5 +81,4 @@ def checking(result: int, testNumber: int) -> (int, bool):
         4: 7,
         5: 2
     }
-
     return correctAnswers[testNumber], result == correctAnswers[testNumber]

@@ -6,6 +6,16 @@ def displayAnswer(string: str, result: str, correctAnswer: str, match: bool):
     print(f"Правильный ответ: {correctAnswer}\nСовпадение: {'да' if match else 'нет'}\n")
 
 
+def getData(pattern: str, string: str, testNumber: int) -> (str, str, bool):
+    result: str = replace(pattern, string)
+
+    correctAnswer: str
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+
+    return result, correctAnswer, match
+
+
 def taskSecondTesting(pattern: str):
     testNumber: int = 1
 
@@ -17,11 +27,11 @@ def taskSecondTesting(pattern: str):
     часа. То есть в 17:00:01 оно уже точно 
     кончится'''
 
-    result: str = replace(pattern, string)
-
+    result: str
     correctAnswer: str
     match: bool
-    correctAnswer, match = checking(result, testNumber)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
+
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -29,11 +39,8 @@ def taskSecondTesting(pattern: str):
     print('## Второй тест ##')
     string: str = '''Сегодня в 29:5849:938475 состоится...'''
 
-    result: str = replace(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: str
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -41,11 +48,8 @@ def taskSecondTesting(pattern: str):
     print('## Третий тест ##')
     string: str = '''Сегодня в 23:7 состоится...'''
 
-    result: str = replace(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: str
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -53,11 +57,8 @@ def taskSecondTesting(pattern: str):
     print('## Четвертый тест ##')
     string: str = '''Сегодня в 07:00 будет занятие в аудитории 235'''
 
-    result: str = replace(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: str
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -65,11 +66,8 @@ def taskSecondTesting(pattern: str):
     print('## Пятый тест ##')
     string: str = '''Сегодня в 00:00 будет занятие в аудитории 235, а в 00:01:70 всем спать. В 0:07:10 ничего не планируется'''
 
-    result: str = replace(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: str
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
 

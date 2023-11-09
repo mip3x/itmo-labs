@@ -13,6 +13,16 @@ def displayList(inputList: list) -> str:
     return outputString
 
 
+def getData(pattern: str, string: str, testNumber: int) -> (list, list, bool):
+    result: list = test(pattern, string)
+
+    correctAnswer: list
+    match: bool
+    correctAnswer, match = checking(result, testNumber)
+
+    return result, correctAnswer, match
+
+
 def taskThirdTesting(pattern: str):
     testNumber: int = 1
     print('### ТРЕТЬЕ ЗАДАНИЕ ###\n')
@@ -22,11 +32,11 @@ def taskThirdTesting(pattern: str):
                    "которое должно идти после слов: трава\n"
                    "и молоко\n")
 
-    result: list = test(pattern, string)
-
+    result: list
     correctAnswer: list
     match: bool
-    correctAnswer, match = checking(result, testNumber)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
+
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -34,11 +44,8 @@ def taskThirdTesting(pattern: str):
     print('## Второй тест ##')
     string: str = "пупп пууууп пооооопооооо пээпээ"
 
-    result: list = test(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: list
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -46,11 +53,8 @@ def taskThirdTesting(pattern: str):
     print('## Третий тест ##')
     string: str = "ппп пппп ннннн"
 
-    result: list = test(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: list
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -58,11 +62,8 @@ def taskThirdTesting(pattern: str):
     print('## Четвертый тест ##')
     string: str = "а и ооо пооопп"
 
-    result: list = test(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: list
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
     testNumber += 1
@@ -70,11 +71,8 @@ def taskThirdTesting(pattern: str):
     print('## Пятый тест ##')
     string: str = "ааа ааа аааааа ооо"
 
-    result: list = test(pattern, string)
+    result, correctAnswer, match = getData(pattern, string, testNumber)
 
-    correctAnswer: list
-    match: bool
-    correctAnswer, match = checking(result, testNumber)
     displayAnswer(string, result, correctAnswer, match)
 
 
