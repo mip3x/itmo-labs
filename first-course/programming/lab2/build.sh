@@ -8,7 +8,7 @@ mkdir -p build/classes
 
 # build classes
 echo 'Building pokemons...'
-javac -d ./build/classes -cp ./lib/Pokemon.jar ./Main.java $(find . | grep .java)
+javac -d ./build/classes -cp ./lib/Pokemon.jar ./src/Main.java $(find . | grep .java)
 
 # create manifest
 cd build/classes
