@@ -30,7 +30,7 @@ def taskThirdTesting(pattern: str):
     print('## Первый тест ##')
     string: str = ("Классное слово – обороноспособность,\n"
                    "которое должно идти после слов: трава\n"
-                   "и молоко\n")
+                   "и молоко и арита\n")
 
     result: list
     correctAnswer: list
