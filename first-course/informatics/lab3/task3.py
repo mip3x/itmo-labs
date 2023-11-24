@@ -30,7 +30,7 @@ def taskThirdTesting(pattern: str):
     print('## Первый тест ##')
     string: str = ("Классное слово – обороноспособность,\n"
                    "которое должно идти после слов: трава\n"
-                   "и молоко и арита\n")
+                   "и молокО и арита\n")
 
     result: list
     correctAnswer: list
@@ -77,11 +77,11 @@ def taskThirdTesting(pattern: str):
 
 
 def test(pattern: str, string: str) -> list:
-    matches = re.finditer(pattern, string)
+    matches = re.findall(pattern, string, re.IGNORECASE)
 
     match_list: list = list()
     for match in matches:
-        match_list.append(match.group())
+        match_list.append(match[0])
 
     match_list = sorted(set(match_list), key=lambda x: (len(x), x))
     return match_list

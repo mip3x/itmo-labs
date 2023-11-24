@@ -5,7 +5,7 @@ SECOND_TASK_PATTERN: str = r'(?<!:)(([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?)(?!:)'
 
 VOWELS: str = 'аеиоуыэюя'
 CONSONANTS: str = 'йцкнгшщзхъфвпрлджчсмтьб'
-THIRD_TASK_PATTERN = r'\b[йцкнгшщзхъфвпрлджчсмтьб]*([аеиоуыэюя])(\1*[йцкнгшщзхъфвпрлджчсмтьб]*)*\b'
+THIRD_TASK_PATTERN = rf'(\b[{CONSONANTS}]*([{VOWELS}])[{CONSONANTS}]*(\2[{CONSONANTS}]*)*\b)'
 
 task_number = input("Введите номер задания (1-3): ")
 if task_number == '1':
