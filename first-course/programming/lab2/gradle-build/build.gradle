@@ -1,0 +1,7 @@
+apply plugin: 'application'
+
+dependencies {
+    implementation files('./lib/Pokemon.jar')
+}
+
+mainClassName = 'Main'
