@@ -1,0 +1,50 @@
+{
+    "week": "odd",
+    "date": "Wednesday",
+    "classes": {
+        "class1": {
+            "subject": "Информатика",
+            "class_type": "Лекция",
+            "teacher": "Балакшин Павел Валерьевич",
+            "time": {
+                "start_time": "08:20",
+                "end_time": "09:50"
+            },
+            "audience": 1216,
+            "building": "ул.Ломоносова, д.9, лит.М"
+        },
+        "class2": {
+            "subject": "Основы профессиональной деятельности",
+            "class_type": "Лекция",
+            "teacher": "Клименков Сергей Викторович",
+            "time": {
+                "start_time": "10:00",
+                "end_time": "11:30"
+            },
+            "audience": 1216,
+            "building": "ул.Ломоносова, д.9, лит.М"
+        },
+        "class3": {
+            "subject": "Информатика",
+            "class_type": "Лабораторная",
+            "teacher": "Малышева Татьяна Алексеевна",
+            "time": {
+                "start_time": "13:30",
+                "end_time": "15:00"
+            },
+            "audience": 2117,
+            "building": "Кронверкский пр., д.49, лит.А"
+        },
+        "class4": {
+            "subject": "Информатика",
+            "class_type": "Лабораторная",
+            "teacher": "Малышева Татьяна Алексеевна",
+            "time": {
+                "start_time": "15:20",
+                "end_time": "16:50"
+            },
+            "audience": 2117,
+            "building": "Кронверкский пр., д.49, лит.А"
+        }
+    }
+}
