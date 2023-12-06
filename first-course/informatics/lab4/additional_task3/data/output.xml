@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<root>
+	<week>odd</week>
+	<date>Wednesday</date>
+	<classes>
+		<class1>
+			<subject>Информатика</subject>
+			<class_type>Лекция</class_type>
+			<teacher>Балакшин Павел Валерьевич</teacher>
+			<time>
+				<start_time>08:20</start_time>
+				<end_time>09:50</end_time>
+			</time>
+			<audience>1216.0</audience>
+			<building>ул.Ломоносова, д.9, лит.М</building>
+		</class1>
+		<class2>
+			<subject>Основы профессиональной деятельности</subject>
+			<class_type>Лекция</class_type>
+			<teacher>Клименков Сергей Викторович</teacher>
+			<time>
+				<start_time>10:00</start_time>
+				<end_time>11:30</end_time>
+			</time>
+			<audience>1216.0</audience>
+			<building>ул.Ломоносова, д.9, лит.М</building>
+		</class2>
+		<class3>
+			<subject>Информатика</subject>
+			<class_type>Лабораторная</class_type>
+			<teacher>Малышева Татьяна Алексеевна</teacher>
+			<time>
+				<start_time>13:30</start_time>
+				<end_time>15:00</end_time>
+			</time>
+			<audience>2117.0</audience>
+			<building>Кронверкский пр., д.49, лит.А</building>
+		</class3>
+		<class4>
+			<subject>Информатика</subject>
+			<class_type>Лабораторная</class_type>
+			<teacher>Малышева Татьяна Алексеевна</teacher>
+			<time>
+				<start_time>15:20</start_time>
+				<end_time>16:50</end_time>
+			</time>
+			<audience>
+				<item>2117.0</item>
+				<item>2228.0</item>
+			</audience>
+			<distance>true</distance>
+			<building>Кронверкский пр., д.49, лит.А</building>
+		</class4>
+	</classes>
+</root>
