@@ -12,7 +12,7 @@ real = Word('-.' + nums).setParseAction(lambda x: float(x[0]))
 string = QuotedString('"')
 value = Forward()
 array = Group(LBRACK + delimitedList(value) + RBRACK) # value is delimiter ([ value ])
-member = Group(string + COLON + value) # colon is delimiter  (string : value)
+member = Group(string + COLON + value) # colon is delimiter (string : value)
 json_object = Dict(LBRACE + delimitedList(member) + RBRACE)
 
 value << (real | integer | string | json_object | array | TRUE | FALSE | NULL)

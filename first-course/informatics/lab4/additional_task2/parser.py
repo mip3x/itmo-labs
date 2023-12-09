@@ -14,8 +14,6 @@ def parse(result_file, matches):
     for match in matches:
         group = match.group().split(': ')
 
-        print(group)
-
         if len(group) > 1:
             group = [group[0].replace('"', ''), group[1].replace('"', '')]
             result_file.write(f"{TAB * tabs}<{group[0]}>{group[1]}</{group[0]}>{NEW_LINE}")

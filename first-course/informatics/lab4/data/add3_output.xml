@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <root>
 	<week>odd</week>
 	<date>Wednesday</date>
@@ -10,7 +11,7 @@
 				<start_time>08:20</start_time>
 				<end_time>09:50</end_time>
 			</time>
-			<audience>1216</audience>
+			<audience>1216.0</audience>
 			<building>ул.Ломоносова, д.9, лит.М</building>
 		</class1>
 		<class2>
@@ -21,7 +22,7 @@
 				<start_time>10:00</start_time>
 				<end_time>11:30</end_time>
 			</time>
-			<audience>1216</audience>
+			<audience>1216.0</audience>
 			<building>ул.Ломоносова, д.9, лит.М</building>
 		</class2>
 		<class3>
@@ -32,7 +33,7 @@
 				<start_time>13:30</start_time>
 				<end_time>15:00</end_time>
 			</time>
-			<audience>2117</audience>
+			<audience>2117.0</audience>
 			<building>Кронверкский пр., д.49, лит.А</building>
 		</class3>
 		<class4>
@@ -43,7 +44,7 @@
 				<start_time>15:20</start_time>
 				<end_time>16:50</end_time>
 			</time>
-			<audience>2117</audience>
+			<audience>2117.0</audience>
 			<building>Кронверкский пр., д.49, лит.А</building>
 		</class4>
 	</classes>
