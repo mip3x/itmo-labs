@@ -6,7 +6,7 @@ import ru.ifmo.se.pokemon.Move;
 
 import moves.status.DoubleTeam;
 
-public class Roserade extends Pokemon {
+public class Roserade extends Roselia {
     public Roserade(String name, int level) {
         super(name, level);
 
