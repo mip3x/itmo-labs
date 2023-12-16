@@ -23,10 +23,11 @@ package "pokemons" {
 
 class Pokemon
 
-Pokemon <-- Hitmonchan
+Pokemon <-- Budew
+Tyrogue <-- Hitmonchan
 Pokemon <-- Kyurem
-Pokemon <-- Roselia
-Pokemon <-- Roserade
+Budew <-- Roselia
+Roselia <-- Roserade
 Pokemon <-- Tyrogue
 
 @enduml
