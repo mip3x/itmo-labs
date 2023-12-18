@@ -1,3 +1,17 @@
-apply plugin: 'application'
+// apply plugin: 'application'
+plugins {
+    id 'java'
+    id 'application'
+}
 
-mainClassName = 'Main'
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+}
+
+application {
+    mainClassName = 'Main'
+}
