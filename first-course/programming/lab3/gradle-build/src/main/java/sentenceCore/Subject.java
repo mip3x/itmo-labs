@@ -9,6 +9,7 @@ import objects.Entity;
 public abstract class Subject extends CoreSpeech implements Dependent {
     private Case dependentCase;
     protected Entity entity;
+    private String VOWELS = "aeiouAEIOU";
 
     public Subject(Entity entity, String characteristic, Order order) {
         super(entity.getName(), characteristic, order);
@@ -31,12 +32,12 @@ public abstract class Subject extends CoreSpeech implements Dependent {
     }
 
     @Override
+    public abstract String getName(); 
+
+    @Override
     public String getCasedName() {
         return (String)getMainWord();
     }
-
-    @Override
-    public abstract String getName(); 
 
     protected abstract Entity getEntity();
 
@@ -55,10 +56,17 @@ public abstract class Subject extends CoreSpeech implements Dependent {
             case MALE:
                 switch (this.dependentCase) {
                     case ACCUSATIVE:
-                        setMainWord(entity.getName() + "а");
+                        if (VOWELS.indexOf(entity.getName().charAt(entity.getName().length() - 1)) == -1) setMainWord(entity.getName() + "а");
+                        else setMainWord(entity.getName() + "у");
                         break;
                     case CREATIVE:
                         if (((String)getMainWord()).toLowerCase().equals("он")) setMainWord("ним");
+                        break;
+                    case PREPOSITIONAL:
+                        switch (entity.getName()) {
+                            case "Лес" -> setMainWord(entity.getName() + "у");
+                            case "папоротник" -> setMainWord(entity.getName() + "е");
+                        }
                         break;
                 }
                 break;

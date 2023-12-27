@@ -10,21 +10,22 @@ import services.MemberType;
 import services.Tense;
 import services.Gender;
 import services.Case;
-import services.binders.Preposition;
+import services.binders.*;
 
 public class Action implements SentenceMember {
     private Representer representer;
     private Predicate predicate;
+    private Case dependenceCase;
 
     public Action(Representer representer, Predicate predicate) {
         setRepresenter(representer);
         setPredicate(predicate);
     }
 
-    public Action(Representer representer, Predicate predicate, Placer placer) {
+    public Action(Representer representer, Predicate predicate, Placer placer, Case dependenceCase) {
         setRepresenter(representer);
         setPredicate(predicate);
-        setPredicateDependence(placer.getPlace().getPreposition(), placer);
+        setPredicateDependence(placer.getPlace().getPreposition(), placer, dependenceCase);
     }
 
     public Representer getRepresenter() {
@@ -47,13 +48,28 @@ public class Action implements SentenceMember {
             Preposition preposition = this.predicate.getDependence().getLeft(); 
             Dependent dependent = this.predicate.getDependence().getRight();
 
-            switch (preposition) {
-                case ON -> dependent.setCase(Case.ACCUSATIVE);
-                case IN -> dependent.setCase(Case.ACCUSATIVE);
-                case AFTER -> dependent.setCase(Case.CREATIVE);
-            }
+            dependent.setCase(dependenceCase);
 
-            dependence = " " + preposition.getSentenceMemberCharacters() + dependent.getCasedName();
+            dependence = " " + preposition.getSentenceMemberCharacters();
+
+            Subject subjectDependent = (Subject)dependent;
+            if (subjectDependent.getCharacteristic() != null) {
+                if (subjectDependent.getOrder() != null) {
+                    switch ((Order)subjectDependent.getOrder()) {
+                        case DIRECT:
+                            dependence += (String)subjectDependent.getCharacteristic() + " " + dependent.getCasedName();
+                            break;
+                        case REVERSE:
+                            if (((String)subjectDependent.getCharacteristic()).contains("вш")) {
+                                dependence += dependent.getCasedName() + " " + Union.COMMA.getSentenceMemberCharacters() + (String)subjectDependent.getCharacteristic();
+                            }
+                            else dependence += dependent.getCasedName() + " " + (String)subjectDependent.getCharacteristic();
+                            break;
+                    }
+                } 
+                else dependence += (String)subjectDependent.getCharacteristic() + " " + dependent.getCasedName();
+            } 
+            else dependence = " " + preposition.getSentenceMemberCharacters() + dependent.getCasedName();
         }
 
         String predicateInfinitive = this.predicate.getInfinitive().toLowerCase();
@@ -85,8 +101,9 @@ public class Action implements SentenceMember {
                             switch (predicateInfinitive) {
                                 case "помчаться" -> this.predicate.setPredicateWord("помчались" + dependence);
                                 case "притаиться" -> this.predicate.setPredicateWord("притаились" + dependence);
-                                case "видеть" -> this.predicate.setPredicateWord("видели" + dependence);
-                                case "слышать" -> this.predicate.setPredicateWord("слышали" + dependence);
+                                case "прислушиваться" -> this.predicate.setPredicateWord("прислушиваясь" + dependence);
+                                case "не видеть" -> this.predicate.setPredicateWord("не видели" + dependence);
+                                case "не слышать" -> this.predicate.setPredicateWord("не слышали" + dependence);
                             }
                     }
             }
@@ -94,7 +111,8 @@ public class Action implements SentenceMember {
         else {}
     }
 
-    public void setPredicateDependence(Preposition preposition, Dependent dependent) {
+    public void setPredicateDependence(Preposition preposition, Dependent dependent, Case dependenceCase) {
+        this.dependenceCase = dependenceCase;
         predicate.setDependence(preposition, dependent);
         setPredicate(predicate);
     }
@@ -102,7 +120,7 @@ public class Action implements SentenceMember {
     @Override
     public String getSentenceMemberCharacters() {
         String result;
-        if (representer == null || representer.getHiddenStatus()) result = predicate.getSentenceMemberCharacters();
+        if (representer.equals(null) || representer.getHiddenStatus()) result = predicate.getSentenceMemberCharacters();
         else result = representer.getSentenceMemberCharacters() + predicate.getSentenceMemberCharacters();
 
         return result;

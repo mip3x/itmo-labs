@@ -53,6 +53,14 @@ public abstract class CoreSpeech implements SentenceMember {
         content.put(characteristicKey, characteristic);
     }
 
+    protected Object getOrder() {
+        return content.get(orderKey);
+    }
+
+    protected void setOrder(Order order) {
+        content.put(orderKey, order);
+    }
+
     @Override
     public String getSentenceMemberCharacters() {
         String result = StringUtils.EMPTY;
