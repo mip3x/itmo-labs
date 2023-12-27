@@ -21,7 +21,7 @@
 				<start_time>10:00</start_time>
 				<end_time>11:30</end_time>
 			</time>
-			<audience>1216</audience>
+			<audience>-1.216</audience>
 			<building>ул.Ломоносова д.9 лит.М</building>
 		</class2>
 		<class3>
@@ -47,4 +47,4 @@
 			<building>Кронверкский пр. д.49 лит.А</building>
 		</class4>
 	</classes>
-</root>
+</[]    massive>

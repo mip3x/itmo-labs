@@ -1,6 +1,9 @@
 {
     "week": "odd",
     "date": "Wednesday",
+    "massive2": [],
+    "massive": [1, 2, 3, 4, 5],
+    "jsonTest": {},
     "classes": {
         "class1": {
             "subject": "Информатика",
@@ -21,7 +24,7 @@
                 "start_time": "10:00",
                 "end_time": "11:30"
             },
-            "audience": 1216,
+            "audience": -1.216,
             "building": "ул.Ломоносова, д.9, лит.М"
         },
         "class3": {

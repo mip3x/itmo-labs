@@ -2,6 +2,15 @@
 <root>
 	<week>odd</week>
 	<date>Wednesday</date>
+	<massive2/>
+	<massive>
+		<item>1.0</item>
+		<item>2.0</item>
+		<item>3.0</item>
+		<item>4.0</item>
+		<item>5.0</item>
+	</massive>
+	<jsonTest/>
 	<classes>
 		<class1>
 			<subject>Информатика</subject>
@@ -22,7 +31,7 @@
 				<start_time>10:00</start_time>
 				<end_time>11:30</end_time>
 			</time>
-			<audience>1216.0</audience>
+			<audience>-1.216</audience>
 			<building>ул.Ломоносова, д.9, лит.М</building>
 		</class2>
 		<class3>
