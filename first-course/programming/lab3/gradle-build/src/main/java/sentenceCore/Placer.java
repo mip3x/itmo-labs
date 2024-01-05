@@ -43,12 +43,4 @@ public class Placer extends Subject {
     public String getName() {
         return entity.getName();
     }
-
-    public Entity getEntity() {
-        return entity;
-    }
-
-    public void setEntity(Entity entity) {
-        this.entity = entity;
-    }
 }

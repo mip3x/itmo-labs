@@ -18,4 +18,10 @@ public class Place extends Entity {
     public void setPreposition(Preposition preposition) {
         this.preposition = preposition;
     }
+
+    public String toString() {
+        return super.toString() + ";" +
+            "preposition=" + getPreposition() +
+            "}";
+    }
 }

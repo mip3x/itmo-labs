@@ -31,6 +31,14 @@ public abstract class Subject extends CoreSpeech implements Dependent {
         setMainWord(name);
     }
 
+    protected Entity getEntity() {
+       return entity; 
+    };
+
+    protected void setEntity(Entity entity) {
+       this.entity = entity; 
+    };
+
     @Override
     public abstract String getName(); 
 
@@ -38,10 +46,6 @@ public abstract class Subject extends CoreSpeech implements Dependent {
     public String getCasedName() {
         return (String)getMainWord();
     }
-
-    protected abstract Entity getEntity();
-
-    protected abstract void setEntity(Entity entity);
 
     @Override
     public Case getCase() {

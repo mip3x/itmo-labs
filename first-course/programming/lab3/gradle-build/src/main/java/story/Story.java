@@ -64,7 +64,7 @@ public class Story {
         Action poohAndPigletHide = new Action(representerPoohAndPiglet, hide, bushesPlacer, Case.PREPOSITIONAL);
         Action poohAndPigletListening = new Action(representerPoohAndPiglet, listening);
 
-        Action nothingWasQuite = new Action(representerNothing, be);
+        Action nothingWasQuite = new Action(representerNothing, be, forestPlacer, Case.PREPOSITIONAL);
 
         Action poohAndPigletSee = new Action(representerPoohAndPiglet, see);
         Action poohAndPigletHear = new Action(representerPoohAndPiglet, hear);
@@ -125,8 +125,7 @@ public class Story {
         // fourth sentence
         Sentence fourthSentence = new Sentence();
 
-        fourthSentence.addSentenceMember(Preposition.IN);
-        fourthSentence.addSentenceMember(forestPlacer);
+        representerNothing.setHiddenStatus(true);
         fourthSentence.addSentenceMember(nothingWasQuite);
 
         representerPoohAndPiglet.setHiddenStatus(true);
@@ -149,7 +148,6 @@ public class Story {
         fifthSentence.addSentenceMember(Union.DOT);
 
         addSentence(fifthSentence);
-
     }
 
     public void startTheTell() {

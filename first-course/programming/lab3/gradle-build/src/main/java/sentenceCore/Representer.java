@@ -52,12 +52,4 @@ public class Representer extends Subject {
     public String getName() {
         return entity.getName();
     }
-
-    protected Entity getEntity() {
-        return entity;
-    }
-
-    protected void setEntity(Entity entity) {
-        this.entity = entity;
-    }
 }

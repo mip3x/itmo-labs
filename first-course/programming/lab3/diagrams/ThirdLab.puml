@@ -20,16 +20,21 @@ package "objects" {
         +String getName()
         +void setName(String name)
         +Gender getGender()
+        +String toString()
+        +boolean equals(Object object)
+        +int hashCode()
     }
 
     Class Person extends Entity {
         +Person(String name, Gender gender)
+        +String toString()
     }
     Class Place extends Entity {
         -Preposition preposition
         +Place(String name, Gender gender, Preposition preposition)
         +Preposition getPreposition()
         +void setPreposition(Preposition preposition)
+        +String toString()
     }
 }
 
@@ -37,15 +42,15 @@ package "sentenceCore" {
     Class Action {
         -Representer representer
         -Predicate predicate
-        -Case dependentCase
+        -Case dependenceCase
 
         +Action(Representer representer, Predicate predicate)
-        +Action(Representer representer, Predicate predicate, Placer placer, Case dependentCase )
+        +Action(Representer representer, Predicate predicate, Placer placer, Case dependenceCase )
         +Representer getRepresenter()
         +void setRepresenter(Representer representer)
         +Predicate getPredicate()
         +void setPredicate(Predicate predicate)
-        +void setPredicateDependence(Preposition preposition, Dependent dependent, Case dependentCase)
+        +void setPredicateDependence(Preposition preposition, Dependent dependent, Case dependenceCase)
 
         +String getSentenceMemberCharacters()
     }
@@ -78,8 +83,6 @@ package "sentenceCore" {
         +Place getPlace()
         +void setPlace(Place place)
         +String getName()
-        +Entity getEntity()
-        +void setEntity(Entity entity)
     }
     Class Predicate extends CoreSpeech {
         -Tense tense
@@ -110,9 +113,6 @@ package "sentenceCore" {
         +Person getPerson()
         +void setPerson(Person person)
         +String getName()
-
-        #Entity getEntity()
-        #void setEntity(Entity entity)
     }
     Abstract Subject extends CoreSpeech {
         -Case dependentCase
@@ -127,8 +127,8 @@ package "sentenceCore" {
         +abstract String getName()
         +String getCasedName()
 
-        #abstract Entity getEntity()
-        #abstract void setEntity(Entity entity)
+        #Entity getEntity()
+        #void setEntity(Entity entity)
 
         +Case getCase()
         +void setCase(Case dependentCase)
@@ -190,6 +190,7 @@ package "services" {
 package "story" {
     class Sentence {
         -String content
+        -final String alphabet
         +Sentence(String content)
         +Sentence()
         +void print()
@@ -207,6 +208,6 @@ SentenceMember <-[dashed]- Action
 SentenceMember <-[dashed]- CoreSpeech 
 SentenceMember <-[dashed]- Preposition 
 SentenceMember <-[dashed]- Union 
-Dependent <-[dashed]- CoreSpeech
+Dependent <-[dashed]- Subject
 
 @enduml
