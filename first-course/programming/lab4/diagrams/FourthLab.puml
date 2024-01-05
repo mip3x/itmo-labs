@@ -1,0 +1,224 @@
+@startuml
+
+package "interfaces" {
+    interface Dependent {
+        +Case getCase()
+        +void setCase(Case dependentCase)
+        +abstract String getName()
+        +String getCasedName()
+    }
+    interface SentenceMember {
+        +String getSentenceMemberCharacters()
+    }
+}
+
+package "objects" {
+    Abstract Entity {
+        -String name
+        -Gender gender
+        +Entity(String name, Gender gender)
+        +String getName()
+        +void setName(String name)
+        +Gender getGender()
+        +String toString()
+        +boolean equals(Object object)
+        +int hashCode()
+    }
+
+    Class Person extends Entity {
+        +Person(String name, Gender gender)
+        +String toString()
+    }
+    Class Place extends Entity {
+        -Preposition preposition
+        +Place(String name, Gender gender, Preposition preposition)
+        +Preposition getPreposition()
+        +void setPreposition(Preposition preposition)
+        +String toString()
+    }
+}
+
+package "sentenceCore" {
+    Class Action {
+        -Representer representer
+        -Predicate predicate
+        -Case dependenceCase
+        -Order coreOrder
+        -Order predicateDependenceOrder
+
+        +Action(Representer representer, Predicate predicate, Order coreOrder, Order predicateDependenceOrder)
+        +Action(Representer representer, Predicate predicate, Placer placer, Case dependenceCase, Order coreOrder, Order predicateDependenceOrder)
+        +Representer getRepresenter()
+        +void setRepresenter(Representer representer)
+        +Predicate getPredicate()
+        +void setPredicate(Predicate predicate)
+        +Order getCoreOrder()
+        +void setCoreOrder(Order coreOrder)
+        +Order getPredicateDependenceOrder()
+        +void setPredicateDependenceOrder(Order predicateDependenceOrder)
+        +void setPredicateDependence(Preposition preposition, Dependent dependent, Case dependenceCase)
+
+        +String getSentenceMemberCharacters()
+    }
+    Abstract CoreSpeech {
+        #Map<String, Object> content
+        -final String mainWordKey
+        -final String characteristicKey
+        -final String orderKey
+        
+        -String checkCharacteristic(String characteristic)
+
+        +CoreSpeech(String mainWord, String characteristic, Order order)
+        +CoreSpeech(String mainWord, String characteristic)
+        +CoreSpeech(String mainWord, MemberType memberType)
+
+        #Object getMainWord()
+        #void setMainWord(String mainWord)
+        #Object getCharacteristic()
+        #void setCharacteristic(String characteristic)
+        #Object getOrder()
+        #void setOrder(Order order)
+
+        +String getSentenceMemberCharacters()
+    }
+    Class Placer extends Subject {
+        -Place place
+        +Placer(Place place, String characteristic, Order order)
+        +Placer(Place place, String characteristic)
+        +Placer(Place place, MemberType memberType)
+        +Placer(String word, MemberType memberType)
+
+        +Place getPlace()
+        +void setPlace(Place place)
+        +String getName()
+    }
+    Class Predicate extends CoreSpeech {
+        -Tense tense
+        -String infinitive
+        -MutablePair<Preposition, Dependent> dependence
+        +Predicate(String mainWord, String characteristic, Tense tense, Order order)
+        +Predicate(String mainWord, String characteristic, Tense tense)
+        +Predicate(String mainWord, MemberType memberType, Tense tense)
+        +Tense getTense()
+        +void setTense(Tense tense)
+        +String getInfinitive()
+        +void setInfinitive(String infinitive)
+        +MutablePair<Preposition, Dependent> getDependence()
+        +void setDependence(Preposition preposition, Dependent dependent)
+        +String getPredicateWord()
+        +void setPredicateWord(String verb)
+    }
+    Class Representer extends Subject {
+        -Person person
+        -Boolean isHidden
+
+        +Representer(Person person, String characteristic, Order order)
+        +Representer(Person person, String characteristic)
+        +Representer(Person person, MemberType memberType)
+        +Representer(String word, MemberType memberType)
+        +Boolean getHiddenStatus()
+        +void setHiddenStatus(Boolean status)
+        +Person getPerson()
+        +void setPerson(Person person)
+        +String getName()
+    }
+    Abstract Subject extends CoreSpeech {
+        -Case dependentCase
+        #Entity entity
+        -private String VOWELS
+        
+        +Subject(Entity entity, String characteristic, Order order)
+        +Subject(Entity entity, String characteristic)
+        +Subject(Entity entity, MemberType memberType)
+        +Subject(String word, MemberType memberType)
+
+        +void setName(String name)
+
+        +abstract String getName()
+        +String getCasedName()
+
+        #Entity getEntity()
+        #void setEntity(Entity entity)
+
+        +Case getCase()
+        +void setCase(Case dependentCase)
+    }
+}
+
+package "services" {
+    package "binders" {
+        Enum Preposition {
+            ON
+            IN
+            AFTER
+
+            -String preposition
+            -Preposition(String preposition)
+
+            +String getSentenceMemberCharacters()
+        }
+        Enum Union {
+            COMMA
+            AND
+            DOT
+            WHAT
+
+            -String union
+            -Union(String union)
+
+            +String getSentenceMemberCharacters()
+        }
+    }
+    Enum Case {
+        NOMINATIVE
+        GENITIVE
+        DATIVE
+        ACCUSATIVE
+        CREATIVE
+        PREPOSITIONAL
+    }
+    Enum Gender {
+        MALE
+        MIDDLE
+        FEMALE
+        GROUP
+    }
+    Enum MemberType {
+        OBJECT 
+        CHARACTERISTIC
+    }
+    Enum Order {
+        DIRECT
+        REVERSE
+    }
+    Enum Tense {
+        FUTURE
+        PRESENT
+        PAST
+    }
+}
+
+package "story" {
+    class Sentence {
+        -String content
+        -final String alphabet
+        +Sentence(String content)
+        +Sentence()
+        +void print()
+        +void addSentenceMember(SentenceMember sentenceMember)
+    }
+    class Story {
+        -List<Sentence> sentences
+        +Story()
+        +void startTheTell()
+        -void addSentence(Sentence sentence)
+    }
+}
+
+SentenceMember <-[dashed]- Action
+SentenceMember <-[dashed]- CoreSpeech 
+SentenceMember <-[dashed]- Preposition 
+SentenceMember <-[dashed]- Union 
+Dependent <-[dashed]- Subject
+
+@enduml
