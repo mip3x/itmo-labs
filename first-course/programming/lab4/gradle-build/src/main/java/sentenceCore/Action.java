@@ -96,6 +96,7 @@ public class Action implements SentenceMember {
                                 case "исчезать" -> this.predicate.setPredicateWord("исчезал");
                                 case "обернуться" -> this.predicate.setPredicateWord("обернулся");
                                 case "подтолкнуть" -> this.predicate.setPredicateWord("подтолкнул"); 
+                                case "раздаться" -> this.predicate.setPredicateWord("раздался");
                             }
                     }
                 case MIDDLE:
@@ -103,6 +104,7 @@ public class Action implements SentenceMember {
                         case PAST:
                             switch (predicateInfinitive) {
                                 case "быть" -> this.predicate.setPredicateWord("было");
+                                case "наступить" -> this.predicate.setPredicateWord("наступило"); 
                             }
                     }
                 case GROUP:

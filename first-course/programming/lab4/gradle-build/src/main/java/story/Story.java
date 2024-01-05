@@ -40,6 +40,12 @@ public class Story {
         Person nothing = new Person("", Gender.MIDDLE);
         Representer representerNothing = new Representer(nothing, MemberType.OBJECT);
 
+        Person footSteps = new Person("топот", Gender.MALE);
+        Representer representerFootSteps = new Representer(footSteps, MemberType.OBJECT);
+
+        Person silence = new Person("молчание", Gender.MIDDLE);
+        Representer representerSilence = new Representer(silence, MemberType.OBJECT);
+
         // places
         Place moment = new Place("момент", Gender.MALE, Preposition.IN);
         Placer momentPlacer = new Placer(moment, "тот самый");
@@ -84,6 +90,10 @@ public class Story {
         Predicate see = new Predicate("не видеть", "ничего", Tense.PAST);
         Predicate hear = new Predicate("не слышать", "ничего", Tense.PAST);
 
+        Predicate ringOut = new Predicate("раздаться", MemberType.OBJECT, Tense.PAST);
+
+        Predicate come = new Predicate("наступить", "снова", Tense.PAST);
+
         // actions 
         Action poohPigletTigraGo = new Action(representerPoohPigletTigra, go, Order.DIRECT, Order.DIRECT);
         Action fogBecome = new Action(representerFog, become, Order.REVERSE, Order.DIRECT);
@@ -114,6 +124,10 @@ public class Story {
 
         Action poohAndPigletSee = new Action(representerPoohAndPiglet, see, Order.DIRECT, Order.DIRECT);
         Action poohAndPigletHear = new Action(representerPoohAndPiglet, hear, Order.DIRECT, Order.DIRECT);
+
+        Action footStepsRingOut = new Action(representerFootSteps, ringOut, Order.REVERSE, Order.DIRECT);
+
+        Action silenceCome = new Action(representerSilence, come, Order.REVERSE, Order.DIRECT);
 
         // zero sentence
         Sentence zeroSentence = new Sentence();
@@ -248,6 +262,25 @@ public class Story {
         fifthSentence.addSentenceMember(Union.DOT);
 
         addSentence(fifthSentence);
+
+        // sixth sentence
+        Sentence sixthSentence = new Sentence();
+
+        sixthSentence.addSentenceMember(footStepsRingOut);
+        sixthSentence.addSentenceMember(Union.DOT);
+        sixthSentence.addSentenceMember(Union.DOT);
+        sixthSentence.addSentenceMember(Union.DOT);
+
+        addSentence(sixthSentence);
+
+        // seventh sentence
+        Sentence seventhSentence = new Sentence();
+
+        seventhSentence.addSentenceMember(Union.AND);
+        seventhSentence.addSentenceMember(silenceCome);
+        seventhSentence.addSentenceMember(Union.DOT);
+
+        addSentence(seventhSentence);
     }
 
     public void startTheTell() {
