@@ -29,6 +29,7 @@ public abstract class Subject extends CoreSpeech implements Dependent {
 
     public void setName(String name) {
         setMainWord(name);
+        entity.setName(name);
     }
 
     protected Entity getEntity() {
@@ -61,12 +62,16 @@ public abstract class Subject extends CoreSpeech implements Dependent {
                 switch (this.dependentCase) {
                     case NOMINATIVE:
                         break;
+                    case GENITIVE:
+                        setMainWord(entity.getName() + "а");
+                        break;
                     case ACCUSATIVE:
-                        if (VOWELS.indexOf(entity.getName().charAt(entity.getName().length() - 1)) == -1) setMainWord(entity.getName() + "а");
+                        if (entity.getName().toLowerCase().equals("он")) setMainWord("его");
+                        else if (VOWELS.indexOf(entity.getName().charAt(entity.getName().length() - 1)) == -1) setMainWord(entity.getName() + "а");
                         else setMainWord(entity.getName() + "у");
                         break;
                     case CREATIVE:
-                        if (((String)getMainWord()).toLowerCase().equals("он")) setMainWord("ним");
+                        if (entity.getName().toLowerCase().equals("он")) setMainWord("ним");
                         break;
                     case PREPOSITIONAL:
                         switch (entity.getName()) {

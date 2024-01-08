@@ -18,11 +18,13 @@ public class Action implements SentenceMember {
     private Case dependenceCase;
     private Order coreOrder;
     private Order predicateDependenceOrder;
+    private String dependence;
 
     public Action(Representer representer, Predicate predicate, Order coreOrder, Order predicateDependenceOrder) {
         setCoreOrder(coreOrder);
         setPredicateDependenceOrder(predicateDependenceOrder);
         setRepresenter(representer);
+        this.predicate = predicate;
         setPredicate(predicate);
     }
 
@@ -30,8 +32,24 @@ public class Action implements SentenceMember {
         setCoreOrder(coreOrder);
         setPredicateDependenceOrder(predicateDependenceOrder);
         setRepresenter(representer);
-        setPredicate(predicate);
+        this.predicate = predicate;
         setPredicateDependence(placer.getPlace().getPreposition(), placer, dependenceCase);
+    }
+
+    public Action(Representer representer, Predicate predicate, Preposition preposition, Representer dependenceRepresenter, Case dependenceCase, Order coreOrder, Order predicateDependenceOrder) {
+        setCoreOrder(coreOrder);
+        setPredicateDependenceOrder(predicateDependenceOrder);
+        setRepresenter(representer);
+        this.predicate = predicate;
+        setPredicateDependence(preposition, dependenceRepresenter, dependenceCase);
+    }
+
+    public Action(Representer representer, Predicate predicate, Representer dependenceRepresenter, Case dependenceCase, Order coreOrder, Order predicateDependenceOrder) {
+        setCoreOrder(coreOrder);
+        setPredicateDependenceOrder(predicateDependenceOrder);
+        setRepresenter(representer);
+        this.predicate = predicate;
+        setPredicateDependence(dependenceRepresenter, dependenceCase);
     }
 
     public Representer getRepresenter() {
@@ -47,7 +65,6 @@ public class Action implements SentenceMember {
     }
 
     public void setPredicate(Predicate predicate) {
-        this.predicate = predicate;
         String dependence = "";
 
         if (this.predicate.getDependence() != null) {
@@ -59,12 +76,12 @@ public class Action implements SentenceMember {
             dependence = preposition.getSentenceMemberCharacters();
 
             Subject subjectDependent = (Subject)dependent;
+            
             if (subjectDependent.getCharacteristic() != null) {
                 if (subjectDependent.getOrder() != null) {
                     switch ((Order)subjectDependent.getOrder()) {
                         case DIRECT:
                             dependence += ((String)subjectDependent.getCharacteristic()).substring(2) + " " + dependent.getCasedName();
-                            System.out.println(dependence + ".");
                             break;
                         case REVERSE:
                             dependence += dependent.getCasedName() + " " + (String)subjectDependent.getCharacteristic();
@@ -75,6 +92,8 @@ public class Action implements SentenceMember {
             } 
             else dependence = preposition.getSentenceMemberCharacters() + dependent.getCasedName();
         }
+
+        this.dependence = dependence;
 
         String predicateInfinitive = this.predicate.getInfinitive().toLowerCase();
         Tense predicateTense = this.predicate.getTense();
@@ -97,6 +116,14 @@ public class Action implements SentenceMember {
                                 case "обернуться" -> this.predicate.setPredicateWord("обернулся");
                                 case "подтолкнуть" -> this.predicate.setPredicateWord("подтолкнул"); 
                                 case "раздаться" -> this.predicate.setPredicateWord("раздался");
+                                case "оглянуться" -> this.predicate.setPredicateWord("оглянулся");
+                                case "не найти" -> this.predicate.setPredicateWord("не нашел");
+                                case "продолжать вдыхать" -> this.predicate.setPredicateWord("продолжал вдыхать");
+                                case "чувствовать" -> this.predicate.setPredicateWord("чувствовал");
+                            }
+                        case PRESENT:
+                            switch (predicateInfinitive) {
+                                case "стараться дышать" -> this.predicate.setPredicateWord("стараясь дышать");
                             }
                     }
                 case MIDDLE:
@@ -121,17 +148,6 @@ public class Action implements SentenceMember {
                                 case "успевать" -> this.predicate.setPredicateWord("успевали"); 
                             }
                     }
-            }
-            String currentPredicateWord = this.predicate.getPredicateWord();
-
-            if (dependence != "") {
-                if (currentPredicateWord != "") {
-                    switch (predicateDependenceOrder) {
-                        case DIRECT -> this.predicate.setPredicateWord(currentPredicateWord + " " + dependence);
-                        case REVERSE -> this.predicate.setPredicateWord(dependence + " " + currentPredicateWord);
-                    }
-                }
-                else this.predicate.setPredicateWord(dependence);
             }
         }
     }
@@ -158,16 +174,28 @@ public class Action implements SentenceMember {
         setPredicate(predicate);
     }
 
+    public void setPredicateDependence(Dependent dependent, Case dependenceCase) {
+        this.dependenceCase = dependenceCase;
+        predicate.setDependence(dependent);
+        setPredicate(predicate);
+    }
+
     @Override
     public String getSentenceMemberCharacters() {
-        String result = "";
-        if (representer.equals(null) || representer.getHiddenStatus()) result = predicate.getSentenceMemberCharacters();
-        else {
+        String result = predicate.getSentenceMemberCharacters();
+
+        switch (predicateDependenceOrder) {
+            case DIRECT -> result = result + " " + dependence + " ";
+            case REVERSE -> result = dependence + " " + result + " ";
+        }
+
+        if (!(representer.equals(null) || representer.getHiddenStatus()))
+        {
             switch (coreOrder) {
-                case DIRECT -> result = representer.getSentenceMemberCharacters() + predicate.getSentenceMemberCharacters();
-                case REVERSE -> result = predicate.getSentenceMemberCharacters() + representer.getSentenceMemberCharacters();
+                case DIRECT -> result = representer.getSentenceMemberCharacters() + " " + result;
+                case REVERSE -> result = result + representer.getSentenceMemberCharacters();
             } 
-        } 
+        }
 
         return result;
     }

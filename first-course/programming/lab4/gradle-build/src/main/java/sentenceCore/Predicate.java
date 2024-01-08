@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import interfaces.SentenceMember;
 import interfaces.Dependent;
+import interfaces.Generator;
 import services.Order;
 import services.MemberType;
 import services.Tense;
@@ -58,6 +59,10 @@ public class Predicate extends CoreSpeech {
 
     public void setDependence(Preposition preposition, Dependent dependent) {
         dependence = MutablePair.of(preposition, dependent);
+    }
+
+    public void setDependence(Dependent dependent) {
+        dependence = MutablePair.of(Preposition.NOTHING, dependent);
     }
 
     public String getPredicateWord() {

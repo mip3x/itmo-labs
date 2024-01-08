@@ -5,7 +5,8 @@ import interfaces.SentenceMember;
 public enum Preposition implements SentenceMember {
     ON("на "),
     IN("в "),
-    AFTER("за ");
+    AFTER("за "),
+    NOTHING("");
 
     private String preposition;
 

@@ -47,7 +47,7 @@ public abstract class CoreSpeech implements SentenceMember {
         content.put(mainWordKey, mainWord);
     }
 
-    protected Object getCharacteristic() {
+    public Object getCharacteristic() {
         return content.get(characteristicKey);
     }
 
@@ -69,7 +69,6 @@ public abstract class CoreSpeech implements SentenceMember {
         content.put(orderKey, order);
     }
 
-
     @Override
     public String getSentenceMemberCharacters() {
         String result = StringUtils.EMPTY;
@@ -78,16 +77,16 @@ public abstract class CoreSpeech implements SentenceMember {
             if (content.containsKey(characteristicKey)) {
                 if (content.containsKey(orderKey)) {
                     result = ((Order)content.get(orderKey) == Order.DIRECT)
-                        ? content.get(characteristicKey) + " " + (String)content.get(mainWordKey) + " "
-                        : (String)content.get(mainWordKey) + " " + content.get(characteristicKey) + " ";
+                        ? content.get(characteristicKey) + " " + (String)content.get(mainWordKey)
+                        : (String)content.get(mainWordKey) + " " + content.get(characteristicKey);
                 }
                 else {
-                    result = content.get(characteristicKey) + " " + (String)content.get(mainWordKey) + " ";
+                    result = content.get(characteristicKey) + " " + (String)content.get(mainWordKey);
                 }
             }
-            else result = (String)content.get(mainWordKey) + " ";
+            else result = (String)content.get(mainWordKey);
         }
-        else result = content.get(characteristicKey) + " "; 
+        else result = (String)content.get(characteristicKey); 
 
         return result;
     }

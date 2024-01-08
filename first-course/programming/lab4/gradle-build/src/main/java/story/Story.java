@@ -3,6 +3,7 @@ package story;
 import java.util.ArrayList;
 import java.util.List;
 
+import interfaces.Generator;
 import services.*;
 import services.binders.*;
 import sentenceCore.*;
@@ -46,6 +47,12 @@ public class Story {
         Person silence = new Person("молчание", Gender.MIDDLE);
         Representer representerSilence = new Representer(silence, MemberType.OBJECT);
 
+        Person pooh = new Person("Пух", Gender.MALE);
+        Representer representerPooh = new Representer(pooh, MemberType.OBJECT);
+
+        Person smellOfRawFern = new Person("запах", Gender.MALE);
+        Representer representerSmellOfRawFern = new Representer(smellOfRawFern, "сырого папоротника", Order.REVERSE);
+
         // places
         Place moment = new Place("момент", Gender.MALE, Preposition.IN);
         Placer momentPlacer = new Placer(moment, "тот самый");
@@ -73,7 +80,7 @@ public class Story {
         Predicate disappearManyTimes = new Predicate("исчезать", "снова", Tense.PAST);
 
         Predicate turnAround = new Predicate("обернуться", MemberType.OBJECT, Tense.PAST);
-        Predicate push = new Predicate("подтолкнуть", "Пятачка", Tense.PAST, Order.REVERSE);
+        Predicate push = new Predicate("подтолкнуть", MemberType.OBJECT, Tense.PAST);
 
         Predicate appearOneTime = new Predicate("появиться", "неожиданно", Tense.PAST);
         Predicate runInto = new Predicate("налететь", MemberType.OBJECT, Tense.PAST);
@@ -94,91 +101,93 @@ public class Story {
 
         Predicate come = new Predicate("наступить", "снова", Tense.PAST);
 
-        // actions 
-        Action poohPigletTigraGo = new Action(representerPoohPigletTigra, go, Order.DIRECT, Order.DIRECT);
-        Action fogBecome = new Action(representerFog, become, Order.REVERSE, Order.DIRECT);
-        Action tigraStartMissGoing = new Action(representerTigra, startMissGoing, Order.DIRECT, Order.DIRECT);
-        Action tigraMissGoing = new Action(representerTigra, missGoing, Order.DIRECT, Order.DIRECT);
-        Action nothingGoingOn = new Action(representerNothing, nothingHappening, momentPlacer, Case.NOMINATIVE, Order.DIRECT, Order.DIRECT);
-        Action youThink = new Action(representerYou, think, Order.DIRECT, Order.DIRECT);
-        Action tigraNotExist = new Action(representerTigra, notExist, Order.DIRECT, Order.DIRECT);
-        Action tigraAppearsManyTimes = new Action(representerTigra, appearManyTimes, Order.DIRECT, Order.DIRECT);
-        Action youKeepUp = new Action(representerBeforeYou, keepUp, Order.DIRECT, Order.DIRECT);
-        Action nothingAnswering = new Action(representerNothing, answer, Order.DIRECT, Order.DIRECT);
-        Action tigraDisappearsManyTimes = new Action(representerTigra, disappearManyTimes, Order.DIRECT, Order.DIRECT);
-
-        Action rabbitTurnsAround = new Action(representerRabbit, turnAround, Order.DIRECT, Order.DIRECT);
-        Action rabbitPushesPiglet = new Action(representerRabbit, push, Order.DIRECT, Order.DIRECT);
-
-        Action tigraAppearsOneTime = new Action(representerTigra, appearOneTime, Order.DIRECT, Order.DIRECT);
-        Action tigraRunsIntoRabbit = new Action(representerTigra, runInto, Order.DIRECT, Order.DIRECT);
-        Action tigraDisappearsOneTime = new Action(representerTigra, disappearOneTime, Order.DIRECT, Order.DIRECT);
-
-        Action tigraRollsUpIntoClearing = new Action(representerTigra, rollUp, clearingPlacer, Case.ACCUSATIVE, Order.DIRECT, Order.DIRECT);
-        Action poohAndPigletRush = new Action(representerPoohAndPiglet, rush, Order.DIRECT, Order.DIRECT);
-
-        Action poohAndPigletHide = new Action(representerPoohAndPiglet, hide, bushesPlacer, Case.PREPOSITIONAL, Order.DIRECT, Order.DIRECT);
-        Action poohAndPigletListening = new Action(representerPoohAndPiglet, listening, Order.DIRECT, Order.DIRECT);
-
-        Action nothingWasQuite = new Action(representerNothing, be, forestPlacer, Case.PREPOSITIONAL, Order.DIRECT, Order.REVERSE);
-
-        Action poohAndPigletSee = new Action(representerPoohAndPiglet, see, Order.DIRECT, Order.DIRECT);
-        Action poohAndPigletHear = new Action(representerPoohAndPiglet, hear, Order.DIRECT, Order.DIRECT);
-
-        Action footStepsRingOut = new Action(representerFootSteps, ringOut, Order.REVERSE, Order.DIRECT);
-
-        Action silenceCome = new Action(representerSilence, come, Order.REVERSE, Order.DIRECT);
+        Predicate nudge = new Predicate("подтолкнуть", "локтем", Tense.PAST, Order.REVERSE);
+        Predicate lookAround = new Predicate("оглянуться", "в поисках", Tense.PAST, Order.REVERSE);
+        Predicate find = new Predicate("не найти", MemberType.OBJECT, Tense.PAST); 
+        Predicate keepInhaling = new Predicate("продолжать вдыхать", MemberType.OBJECT, Tense.PAST);
+        Predicate tryingBreathe = new Predicate("стараться дышать", "как можно тише", Tense.PRESENT, Order.REVERSE);
+        Predicate feelYourself = new Predicate("чувствовать", "себя очень храбро", Tense.PAST, Order.REVERSE);
 
         // zero sentence
         Sentence zeroSentence = new Sentence();
 
         zeroSentence.addSentenceMember(Union.AND);
+
+        Action poohPigletTigraGo = new Action(representerPoohPigletTigra, go, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(poohPigletTigraGo);
+
         zeroSentence.addSentenceMember(Union.COMMA);
+
+        Action fogBecome = new Action(representerFog, become, Order.REVERSE, Order.DIRECT);
         zeroSentence.addSentenceMember(fogBecome);
 
         zeroSentence.addSentenceMember(Union.COMMA);
+
+        Action tigraStartMissGoing = new Action(representerTigra, startMissGoing, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(tigraStartMissGoing);
+
         representerTigra.setHiddenStatus(true);
+
+        Action tigraMissGoing = new Action(representerTigra, missGoing, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(tigraMissGoing);
 
         zeroSentence.addSentenceMember(Union.COMMA);
         zeroSentence.addSentenceMember(Union.AND);
         representerNothing.setHiddenStatus(true);
+
+        Action nothingGoingOn = new Action(representerNothing, nothingHappening, momentPlacer, Case.NOMINATIVE, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(nothingGoingOn);
 
         zeroSentence.addSentenceMember(Union.COMMA);
+
+        Action youThink = new Action(representerYou, think, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(youThink);
+
         zeroSentence.addSentenceMember(Union.COMMA);
         zeroSentence.addSentenceMember(Union.WHAT);
         representerTigra.setName("его");
         representerTigra.setHiddenStatus(false);
+
+        Action tigraNotExist = new Action(representerTigra, notExist, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(tigraNotExist);
 
         zeroSentence.addSentenceMember(Union.COMMA);
         representerTigra.setName("он");
+
+        Action tigraAppearsManyTimes = new Action(representerTigra, appearManyTimes, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(tigraAppearsManyTimes);
 
         zeroSentence.addSentenceMember(Union.AND);
         zeroSentence.addSentenceMember(Union.COMMA);
+
+        Action youKeepUp = new Action(representerBeforeYou, keepUp, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(youKeepUp);
+
+        Action nothingAnswering = new Action(representerNothing, answer, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(nothingAnswering);
 
         zeroSentence.addSentenceMember(Union.COMMA);
+
+        Action tigraDisappearsManyTimes = new Action(representerTigra, disappearManyTimes, Order.DIRECT, Order.DIRECT);
         zeroSentence.addSentenceMember(tigraDisappearsManyTimes);
 
         zeroSentence.addSentenceMember(Union.DOT);
         addSentence(zeroSentence);
 
         // minus first sentence
+
         Sentence minusFirstSentence = new Sentence();
 
+        Action rabbitTurnsAround = new Action(representerRabbit, turnAround, Order.DIRECT, Order.DIRECT);
         minusFirstSentence.addSentenceMember(rabbitTurnsAround);
 
         representerRabbit.setHiddenStatus(true);
         minusFirstSentence.addSentenceMember(Union.AND);
 
+        Action rabbitPushesPiglet = new Action(representerRabbit, push, representerPiglet, Case.ACCUSATIVE, Order.DIRECT, Order.DIRECT);
         minusFirstSentence.addSentenceMember(rabbitPushesPiglet);
+        representerPiglet.setName("Пятачок");
+
         minusFirstSentence.addSentenceMember(Union.DOT);
 
         addSentence(minusFirstSentence);
@@ -187,15 +196,21 @@ public class Story {
         Sentence firstSentence = new Sentence();
 
         representerTigra.setName("Тигра");
+
+        Action tigraAppearsOneTime = new Action(representerTigra, appearOneTime, Order.DIRECT, Order.DIRECT);
         firstSentence.addSentenceMember(tigraAppearsOneTime);
+
         firstSentence.addSentenceMember(Union.COMMA);
 
         representerTigra.setHiddenStatus(true);
 
-        tigraRunsIntoRabbit.setPredicateDependence(Preposition.ON, representerRabbit, Case.ACCUSATIVE);
-        
+        Action tigraRunsIntoRabbit = new Action(representerTigra, runInto, Preposition.ON, representerRabbit, Case.ACCUSATIVE, Order.DIRECT, Order.DIRECT);
         firstSentence.addSentenceMember(tigraRunsIntoRabbit);
+        representerRabbit.setName("Кролик");
+
         firstSentence.addSentenceMember(Union.AND);
+
+        Action tigraDisappearsOneTime = new Action(representerTigra, disappearOneTime, Order.DIRECT, Order.DIRECT);
         firstSentence.addSentenceMember(tigraDisappearsOneTime);
 
         firstSentence.addSentenceMember(Union.DOT);
@@ -208,29 +223,32 @@ public class Story {
         representerTigra.setName("Он");
         representerTigra.setHiddenStatus(false);
 
+        Action tigraRollsUpIntoClearing = new Action(representerTigra, rollUp, clearingPlacer, Case.ACCUSATIVE, Order.DIRECT, Order.DIRECT);
         secondSentence.addSentenceMember(tigraRollsUpIntoClearing);
+
         secondSentence.addSentenceMember(Union.COMMA);
         secondSentence.addSentenceMember(Union.AND);
 
-        poohAndPigletRush.setPredicateDependence(Preposition.AFTER, representerTigra, Case.CREATIVE);
-
+        Action poohAndPigletRush = new Action(representerPoohAndPiglet, rush, Preposition.AFTER, representerTigra, Case.CREATIVE, Order.DIRECT, Order.DIRECT);
         secondSentence.addSentenceMember(poohAndPigletRush);
 
         secondSentence.addSentenceMember(Union.DOT);
 
         addSentence(secondSentence);
 
-
         // third sentence
         Sentence thirdSentence = new Sentence();
 
         representerPoohAndPiglet.setName("Они");
 
+        Action poohAndPigletHide = new Action(representerPoohAndPiglet, hide, bushesPlacer, Case.PREPOSITIONAL, Order.DIRECT, Order.DIRECT);
         thirdSentence.addSentenceMember(poohAndPigletHide);
+
         thirdSentence.addSentenceMember(Union.COMMA);
 
         representerPoohAndPiglet.setHiddenStatus(true);
 
+        Action poohAndPigletListening = new Action(representerPoohAndPiglet, listening, Order.DIRECT, Order.DIRECT);
         thirdSentence.addSentenceMember(poohAndPigletListening);
 
         thirdSentence.addSentenceMember(Union.DOT);
@@ -240,6 +258,7 @@ public class Story {
         // fourth sentence
         Sentence fourthSentence = new Sentence();
 
+        Action nothingWasQuite = new Action(representerNothing, be, forestPlacer, Case.PREPOSITIONAL, Order.DIRECT, Order.REVERSE);
         fourthSentence.addSentenceMember(nothingWasQuite);
 
         representerPoohAndPiglet.setHiddenStatus(true);
@@ -252,11 +271,15 @@ public class Story {
         Sentence fifthSentence = new Sentence();
 
         representerPoohAndPiglet.setHiddenStatus(false);
+
+        Action poohAndPigletSee = new Action(representerPoohAndPiglet, see, Order.DIRECT, Order.DIRECT);
         fifthSentence.addSentenceMember(poohAndPigletSee);
+
         fifthSentence.addSentenceMember(Union.AND);
 
         representerPoohAndPiglet.setHiddenStatus(true);
 
+        Action poohAndPigletHear = new Action(representerPoohAndPiglet, hear, Order.DIRECT, Order.DIRECT);
         fifthSentence.addSentenceMember(poohAndPigletHear);
 
         fifthSentence.addSentenceMember(Union.DOT);
@@ -266,7 +289,9 @@ public class Story {
         // sixth sentence
         Sentence sixthSentence = new Sentence();
 
+        Action footStepsRingOut = new Action(representerFootSteps, ringOut, Order.REVERSE, Order.DIRECT);
         sixthSentence.addSentenceMember(footStepsRingOut);
+
         sixthSentence.addSentenceMember(Union.DOT);
         sixthSentence.addSentenceMember(Union.DOT);
         sixthSentence.addSentenceMember(Union.DOT);
@@ -277,10 +302,70 @@ public class Story {
         Sentence seventhSentence = new Sentence();
 
         seventhSentence.addSentenceMember(Union.AND);
+
+        Action silenceCome = new Action(representerSilence, come, Order.REVERSE, Order.DIRECT);
         seventhSentence.addSentenceMember(silenceCome);
+
         seventhSentence.addSentenceMember(Union.DOT);
 
         addSentence(seventhSentence);
+
+        // eighth sentence
+        Sentence eighthSentence = new Sentence();
+
+        representerRabbit.setHiddenStatus(false);
+        Action rabbitNudgesPooh = new Action(representerRabbit, nudge, representerPooh, Case.ACCUSATIVE, Order.DIRECT, Order.DIRECT);
+        eighthSentence.addSentenceMember(rabbitNudgesPooh);
+        representerPooh.setName("Пух");
+
+        eighthSentence.addSentenceMember(Union.COMMA);
+        eighthSentence.addSentenceMember(Union.AND);
+
+        Action poohLooksAroundForPiglet = new Action(representerPooh, lookAround, representerPiglet, Case.GENITIVE, Order.DIRECT, Order.DIRECT);
+        eighthSentence.addSentenceMember(poohLooksAroundForPiglet);
+        representerPiglet.setName("Пятачок");
+        
+        eighthSentence.addSentenceMember(Union.COMMA);
+        eighthSentence.addSentenceMember(Union.TO);
+
+        Generator<Predicate> nudgeInfinitiveGenerator = new Generator<Predicate>() {
+            @Override
+            public Predicate generate() {
+                return new Predicate(nudge.getInfinitive(), (String)nudge.getCharacteristic(), Tense.PRESENT, Order.REVERSE);
+            }
+        };
+
+        representerPiglet.setName("Он");
+        representerPooh.setHiddenStatus(true);
+
+        Action poohNudgesPiglet = new Action(representerPooh, nudgeInfinitiveGenerator.generate(), representerPiglet, Case.ACCUSATIVE, Order.DIRECT, Order.REVERSE);
+        eighthSentence.addSentenceMember(poohNudgesPiglet);
+        representerPiglet.setName("Он");
+
+        eighthSentence.addSentenceMember(Union.COMMA);
+        eighthSentence.addSentenceMember(Union.AND);
+        Action poohFindsPiglet = new Action(representerPooh, find, representerPiglet, Case.ACCUSATIVE, Order.DIRECT, Order.DIRECT);
+        eighthSentence.addSentenceMember(poohFindsPiglet);
+        representerPiglet.setName("Пятачок");
+
+        eighthSentence.addSentenceMember(Union.COMMA);
+        eighthSentence.addSentenceMember(Union.BUTA);
+        Action pigletKeepsInhaling = new Action(representerPiglet, keepInhaling, representerSmellOfRawFern, Case.NOMINATIVE, Order.DIRECT, Order.DIRECT);
+        eighthSentence.addSentenceMember(pigletKeepsInhaling);
+
+        eighthSentence.addSentenceMember(Union.COMMA);
+        representerPiglet.setHiddenStatus(true);
+        Action pigletTryingBreathe = new Action(representerPiglet, tryingBreathe, Order.DIRECT, Order.DIRECT);
+        eighthSentence.addSentenceMember(pigletTryingBreathe);
+
+        eighthSentence.addSentenceMember(Union.COMMA);
+        eighthSentence.addSentenceMember(Union.AND);
+        Action pigletFeelHimselfBrave = new Action(representerPiglet, feelYourself, Order.DIRECT, Order.DIRECT);
+        eighthSentence.addSentenceMember(pigletFeelHimselfBrave);
+
+        eighthSentence.addSentenceMember(Union.DOT);
+
+        addSentence(eighthSentence);
     }
 
     public void startTheTell() {

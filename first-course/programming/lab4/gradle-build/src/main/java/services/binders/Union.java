@@ -6,7 +6,9 @@ public enum Union implements SentenceMember {
     COMMA(", "),
     AND("и "),
     DOT(". "),
-    WHAT("что ");
+    WHAT("что "),
+    TO("чтобы "),
+    BUTA("а ");
         
     private String union;
 
