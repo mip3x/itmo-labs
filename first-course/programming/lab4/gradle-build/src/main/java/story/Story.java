@@ -93,7 +93,7 @@ public class Story {
         Predicate listening = new Predicate("прислушиваться", MemberType.OBJECT, Tense.PAST);
 
         Predicate be = new Predicate("быть", "очень, очень тихо", Tense.PAST, Order.REVERSE);
-        
+
         Predicate see = new Predicate("не видеть", "ничего", Tense.PAST);
         Predicate hear = new Predicate("не слышать", "ничего", Tense.PAST);
 
@@ -324,7 +324,7 @@ public class Story {
         Action poohLooksAroundForPiglet = new Action(representerPooh, lookAround, representerPiglet, Case.GENITIVE, Order.DIRECT, Order.DIRECT);
         eighthSentence.addSentenceMember(poohLooksAroundForPiglet);
         representerPiglet.setName("Пятачок");
-        
+
         eighthSentence.addSentenceMember(Union.COMMA);
         eighthSentence.addSentenceMember(Union.TO);
 
@@ -368,9 +368,14 @@ public class Story {
         addSentence(eighthSentence);
     }
 
-    public void startTheTell() {
-        for (var sentence : sentences) {
-            sentence.print();
+    public void startTheTell() throws StoryIsNotReadyException {
+        if (!sentences.isEmpty()) {
+            for (var sentence : sentences) {
+                sentence.print();
+            }
+        }
+        else {
+            throw new StoryIsNotReadyException("История не может быть рассказана: нет предложений!");
         }
     }
 
