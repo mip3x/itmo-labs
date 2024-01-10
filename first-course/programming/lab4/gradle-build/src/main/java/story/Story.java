@@ -16,6 +16,8 @@ public class Story {
         this.sentences = new ArrayList<>();
 
         // persons
+        Person illegalPerson = new Person("l1123", Gender.MALE);
+
         Person poohPigletTigra = new Person("они", Gender.GROUP);
         Representer representerPoohPigletTigra = new Representer(poohPigletTigra, "чем дальше");
 

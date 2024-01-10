@@ -10,6 +10,8 @@ public abstract class Entity {
     public Entity(String name, Gender gender) {
         this.name = name;
         this.gender = gender;
+        
+        validateName();
     }
 
     public String getName() {
@@ -23,6 +25,13 @@ public abstract class Entity {
     public Gender getGender() {
         return gender;
     }
+
+    private void validateName() throws IllegalArgumentException {
+        char[] nameInChars = name.toCharArray();
+        for (char c : nameInChars) {
+            if (Character.isDigit(c)) throw new IllegalArgumentException("Ошибка: в названии содержатся цифры!");
+        }
+    } 
 
     @Override
     public String toString() {
