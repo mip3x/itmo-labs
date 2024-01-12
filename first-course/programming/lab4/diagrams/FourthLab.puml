@@ -10,6 +10,9 @@ package "interfaces" {
     interface SentenceMember {
         +String getSentenceMemberCharacters()
     }
+    interface Generator<T> {
+        +T generate();
+    }
 }
 
 package "objects" {
@@ -19,6 +22,7 @@ package "objects" {
         +Entity(String name, Gender gender)
         +String getName()
         +void setName(String name)
+        -void validateName() throws IllegalArgumentException
         +Gender getGender()
         +String toString()
         +boolean equals(Object object)
@@ -36,6 +40,9 @@ package "objects" {
         +void setPreposition(Preposition preposition)
         +String toString()
     }
+    Class IllegalArgumentException extends Error {
+        +IllegalArgumentException(String message)
+    }
 }
 
 package "sentenceCore" {
@@ -45,9 +52,12 @@ package "sentenceCore" {
         -Case dependenceCase
         -Order coreOrder
         -Order predicateDependenceOrder
+        -String dependence
 
         +Action(Representer representer, Predicate predicate, Order coreOrder, Order predicateDependenceOrder)
         +Action(Representer representer, Predicate predicate, Placer placer, Case dependenceCase, Order coreOrder, Order predicateDependenceOrder)
+        +Action(Representer representer, Predicate predicate, Preposition preposition, Representer dependenceRepresenter, Case dependenceCase, Order coreOrder, Order predicateDependenceOrder)
+        +Action(Representer representer, Predicate predicate, Representer dependenceRepresenter, Case dependenceCase, Order coreOrder, Order predicateDependenceOrder)
         +Representer getRepresenter()
         +void setRepresenter(Representer representer)
         +Predicate getPredicate()
@@ -57,6 +67,7 @@ package "sentenceCore" {
         +Order getPredicateDependenceOrder()
         +void setPredicateDependenceOrder(Order predicateDependenceOrder)
         +void setPredicateDependence(Preposition preposition, Dependent dependent, Case dependenceCase)
+        +void setPredicateDependence(Dependent dependent, Case dependenceCase)
 
         +String getSentenceMemberCharacters()
     }
@@ -74,7 +85,7 @@ package "sentenceCore" {
 
         #Object getMainWord()
         #void setMainWord(String mainWord)
-        #Object getCharacteristic()
+        +Object getCharacteristic()
         #void setCharacteristic(String characteristic)
         #Object getOrder()
         #void setOrder(Order order)
@@ -105,6 +116,7 @@ package "sentenceCore" {
         +void setInfinitive(String infinitive)
         +MutablePair<Preposition, Dependent> getDependence()
         +void setDependence(Preposition preposition, Dependent dependent)
+        +void setDependence(Dependent dependent)
         +String getPredicateWord()
         +void setPredicateWord(String verb)
     }
@@ -151,6 +163,7 @@ package "services" {
             ON
             IN
             AFTER
+            NOTHING
 
             -String preposition
             -Preposition(String preposition)
@@ -162,6 +175,8 @@ package "services" {
             AND
             DOT
             WHAT
+            TO
+            BUTA
 
             -String union
             -Union(String union)
@@ -212,6 +227,9 @@ package "story" {
         +Story()
         +void startTheTell()
         -void addSentence(Sentence sentence)
+    }
+    class StoryIsNotReadyException extends Exception {
+        +StoryIsNotReadyException(String message)
     }
 }
 
