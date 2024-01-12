@@ -14,6 +14,12 @@ public class Story {
     private static int personCount = 0;
 
     public Story() {
+        class SentenceAdder {
+            private void addSentenceToStory(Sentence sentence) {
+                addSentence(sentence);
+            } 
+        }
+
         SentenceAdder sentenceAdder = new SentenceAdder();
         this.sentences = new ArrayList<>();
 
@@ -383,12 +389,6 @@ public class Story {
         eighthSentence.addSentenceMember(Union.DOT);
 
         sentenceAdder.addSentenceToStory(eighthSentence);
-    }
-
-    private class SentenceAdder {
-        private void addSentenceToStory(Sentence sentence) {
-            addSentence(sentence);
-        } 
     }
 
     public static class PersonCounter {
