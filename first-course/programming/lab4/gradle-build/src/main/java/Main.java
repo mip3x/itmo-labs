@@ -7,6 +7,7 @@ public class Main {
         
         try {
             story.startTheTell();
+            System.out.println(Story.PersonCounter.getPersonCount());
         }
         catch (StoryIsNotReadyException exception) {
             System.out.println(exception.getMessage());

@@ -11,48 +11,62 @@ import objects.*;
 
 public class Story {
     private List<Sentence> sentences;
+    private static int personCount = 0;
 
     public Story() {
+        SentenceAdder sentenceAdder = new SentenceAdder();
         this.sentences = new ArrayList<>();
 
         // persons
-        Person illegalPerson = new Person("l1123", Gender.MALE);
+        // Person illegalPerson = new Person("l1123", Gender.MALE);
 
         Person poohPigletTigra = new Person("они", Gender.GROUP);
+        personCount++;
         Representer representerPoohPigletTigra = new Representer(poohPigletTigra, "чем дальше");
 
         Person fog = new Person("туман", Gender.MALE);
+        personCount++;
         Representer representerFog = new Representer(fog, MemberType.OBJECT);
 
         Person tigra = new Person("Тигра", Gender.MALE);
+        personCount++;
         Representer representerTigra = new Representer(tigra, MemberType.OBJECT);
 
         Person you = new Person("вы", Gender.GROUP);
+        personCount++;
         Representer representerYou = new Representer(you, "когда");
         Representer representerBeforeYou = new Representer(you, "прежде чем");
 
         Person rabbit = new Person("Кролик", Gender.MALE);
+        personCount++;
         Representer representerRabbit = new Representer(rabbit, MemberType.OBJECT);
 
         Person piglet = new Person("Пятачок", Gender.MALE);
+        personCount++;
         Representer representerPiglet = new Representer(piglet, MemberType.OBJECT);
 
         Person poohAndPiglet = new Person("Пух и Пятачок", Gender.GROUP);
+        personCount++;
         Representer representerPoohAndPiglet = new Representer(poohAndPiglet, MemberType.OBJECT);
 
         Person nothing = new Person("", Gender.MIDDLE);
+        personCount++;
         Representer representerNothing = new Representer(nothing, MemberType.OBJECT);
 
         Person footSteps = new Person("топот", Gender.MALE);
+        personCount++;
         Representer representerFootSteps = new Representer(footSteps, MemberType.OBJECT);
 
         Person silence = new Person("молчание", Gender.MIDDLE);
+        personCount++;
         Representer representerSilence = new Representer(silence, MemberType.OBJECT);
 
         Person pooh = new Person("Пух", Gender.MALE);
+        personCount++;
         Representer representerPooh = new Representer(pooh, MemberType.OBJECT);
 
         Person smellOfRawFern = new Person("запах", Gender.MALE);
+        personCount++;
         Representer representerSmellOfRawFern = new Representer(smellOfRawFern, "сырого папоротника", Order.REVERSE);
 
         // places
@@ -174,7 +188,8 @@ public class Story {
         zeroSentence.addSentenceMember(tigraDisappearsManyTimes);
 
         zeroSentence.addSentenceMember(Union.DOT);
-        addSentence(zeroSentence);
+
+        sentenceAdder.addSentenceToStory(zeroSentence);
 
         // minus first sentence
 
@@ -192,7 +207,7 @@ public class Story {
 
         minusFirstSentence.addSentenceMember(Union.DOT);
 
-        addSentence(minusFirstSentence);
+        sentenceAdder.addSentenceToStory(minusFirstSentence);
 
         // first sentence
         Sentence firstSentence = new Sentence();
@@ -217,7 +232,7 @@ public class Story {
 
         firstSentence.addSentenceMember(Union.DOT);
 
-        addSentence(firstSentence);
+        sentenceAdder.addSentenceToStory(firstSentence);
 
         // second sentence
         Sentence secondSentence = new Sentence();
@@ -236,7 +251,7 @@ public class Story {
 
         secondSentence.addSentenceMember(Union.DOT);
 
-        addSentence(secondSentence);
+        sentenceAdder.addSentenceToStory(secondSentence);
 
         // third sentence
         Sentence thirdSentence = new Sentence();
@@ -255,7 +270,7 @@ public class Story {
 
         thirdSentence.addSentenceMember(Union.DOT);
 
-        addSentence(thirdSentence);
+        sentenceAdder.addSentenceToStory(thirdSentence);
 
         // fourth sentence
         Sentence fourthSentence = new Sentence();
@@ -267,7 +282,7 @@ public class Story {
 
         fourthSentence.addSentenceMember(Union.DOT);
 
-        addSentence(fourthSentence);
+        sentenceAdder.addSentenceToStory(fourthSentence);
 
         // fifth sentence
         Sentence fifthSentence = new Sentence();
@@ -286,7 +301,7 @@ public class Story {
 
         fifthSentence.addSentenceMember(Union.DOT);
 
-        addSentence(fifthSentence);
+        sentenceAdder.addSentenceToStory(fifthSentence);
 
         // sixth sentence
         Sentence sixthSentence = new Sentence();
@@ -298,7 +313,7 @@ public class Story {
         sixthSentence.addSentenceMember(Union.DOT);
         sixthSentence.addSentenceMember(Union.DOT);
 
-        addSentence(sixthSentence);
+        sentenceAdder.addSentenceToStory(sixthSentence);
 
         // seventh sentence
         Sentence seventhSentence = new Sentence();
@@ -310,7 +325,7 @@ public class Story {
 
         seventhSentence.addSentenceMember(Union.DOT);
 
-        addSentence(seventhSentence);
+        sentenceAdder.addSentenceToStory(seventhSentence);
 
         // eighth sentence
         Sentence eighthSentence = new Sentence();
@@ -367,7 +382,19 @@ public class Story {
 
         eighthSentence.addSentenceMember(Union.DOT);
 
-        addSentence(eighthSentence);
+        sentenceAdder.addSentenceToStory(eighthSentence);
+    }
+
+    private class SentenceAdder {
+        private void addSentenceToStory(Sentence sentence) {
+            addSentence(sentence);
+        } 
+    }
+
+    public static class PersonCounter {
+        public static int getPersonCount() {
+            return personCount;
+        }
     }
 
     public void startTheTell() throws StoryIsNotReadyException {
