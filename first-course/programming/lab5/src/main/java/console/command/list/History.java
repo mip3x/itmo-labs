@@ -1,15 +1,17 @@
 package console.command.list;
 
+import console.command.InformationManager;
+
 import java.util.List;
 
 public class History extends Command {
     private List<Command> history;
     private int historySize;
 
-    public History(String name, String description, List<Command> history, int historySize) {
-        super(name, description);
-        this.history = history;
-        this.historySize = historySize;
+    public History(String name, String description, InformationManager informationManager) {
+        super(name, description, informationManager);
+        this.historySize = informationManager.getHistorySize();
+        this.history = informationManager.getHistory();
     }
 
     @Override
