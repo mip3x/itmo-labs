@@ -9,15 +9,16 @@ import java.util.ArrayList;
 public class CommandManager {
     private ConsoleHandler consoleHandler;
     private InformationManager informationManager;
-    private List<Command> commandsList;
+    private List<Command> commandsList = new ArrayList<>();
 
     public CommandManager(ConsoleHandler consoleHandler) {
         this.consoleHandler = consoleHandler;
-        informationManager = new InformationManager();
+        informationManager = InformationManager.getInstance(commandsList);
+        addCommands();
         this.commandsList = informationManager.getCommandsList();
     }
 
-    public void validateCommand(String text) {
+    public void executeCommand(String text) {
         String[] tokens = text.trim().split(" ");
 
         for (Command command: commandsList) {
@@ -29,5 +30,11 @@ public class CommandManager {
             }
         }
         consoleHandler.send("Команда не распознана!");
+    }
+
+    private void addCommands() {
+        commandsList.add(new Exit("exit", "Выход из программы", informationManager));
+        commandsList.add(new History("history", "История вызовов", informationManager));
+        commandsList.add(new Help("help", "Выводит список всех команд", informationManager));
     }
 }

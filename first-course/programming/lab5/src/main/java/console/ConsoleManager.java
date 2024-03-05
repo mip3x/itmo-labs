@@ -15,7 +15,7 @@ public class ConsoleManager {
     public void init() {
         while (true) {
             String line = consoleHandler.receive();
-            commandManager.validateCommand(line);
+            commandManager.executeCommand(line);
         }
     }
 }
