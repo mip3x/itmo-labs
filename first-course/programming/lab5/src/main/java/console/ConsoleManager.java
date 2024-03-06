@@ -3,6 +3,7 @@ package console;
 import console.ConsoleHandler;
 import console.command.CommandManager;
 import collection.CollectionManager;
+import exception.InvalidInputException;
 
 public class ConsoleManager {
     private final ConsoleHandler consoleHandler;
@@ -15,8 +16,14 @@ public class ConsoleManager {
 
     public void init() {
         while (true) {
-            String line = consoleHandler.receive();
-            commandManager.executeCommand(line);
+            try {
+                consoleHandler.printPrompt();
+                String line = consoleHandler.receive();
+                commandManager.executeCommand(line);
+            }
+            catch (InvalidInputException exception) {
+                consoleHandler.sendWithNewLine(exception.getMessage());
+            }
         }
     }
 }

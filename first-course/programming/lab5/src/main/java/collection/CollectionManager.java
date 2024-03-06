@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Date;
 
 import collection.data.StudyGroup;
+import collection.data.StudyGroupBuilder;
 
 public class CollectionManager {
     private LinkedList<StudyGroup> studyGroupCollection;
@@ -19,7 +20,6 @@ public class CollectionManager {
         studyGroupCollection = new LinkedList<>();
         initializationDate = new Date();
         studyGroupCollection.add(new StudyGroup());
-        // StudyGroup testGroup = studyGroupCollection.get(0);
     }
 
     public String clearCollection() {
@@ -28,7 +28,23 @@ public class CollectionManager {
     }
 
     public String getCollectionHead() {
-        return "";
+        try {
+            return getStudyGroupInfo(studyGroupCollection.get(0));
+        }
+        catch (IndexOutOfBoundsException e) {
+            return "Невозможно получить элемент коллекции: коллекция пуста!";
+        }
+    }
+
+    public String getAllStudyGroupsInfo() {
+        String studyGroupsInfo = "";
+        if (studyGroupCollection.size() == 0) return "Невозможно получить элемент коллекции: коллекция пуста!";
+        studyGroupCollection.forEach(studyGroup -> studyGroupsInfo.concat(getStudyGroupInfo(studyGroup) + "\n"));
+        return studyGroupsInfo;
+    }
+
+    public String getStudyGroupInfo(StudyGroup studyGroup) {
+        return studyGroup.toString();
     }
 
     public String getCollectionInfo() {
@@ -36,5 +52,18 @@ public class CollectionManager {
         String collectionInitializationDate = "Время инициализации коллекции: " + initializationDate;
         String collectionElementsNumber = "Количество элементов коллекции: " + studyGroupCollection.size(); 
         return collectionType + "\n" + collectionInitializationDate + "\n" + collectionElementsNumber;
+    }
+
+    public void addStudyGroupToCollection(StudyGroup studyGroup) {
+        studyGroupCollection.add(studyGroup);
+    }
+
+    public StudyGroup callStudyGroupBuilder() {
+        return new StudyGroupBuilder();
+    }
+
+    public StudyGroup callStudyGroupBuilder(Integer id) {
+        // search
+        return new StudyGroupBuilder(id);
     }
 }

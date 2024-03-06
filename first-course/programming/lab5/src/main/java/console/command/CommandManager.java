@@ -3,33 +3,32 @@ package console.command;
 import console.command.list.*;
 import console.ConsoleHandler;
 import collection.CollectionManager;
+import exception.InvalidInputException;
 
 import java.util.List;
 import java.util.ArrayList;
 
 public class CommandManager {
-    private final ConsoleHandler consoleHandler;
     private final InformationManager informationManager;
     private List<Command> commandsList = new ArrayList<>();
 
-    public CommandManager(ConsoleHandler consoleHandler, CollectionManager collectionManager) {
-        this.consoleHandler = consoleHandler;
+    public CommandManager(CollectionManager collectionManager) {
         informationManager = InformationManager.getInstance(commandsList, collectionManager);
         addCommands();
     }
 
-    public void executeCommand(String text) {
+    public void executeCommand(String text) throws InvalidInputException {
         String[] tokens = text.trim().split(" ");
 
         for (Command command: commandsList) {
             if (command.getName().equals(tokens[0])) {
                 String output = command.execute();
                 informationManager.addToHistory(command);
-                consoleHandler.send(output);
+                consoleHandler.sendWithNewLine(output);
                 return;
             }
         }
-        consoleHandler.send("Команда не распознана!");
+        throw new InvalidInputException("Команда не распознана!");
     }
 
     private void addCommands() {
@@ -40,5 +39,6 @@ public class CommandManager {
         commandsList.add(new Info("info", "Вывести информацию о коллекции", informationManager));
         commandsList.add(new Head("head", "Вывести первый элемент коллекции", informationManager));
         commandsList.add(new Clear("clear", "Очистить коллекцию", informationManager));
+        commandsList.add(new Show("show", "Вывести все элементы коллекции", informationManager));
     }
 }

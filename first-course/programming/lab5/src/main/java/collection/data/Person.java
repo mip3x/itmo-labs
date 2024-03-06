@@ -6,4 +6,9 @@ public class Person {
     private String passportID; //Значение этого поля должно быть уникальным, Длина строки должна быть не меньше 4, Строка не может быть пустой, Поле может быть null
     private Color eyeColor; //Поле может быть null
     private Location location; //Поле может быть null
+    
+    @Override
+    public String toString() {
+        return "Имя: " + name + "\nВес: " + weight + "\nНомер паспорта: " + passportID + "\nЦвет глаз: " + eyeColor + "\nМестонахождение: \n" + location.toString();
+    }
 }

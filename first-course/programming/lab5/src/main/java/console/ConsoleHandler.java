@@ -12,12 +12,15 @@ public class ConsoleHandler {
     }
 
     public String receive() {
-        printPrompt();
         String line = scanner.nextLine();
         return line;
     }
 
     public void send(String message) {
+        System.out.print(message);
+    }
+
+    public void sendWithNewLine(String message) {
         System.out.println(message);
     }
 
