@@ -6,12 +6,18 @@ import collection.CollectionManager;
 import exception.InvalidInputException;
 
 public class ConsoleManager {
+    private static ConsoleManager instance = null;
     private final ConsoleHandler consoleHandler;
     private final CommandManager commandManager;
 
+    public static ConsoleManager getInstance(CollectionManager collectionManager) {
+        if (instance == null) instance = new ConsoleManager(collectionManager);
+        return instance;
+    }
+
     public ConsoleManager(CollectionManager collectionManager) {
         this.consoleHandler = new ConsoleHandler();
-        this.commandManager = new CommandManager(consoleHandler, collectionManager);
+        this.commandManager = CommandManager.getInstance(consoleHandler, collectionManager);
     }
 
     public void init() {

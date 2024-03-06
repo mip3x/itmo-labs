@@ -9,10 +9,18 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class CommandManager {
+    private static CommandManager instance = null;
+    private final ConsoleHandler consoleHandler;
     private final InformationManager informationManager;
     private List<Command> commandsList = new ArrayList<>();
 
-    public CommandManager(CollectionManager collectionManager) {
+    public static CommandManager getInstance(ConsoleHandler consoleHandler, CollectionManager collectionManager) {
+        if (instance == null) instance = new CommandManager(consoleHandler, collectionManager);
+        return instance;
+    }
+
+    public CommandManager(ConsoleHandler consoleHandler, CollectionManager collectionManager) {
+        this.consoleHandler = consoleHandler;
         informationManager = InformationManager.getInstance(commandsList, collectionManager);
         addCommands();
     }

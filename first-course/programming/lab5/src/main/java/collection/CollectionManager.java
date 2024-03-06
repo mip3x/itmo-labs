@@ -5,16 +5,22 @@ import java.util.Date;
 
 import collection.data.StudyGroup;
 import collection.data.StudyGroupBuilder;
+import console.ConsoleManager;
 
 public class CollectionManager {
-    private LinkedList<StudyGroup> studyGroupCollection;
     private static CollectionManager instance = null;
+    private ConsoleManager consoleManager;
+    private LinkedList<StudyGroup> studyGroupCollection;
     private Date initializationDate;
 
     public static CollectionManager getInstance() {
         if (instance == null) instance = new CollectionManager();
         return instance;
     }
+
+    public void setConsoleManager(ConsoleManager consoleManager) {
+        this.consoleManager = consoleManager;
+    } 
 
     public CollectionManager() {
         studyGroupCollection = new LinkedList<>();
@@ -59,11 +65,11 @@ public class CollectionManager {
     }
 
     public StudyGroup callStudyGroupBuilder() {
-        return new StudyGroupBuilder();
+        return new StudyGroupBuilder().getStudyGroup();
     }
 
     public StudyGroup callStudyGroupBuilder(Integer id) {
         // search
-        return new StudyGroupBuilder(id);
+        return new StudyGroupBuilder(id).getStudyGroup();
     }
 }

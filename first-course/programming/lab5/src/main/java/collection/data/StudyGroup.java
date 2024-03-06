@@ -25,11 +25,11 @@ public class StudyGroup implements Comparable<StudyGroup> {
     public boolean setName(String name) {
         if (name == null || name.isEmpty()) return false;
         this.name = name;
-        return true
+        return true;
     }
 
     public boolean setCoordinates(Coordinates coordinates) {
-        if (coordinates == null) return false
+        if (coordinates == null) return false;
         this.coordinates = coordinates;
         return true;
     }
