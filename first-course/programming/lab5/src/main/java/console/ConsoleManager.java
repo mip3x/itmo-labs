@@ -2,14 +2,15 @@ package console;
 
 import console.ConsoleHandler;
 import console.command.CommandManager;
+import collection.CollectionManager;
 
 public class ConsoleManager {
-    private ConsoleHandler consoleHandler;
-    private CommandManager commandManager;
+    private final ConsoleHandler consoleHandler;
+    private final CommandManager commandManager;
 
-    public ConsoleManager(ConsoleHandler consoleHandler, CommandManager commandManager) {
-        this.consoleHandler = consoleHandler;
-        this.commandManager = commandManager;
+    public ConsoleManager(CollectionManager collectionManager) {
+        this.consoleHandler = new ConsoleHandler();
+        this.commandManager = new CommandManager(consoleHandler, collectionManager);
     }
 
     public void init() {

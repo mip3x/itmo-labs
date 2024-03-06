@@ -1,4 +1,4 @@
-package data;
+package collection.data;
 
 public enum FormOfEducation {
     DISTANCE_EDUCATION,

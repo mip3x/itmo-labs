@@ -1,8 +1,8 @@
-package data;
+package collection.data;
 
 public class Location {
     private Double x; //Поле не может быть null
-    private long y;
-    private int z;
+    private double y;
+    private Integer z; //Поле не может быть null
     private String name; //Поле не может быть null
 }

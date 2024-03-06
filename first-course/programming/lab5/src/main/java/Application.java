@@ -1,11 +1,10 @@
-import console.*;
-import console.command.*;
+import console.ConsoleManager;
+import collection.CollectionManager;
 
 public class Application {
     public static void main(String[] args) {
-        ConsoleHandler consoleHandler = new ConsoleHandler();
-        CommandManager commandManager = new CommandManager(consoleHandler);
-        ConsoleManager consoleManager = new ConsoleManager(consoleHandler, commandManager);
+        CollectionManager collectionManager = CollectionManager.getInstance();
+        ConsoleManager consoleManager = new ConsoleManager(collectionManager);
 
         consoleManager.init();
     }
