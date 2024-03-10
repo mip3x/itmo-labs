@@ -6,12 +6,12 @@ START:
     CLA
     return: LD (phrase)+
     CMP eol
-	BEQ exit
-	OUT 2
-	SWAB
-	OUT 2
-	JUMP return
-	exit: HLT
+    BEQ exit
+    OUT 2
+    SWAB
+    OUT 2
+    JUMP return
+    exit: HLT
 
 ORG 0x628
 WORD 0x041B
