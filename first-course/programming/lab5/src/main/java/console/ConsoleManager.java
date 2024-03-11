@@ -21,15 +21,18 @@ public class ConsoleManager {
     }
 
     public void init() {
-        while (true) {
-            try {
-                consoleHandler.printPrompt();
-                String line = consoleHandler.receive();
-                commandManager.executeCommand(line);
-            }
-            catch (InvalidInputException exception) {
-                consoleHandler.sendWithNewLine(exception.getMessage());
-            }
+        String inputLine;
+
+        while ((inputLine = consoleHandler.receive(true)) != null) {
+            process(inputLine);
+        }
+    }
+
+    private void process(String inputLine) {
+        try {
+            commandManager.executeCommand(inputLine);
+        } catch (Exception exception) {
+            consoleHandler.sendWithNewLine(exception.getMessage());
         }
     }
 }

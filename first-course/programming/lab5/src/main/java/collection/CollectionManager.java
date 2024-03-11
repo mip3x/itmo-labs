@@ -9,7 +9,6 @@ import console.ConsoleManager;
 
 public class CollectionManager {
     private static CollectionManager instance = null;
-    private ConsoleManager consoleManager;
     private LinkedList<StudyGroup> studyGroupCollection;
     private Date initializationDate;
 
@@ -17,10 +16,6 @@ public class CollectionManager {
         if (instance == null) instance = new CollectionManager();
         return instance;
     }
-
-    public void setConsoleManager(ConsoleManager consoleManager) {
-        this.consoleManager = consoleManager;
-    } 
 
     public CollectionManager() {
         studyGroupCollection = new LinkedList<>();

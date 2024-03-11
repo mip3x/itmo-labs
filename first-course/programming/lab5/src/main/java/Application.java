@@ -6,8 +6,6 @@ public class Application {
         CollectionManager collectionManager = CollectionManager.getInstance();
         ConsoleManager consoleManager = ConsoleManager.getInstance(collectionManager);
 
-        collectionManager.setConsoleManager(consoleManager);
-
         consoleManager.init();
     }
 }

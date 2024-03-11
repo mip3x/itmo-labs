@@ -8,12 +8,21 @@ public class ConsoleHandler {
 
     public ConsoleHandler() {
         this.scanner = new Scanner(System.in);
-        this.prompt = "[~]: ";
+        this.prompt = "[~]";
+    }
+
+    public String receive(boolean printPrompt) {
+        if (printPrompt) printPrompt();
+        return scanner.nextLine();
     }
 
     public String receive() {
-        String line = scanner.nextLine();
-        return line;
+        return receive(false);
+    }
+
+    public String receive(String customPrompt) {
+        printPrompt(customPrompt);
+        return receive();
     }
 
     public void send(String message) {
@@ -25,6 +34,10 @@ public class ConsoleHandler {
     }
 
     public void printPrompt() {
-        System.out.print(prompt);
+        System.out.print(prompt + ": ");
+    }
+
+    public void printPrompt(String customPrompt) {
+        System.out.print(customPrompt + ": ");
     }
 }
