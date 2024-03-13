@@ -1,20 +1,16 @@
 package console.command.list;
 
-import console.command.InformationManager;
+import console.InformationStorage;
 import collection.CollectionManager;
 
-import java.util.List;
-
 public class Head extends Command {
-    private final CollectionManager collectionManager;
-
-    public Head(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
-        this.collectionManager = informationManager.getCollectionManager();
+    public Head() {
+        super("head", "Вывести первый элемент коллекции");
     }
 
     @Override
     public String execute() {
-        return collectionManager.getCollectionHead();
-    } 
+//        return collectionManager.getCollectionHead();
+        return "Head executed";
+    }
 }

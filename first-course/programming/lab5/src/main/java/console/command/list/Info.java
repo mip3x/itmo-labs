@@ -1,18 +1,16 @@
 package console.command.list;
 
-import console.command.InformationManager;
+import console.InformationStorage;
 import collection.CollectionManager;
 
 public class Info extends Command {
-    private final CollectionManager collectionManager;
-
-    public Info(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
-        this.collectionManager = informationManager.getCollectionManager();
+    public Info() {
+        super("info", "Вывести информацию о коллекции");
     }
 
     @Override
     public String execute() {
-        return collectionManager.getCollectionInfo();
+//        return collectionManager.getCollectionInfo();
+        return "Info was executed";
     } 
 }

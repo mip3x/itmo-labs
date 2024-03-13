@@ -1,20 +1,16 @@
 package console.command.list;
 
-import console.command.InformationManager;
+import console.InformationStorage;
 import collection.CollectionManager;
 
-import java.util.List;
-
 public class Clear extends Command {
-    private final CollectionManager collectionManager;
-
-    public Clear(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
-        this.collectionManager = informationManager.getCollectionManager();
+    public Clear() {
+        super("clear", "Очистить коллекцию");
     }
 
     @Override
     public String execute() {
-        return collectionManager.clearCollection();
+//        return collectionManager.clearCollection();
+        return "Clear executed";
     } 
 }

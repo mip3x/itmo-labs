@@ -1,16 +1,14 @@
 package console.command.list; 
 
-import console.command.InformationManager;
+import console.InformationStorage;
 
 public abstract class Command {
-    private String name;
-    private String description;
-    protected InformationManager informationManager;
+    private final String name;
+    private final String description;
 
-    public Command(String name, String description, InformationManager informationManager) {
+    public Command(String name, String description) {
         this.name = name;
         this.description = description;
-        this.informationManager = informationManager;
     }
 
     public abstract String execute();

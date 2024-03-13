@@ -1,23 +1,18 @@
 package console.command.list;
 
-import console.command.InformationManager;
+import console.InformationStorage;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class Help extends Command {
-    private final List<Command> commandsList;
-
-    public Help(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
-        this.commandsList = informationManager.getCommandsList();
+    public Help() {
+        super("help", "Вывести список всех команд");
     }
 
     @Override
     public String execute() {
-        String result = "";
-        for (Command command: commandsList) {
-            result += command.getName() + ": " + command.getDescription() + "\n";
-        }
-        return result.substring(0, result.length() - 1);
-    } 
+        return InformationStorage.getCommandsList().stream()
+                .map(command -> String.format("    %-12s%-4s%s%n", command.getName(), "->", command.getDescription()))
+                .collect(Collectors.joining());
+    }
 }

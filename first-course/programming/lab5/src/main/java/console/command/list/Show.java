@@ -1,18 +1,18 @@
 package console.command.list;
 
-import console.command.InformationManager;
+import console.InformationStorage;
 import collection.CollectionManager;
 
 public class Show extends Command {
-    private final CollectionManager collectionManager;
+//    private final CollectionManager collectionManager;
 
-    public Show(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
-        this.collectionManager = informationManager.getCollectionManager();
+    public Show() {
+        super("show", "Вывести все элементы коллекции");
     }
 
     @Override
     public String execute() {
-        return collectionManager.getAllStudyGroupsInfo();
+//        return collectionManager.getAllStudyGroupsInfo();
+        return "Show was executed";
     } 
 }

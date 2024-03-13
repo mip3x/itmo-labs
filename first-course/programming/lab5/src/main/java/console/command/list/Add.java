@@ -1,21 +1,20 @@
 package console.command.list;
 
-import console.command.InformationManager;
+import console.InformationStorage;
 import collection.CollectionManager;
 import collection.data.StudyGroup;
 
 public class Add extends Command {
-    private final CollectionManager collectionManager;
+//    private final CollectionManager collectionManager;
 
-    public Add(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
-        this.collectionManager = informationManager.getCollectionManager();
+    public Add() {
+        super("add", "Добавить новый элемент в коллекцию");
     }
 
     @Override
     public String execute() {
-        StudyGroup studyGroup = collectionManager.callStudyGroupBuilder(); 
-        collectionManager.addStudyGroupToCollection(studyGroup);
+//        StudyGroup studyGroup = collectionManager.callStudyGroupBuilder();
+//        collectionManager.addStudyGroupToCollection(studyGroup);
         return "Add executed";
     } 
 }

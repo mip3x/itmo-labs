@@ -1,23 +1,22 @@
 package console;
 
-import console.ConsoleHandler;
-import console.command.CommandManager;
 import collection.CollectionManager;
+import console.command.list.Command;
 import exception.InvalidInputException;
 
 public class ConsoleManager {
     private static ConsoleManager instance = null;
     private final ConsoleHandler consoleHandler;
-    private final CommandManager commandManager;
+    private final InformationStorage informationStorage;
 
-    public static ConsoleManager getInstance(CollectionManager collectionManager) {
-        if (instance == null) instance = new ConsoleManager(collectionManager);
+    public static ConsoleManager getInstance(CollectionManager collectionManager, InformationStorage informationStorage) {
+        if (instance == null) instance = new ConsoleManager(collectionManager, informationStorage);
         return instance;
     }
 
-    public ConsoleManager(CollectionManager collectionManager) {
+    public ConsoleManager(CollectionManager collectionManager, InformationStorage informationStorage) {
+        this.informationStorage = informationStorage;
         this.consoleHandler = new ConsoleHandler();
-        this.commandManager = CommandManager.getInstance(consoleHandler, collectionManager);
     }
 
     public void init() {
@@ -30,7 +29,17 @@ public class ConsoleManager {
 
     private void process(String inputLine) {
         try {
-            commandManager.executeCommand(inputLine);
+            String[] tokens = inputLine.trim().split(" ");
+
+            for (Command command: InformationStorage.getCommandsList()) {
+                if (command.getName().equals(tokens[0])) {
+                    String output = command.execute();
+                    informationStorage.addToHistory(command);
+                    consoleHandler.send(output);
+                    return;
+                }
+            }
+            throw new InvalidInputException("Команда не распознана!");
         } catch (Exception exception) {
             consoleHandler.sendWithNewLine(exception.getMessage());
         }

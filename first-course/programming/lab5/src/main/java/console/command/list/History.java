@@ -1,38 +1,18 @@
 package console.command.list;
 
-import console.command.InformationManager;
+import console.InformationStorage;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class History extends Command {
-    private List<Command> history;
-    private int historySize;
-
-    public History(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
-        this.historySize = informationManager.getHistorySize();
-        this.history = informationManager.getHistory();
+    public History() {
+        super("history", "Вывести историю вызовов");
     }
 
     @Override
-    public String execute() {        
-        String result = "";
-
-        if (history.size() != 0) {
-
-            if (history.size() <= historySize) {
-                for (Command command: history) {
-                    result += command.getName() + "\n";
-                }
-            }
-            else {
-                for (int i = history.size() - historySize; i <= history.size() - 1; i++) {
-                    result += history.get(i).getName() + "\n";
-                }
-            }
-
-            return result.substring(0, result.length() - 1);
-        }
-        else return result;
-    } 
+    public String execute() {
+        return InformationStorage.getHistory().stream().limit(InformationStorage.getHistorySize())
+                .map(command -> String.format("%s%n", command.getName())).collect(Collectors.joining());
+    }
 }

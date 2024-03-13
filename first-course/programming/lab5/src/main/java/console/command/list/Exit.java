@@ -1,12 +1,10 @@
 package console.command.list;
 
-import console.command.InformationManager;
-
-import java.util.List;
+import console.InformationStorage;
 
 public class Exit extends Command {
-    public Exit(String name, String description, InformationManager informationManager) {
-        super(name, description, informationManager);
+    public Exit() {
+        super("exit", "Выйти из программы");
     }
 
     @Override
