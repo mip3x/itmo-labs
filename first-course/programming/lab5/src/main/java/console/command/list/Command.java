@@ -1,7 +1,5 @@
 package console.command.list; 
 
-import console.InformationStorage;
-
 public abstract class Command {
     private final String name;
     private final String description;

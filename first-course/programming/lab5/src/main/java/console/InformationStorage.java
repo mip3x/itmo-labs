@@ -1,5 +1,6 @@
 package console;
 
+import collection.CollectionManager;
 import console.command.list.*;
 
 import java.util.ArrayDeque;
@@ -8,17 +9,19 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class InformationStorage {
+    private static InformationStorage instance = null;
     private static List<Command> commandsList = new ArrayList<>();
     private static final int historySize = 14;
-    private static InformationStorage instance = null;
     private static final Deque<Command> history = new ArrayDeque<>();
+    private static CollectionManager collectionManager;
 
-    public static InformationStorage getInstance() {
-        if (instance == null) instance = new InformationStorage();
+    public static InformationStorage getInstance(CollectionManager collectionManager) {
+        if (instance == null) instance = new InformationStorage(collectionManager);
         return instance;
     }
 
-    public InformationStorage() {
+    public InformationStorage(CollectionManager collectionManager) {
+        InformationStorage.collectionManager = collectionManager;
         addCommands();
     }
 
@@ -36,6 +39,10 @@ public class InformationStorage {
 
     public static int getHistorySize() {
         return historySize;
+    }
+
+    public static CollectionManager getCollectionManager() {
+        return collectionManager;
     }
 
     private void addCommands() {

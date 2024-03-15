@@ -5,12 +5,11 @@ import java.util.Date;
 
 import collection.data.StudyGroup;
 import collection.data.StudyGroupBuilder;
-import console.ConsoleManager;
 
 public class CollectionManager {
     private static CollectionManager instance = null;
-    private LinkedList<StudyGroup> studyGroupCollection;
-    private Date initializationDate;
+    private final LinkedList<StudyGroup> studyGroupCollection;
+    private final Date initializationDate;
 
     public static CollectionManager getInstance() {
         if (instance == null) instance = new CollectionManager();
@@ -39,7 +38,7 @@ public class CollectionManager {
 
     public String getAllStudyGroupsInfo() {
         String studyGroupsInfo = "";
-        if (studyGroupCollection.size() == 0) return "Невозможно получить элемент коллекции: коллекция пуста!";
+        if (studyGroupCollection.isEmpty()) return "Невозможно получить элемент коллекции: коллекция пуста!";
         studyGroupCollection.forEach(studyGroup -> studyGroupsInfo.concat(getStudyGroupInfo(studyGroup) + "\n"));
         return studyGroupsInfo;
     }
@@ -55,8 +54,9 @@ public class CollectionManager {
         return collectionType + "\n" + collectionInitializationDate + "\n" + collectionElementsNumber;
     }
 
-    public void addStudyGroupToCollection(StudyGroup studyGroup) {
+    public String addStudyGroupToCollection(StudyGroup studyGroup) {
         studyGroupCollection.add(studyGroup);
+        return "Добавлен новый элемент в коллекцию";
     }
 
     public StudyGroup callStudyGroupBuilder() {

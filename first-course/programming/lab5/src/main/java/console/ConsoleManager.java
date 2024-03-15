@@ -9,12 +9,12 @@ public class ConsoleManager {
     private final ConsoleHandler consoleHandler;
     private final InformationStorage informationStorage;
 
-    public static ConsoleManager getInstance(CollectionManager collectionManager, InformationStorage informationStorage) {
-        if (instance == null) instance = new ConsoleManager(collectionManager, informationStorage);
+    public static ConsoleManager getInstance(InformationStorage informationStorage) {
+        if (instance == null) instance = new ConsoleManager(informationStorage);
         return instance;
     }
 
-    public ConsoleManager(CollectionManager collectionManager, InformationStorage informationStorage) {
+    public ConsoleManager(InformationStorage informationStorage) {
         this.informationStorage = informationStorage;
         this.consoleHandler = new ConsoleHandler();
     }
@@ -35,7 +35,7 @@ public class ConsoleManager {
                 if (command.getName().equals(tokens[0])) {
                     String output = command.execute();
                     informationStorage.addToHistory(command);
-                    consoleHandler.send(output);
+                    consoleHandler.sendWithNewLine(output);
                     return;
                 }
             }

@@ -90,6 +90,6 @@ public class StudyGroup implements Comparable<StudyGroup> {
              + studyGroupShouldBeExpelled + "\n"
              + studyGroupFormOfEducation + "\n"
              + studyGroupSemester + "\n"
-             + studyGroupPerson;
+             + studyGroupPerson + "\n";
     }
 }

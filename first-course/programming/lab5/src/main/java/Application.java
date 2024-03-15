@@ -4,9 +4,9 @@ import console.InformationStorage;
 
 public class Application {
     public static void main(String[] args) {
-        InformationStorage informationStorage = InformationStorage.getInstance();
         CollectionManager collectionManager = CollectionManager.getInstance();
-        ConsoleManager consoleManager = ConsoleManager.getInstance(collectionManager, informationStorage);
+        InformationStorage informationStorage = InformationStorage.getInstance(collectionManager);
+        ConsoleManager consoleManager = ConsoleManager.getInstance(informationStorage);
 
         consoleManager.init();
     }
