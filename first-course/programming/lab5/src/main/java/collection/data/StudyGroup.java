@@ -79,22 +79,22 @@ public class StudyGroup implements Comparable<StudyGroup>, Invokable {
     public String toString() {
         String studyGroupName = "Учебная группа " + name;
         String studyGroupID = "id: " + id;
-        String studyGroupCoordinates = "Координаты: \n" + coordinates.toString();
+        String studyGroupCoordinates = "Координаты: " + coordinates.toString();
         String studyGroupCreationDate = "Дата создания: " + creationDate;
         String studyGroupStudentsCount = "Количество студентов: " + studentsCount;
         String studyGroupShouldBeExpelled = "Количество студентов, которых нужно исключить: " + shouldBeExpelled;
-//        String studyGroupFormOfEducation = "Форма обучения: " + formOfEducation;
-//        String studyGroupSemester = "Семестр обучения: " + semesterEnum;
-//        String studyGroupPerson = "Староста группы: \n" + groupAdmin.toString();
+        String studyGroupFormOfEducation = "Форма обучения: " + formOfEducation;
+        String studyGroupSemester = "Семестр обучения: " + semesterEnum;
+//        String studyGroupAdmin = "Староста группы: \n" + groupAdmin.toString();
 
         return studyGroupName + "\n"
              + studyGroupID + "\n"
              + studyGroupCoordinates + "\n"
              + studyGroupCreationDate + "\n"
              + studyGroupStudentsCount + "\n"
-             + studyGroupShouldBeExpelled;
-//             + studyGroupFormOfEducation + "\n"
-//             + studyGroupSemester + "\n"
-//             + studyGroupPerson + "\n";
+             + studyGroupShouldBeExpelled + "\n"
+             + studyGroupFormOfEducation + "\n"
+             + studyGroupSemester;
+//             + studyGroupAdmin;
     }
 }

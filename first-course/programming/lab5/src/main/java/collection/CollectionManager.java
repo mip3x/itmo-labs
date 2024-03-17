@@ -18,7 +18,6 @@ public class CollectionManager {
     public CollectionManager() {
         studyGroupCollection = new LinkedList<>();
         initializationDate = new Date();
-        studyGroupCollection.add(new StudyGroup());
     }
 
     public String clearCollection() {
@@ -36,10 +35,12 @@ public class CollectionManager {
     }
 
     public String getAllStudyGroupsInfo() {
-        String studyGroupsInfo = "";
+        StringBuilder studyGroupsInfo = new StringBuilder();
         if (studyGroupCollection.isEmpty()) return "Невозможно получить элемент коллекции: коллекция пуста!";
-        studyGroupCollection.forEach(studyGroup -> studyGroupsInfo.concat(getStudyGroupInfo(studyGroup) + "\n"));
-        return studyGroupsInfo;
+        studyGroupCollection.forEach(studyGroup ->
+                studyGroupsInfo.append(getStudyGroupInfo(studyGroup)).append("\n\n"));
+        String result = studyGroupsInfo.toString();
+        return result.substring(0, result.length() - 2);
     }
 
     public String getStudyGroupInfo(StudyGroup studyGroup) {

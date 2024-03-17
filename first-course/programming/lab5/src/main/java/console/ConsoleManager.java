@@ -2,6 +2,8 @@ package console;
 
 import collection.Invokable;
 import collection.data.Coordinates;
+import collection.data.FormOfEducation;
+import collection.data.Semester;
 import collection.data.StudyGroup;
 import console.command.list.Command;
 import exception.InvalidInputException;
@@ -10,6 +12,7 @@ import exception.InvalidTypeCastException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class ConsoleManager {
@@ -91,6 +94,13 @@ public class ConsoleManager {
                 Double::parseDouble,
                 Double.class));
 
+        try {
+            studyGroup.setCoordinates(coordinates);
+        }
+        catch (Exception exception) {
+            consoleHandler.sendWithNewLine(exception.getMessage());
+        }
+
         while (InputField("количество студентов на отчисление",
                 studyGroup,
                 studyGroup.getClass().getMethod("setShouldBeExpelled", Long.class),
@@ -98,12 +108,21 @@ public class ConsoleManager {
                 Long.class
                 ));
 
-        try {
-            studyGroup.setCoordinates(coordinates);
-        }
-        catch (Exception exception) {
-            consoleHandler.sendWithNewLine(exception.getMessage());
-        }
+        while (InputField("значение поля 'форма обучения' (одно из нижеперечисленных):\n"
+                + Arrays.toString(FormOfEducation.values()),
+                studyGroup,
+                studyGroup.getClass().getMethod("setFormOfEducation", FormOfEducation.class),
+                FormOfEducation::valueOf,
+                FormOfEducation.class
+        ));
+
+        while (InputField("значение поля 'семестр обучения' (одно из нижеперечисленных):\n"
+                        + Arrays.toString(Semester.values()),
+                studyGroup,
+                studyGroup.getClass().getMethod("setSemesterEnum", Semester.class),
+                Semester::valueOf,
+                Semester.class
+        ));
 
         return studyGroup;
     }

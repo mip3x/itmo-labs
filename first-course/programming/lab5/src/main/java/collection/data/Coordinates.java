@@ -24,6 +24,6 @@ public class Coordinates implements Invokable {
 
     @Override
     public String toString() {
-        return "\tx: " + x + "; y: " + y;
+        return "X: " + x + "; Y: " + y;
     }
 }
