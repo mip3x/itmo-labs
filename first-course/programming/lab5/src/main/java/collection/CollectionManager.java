@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.Date;
 
 import collection.data.StudyGroup;
-import collection.data.StudyGroupBuilder;
 
 public class CollectionManager {
     private static CollectionManager instance = null;
@@ -57,14 +56,5 @@ public class CollectionManager {
     public String addStudyGroupToCollection(StudyGroup studyGroup) {
         studyGroupCollection.add(studyGroup);
         return "Добавлен новый элемент в коллекцию";
-    }
-
-    public StudyGroup callStudyGroupBuilder() {
-        return new StudyGroupBuilder().getStudyGroup();
-    }
-
-    public StudyGroup callStudyGroupBuilder(Integer id) {
-        // search
-        return new StudyGroupBuilder(id).getStudyGroup();
     }
 }

@@ -12,7 +12,7 @@ public class Add extends Command {
 
     @Override
     public String execute() {
-        StudyGroup studyGroup = collectionManager.callStudyGroupBuilder();
+        StudyGroup studyGroup = InformationStorage.getReceivedStudyGroup();
         return collectionManager.addStudyGroupToCollection(studyGroup);
     }
 }
