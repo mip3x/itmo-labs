@@ -1,5 +1,7 @@
 package console;
 
+import collection.Invokable;
+import collection.data.Coordinates;
 import collection.data.StudyGroup;
 import console.command.list.Command;
 import exception.InvalidInputException;
@@ -73,13 +75,49 @@ public class ConsoleManager {
                 Long::parseLong,
                 Long.class));
 
+        consoleHandler.sendWithNewLine("* Введите координаты");
+
+        Coordinates coordinates = new Coordinates();
+
+        while (InputField("значение поля 'координата X'",
+                coordinates,
+                coordinates.getClass().getMethod("setX", Long.class),
+                Long::parseLong,
+                long.class));
+
+        while (InputField("значение поля 'координата Y'",
+                coordinates,
+                coordinates.getClass().getMethod("setY", Double.class),
+                Double::parseDouble,
+                Double.class));
+
+        while (InputField("количество студентов на отчисление",
+                studyGroup,
+                studyGroup.getClass().getMethod("setShouldBeExpelled", Long.class),
+                Long::parseLong,
+                Long.class
+                ));
+
+        try {
+            studyGroup.setCoordinates(coordinates);
+        }
+        catch (Exception exception) {
+            consoleHandler.sendWithNewLine(exception.getMessage());
+        }
+
         return studyGroup;
     }
 
-    private <T> boolean InputField(String fieldName, StudyGroup studyGroup, Method method, Function<String, T> converter, Class<T> type) {
+    private <T> boolean InputField(String fieldName, Invokable invokable, Method method, Function<String, T> converter, Class<T> type) {
         try {
             String userInput = consoleHandler.receive(MessageFormat.format("> Введите {0}", fieldName));
-            method.invoke(studyGroup, castField(userInput, converter, type));
+
+            if (userInput.isBlank()) {
+                method.invoke(invokable, (Object) null);
+                return false;
+            }
+
+            method.invoke(invokable, castField(userInput, converter, type));
             return false;
         }
         catch (InvocationTargetException exception) {

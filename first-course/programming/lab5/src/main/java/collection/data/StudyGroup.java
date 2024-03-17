@@ -1,16 +1,17 @@
 package collection.data;
 
+import collection.Invokable;
 import exception.InvalidInputException;
 
 import java.util.Date;
 import java.util.Random;
 
-public class StudyGroup implements Comparable<StudyGroup> {
+public class StudyGroup implements Comparable<StudyGroup>, Invokable {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
-    private java.util.Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
-    private Long studentsCount; //Значение поля должно быть больше 0, Поле может быть null
+    private final java.util.Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
+    private Long studentsCount = null; //Значение поля должно быть больше 0, Поле может быть null
     private long shouldBeExpelled; //Значение поля должно быть больше 0
     private FormOfEducation formOfEducation; //Поле не может быть null
     private Semester semesterEnum; //Поле не может быть null
@@ -31,19 +32,20 @@ public class StudyGroup implements Comparable<StudyGroup> {
         return true;
     }
 
-    public boolean setCoordinates(Coordinates coordinates) throws InvalidInputException {
+    public void setCoordinates(Coordinates coordinates) throws InvalidInputException {
         if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
         this.coordinates = coordinates;
-        return true;
     }
 
     public boolean setStudentsCount(Long studentsCount) throws InvalidInputException {
+        if (studentsCount == null) return true;
         if (studentsCount <= 0) throw new InvalidInputException("Количество студентов должно быть больше нуля!");
         this.studentsCount = studentsCount;
         return true;
     }
 
     public boolean setShouldBeExpelled(Long shouldBeExpelled) throws InvalidInputException {
+        if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'кол-во студентов на отчисление' не должно быть пустым!");
         if (shouldBeExpelled <= 0) throw new InvalidInputException("Количество студентов на отчисление должно быть больше нуля!");
         this.shouldBeExpelled = shouldBeExpelled;
         return true;
@@ -77,20 +79,20 @@ public class StudyGroup implements Comparable<StudyGroup> {
     public String toString() {
         String studyGroupName = "Учебная группа " + name;
         String studyGroupID = "id: " + id;
-//        String studyGroupCoordinates = "Координаты: \n" + coordinates.toString();
-//        String studyGroupCreationDate = "Дата создания: " + creationDate;
+        String studyGroupCoordinates = "Координаты: \n" + coordinates.toString();
+        String studyGroupCreationDate = "Дата создания: " + creationDate;
         String studyGroupStudentsCount = "Количество студентов: " + studentsCount;
-//        String studyGroupShouldBeExpelled = "Количество студентов, которых нужно исключить: " + shouldBeExpelled;
+        String studyGroupShouldBeExpelled = "Количество студентов, которых нужно исключить: " + shouldBeExpelled;
 //        String studyGroupFormOfEducation = "Форма обучения: " + formOfEducation;
 //        String studyGroupSemester = "Семестр обучения: " + semesterEnum;
 //        String studyGroupPerson = "Староста группы: \n" + groupAdmin.toString();
 
         return studyGroupName + "\n"
              + studyGroupID + "\n"
-//             + studyGroupCoordinates + "\n"
-//             + studyGroupCreationDate + "\n"
-             + studyGroupStudentsCount;
-//             + studyGroupShouldBeExpelled + "\n"
+             + studyGroupCoordinates + "\n"
+             + studyGroupCreationDate + "\n"
+             + studyGroupStudentsCount + "\n"
+             + studyGroupShouldBeExpelled;
 //             + studyGroupFormOfEducation + "\n"
 //             + studyGroupSemester + "\n"
 //             + studyGroupPerson + "\n";
