@@ -1,12 +1,11 @@
 package collection.data;
 
-import collection.Invokable;
 import exception.InvalidInputException;
 
 import java.util.Date;
 import java.util.Random;
 
-public class StudyGroup implements Comparable<StudyGroup>, Invokable {
+public class StudyGroup implements Comparable<StudyGroup> {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
@@ -26,47 +25,41 @@ public class StudyGroup implements Comparable<StudyGroup>, Invokable {
         this.id = id;
     }
 
-    public boolean setName(String name) throws InvalidInputException {
+    public void setName(String name) {
         if (name == null || name.isBlank()) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
         this.name = name;
-        return true;
     }
 
-    public void setCoordinates(Coordinates coordinates) throws InvalidInputException {
+    public void setCoordinates(Coordinates coordinates) {
         if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
         this.coordinates = coordinates;
     }
 
-    public boolean setStudentsCount(Long studentsCount) throws InvalidInputException {
-        if (studentsCount == null) return true;
+    public void setStudentsCount(Long studentsCount) {
+        if (studentsCount == null) return;
         if (studentsCount <= 0) throw new InvalidInputException("Количество студентов должно быть больше нуля!");
         this.studentsCount = studentsCount;
-        return true;
     }
 
-    public boolean setShouldBeExpelled(Long shouldBeExpelled) throws InvalidInputException {
+    public void setShouldBeExpelled(Long shouldBeExpelled) {
         if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'кол-во студентов на отчисление' не должно быть пустым!");
         if (shouldBeExpelled <= 0) throw new InvalidInputException("Количество студентов на отчисление должно быть больше нуля!");
         this.shouldBeExpelled = shouldBeExpelled;
-        return true;
     }
 
-    public boolean setFormOfEducation(FormOfEducation formOfEducation) throws InvalidInputException {
+    public void setFormOfEducation(FormOfEducation formOfEducation) {
         if (formOfEducation == null) throw new InvalidInputException("Поле 'Форма обучения' не должно быть пустым!");
         this.formOfEducation = formOfEducation;
-        return true;
     }
 
-    public boolean setSemesterEnum(Semester semesterEnum) throws InvalidInputException {
+    public void setSemesterEnum(Semester semesterEnum) {
         if (semesterEnum == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
         this.semesterEnum = semesterEnum;
-        return true;
     }
 
-    public boolean setGroupAdmin(Person groupAdmin) throws InvalidInputException {
+    public void setGroupAdmin(Person groupAdmin) {
         if (groupAdmin == null) throw new InvalidInputException("Поле 'Староста группы' не должно быть пустым!");
         this.groupAdmin = groupAdmin;
-        return true;
     }
 
     @Override
@@ -85,7 +78,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Invokable {
         String studyGroupShouldBeExpelled = "Количество студентов, которых нужно исключить: " + shouldBeExpelled;
         String studyGroupFormOfEducation = "Форма обучения: " + formOfEducation;
         String studyGroupSemester = "Семестр обучения: " + semesterEnum;
-//        String studyGroupAdmin = "Староста группы: \n" + groupAdmin.toString();
+        String studyGroupAdmin = "Староста группы: \n" + groupAdmin.toString();
 
         return studyGroupName + "\n"
              + studyGroupID + "\n"
@@ -94,7 +87,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Invokable {
              + studyGroupStudentsCount + "\n"
              + studyGroupShouldBeExpelled + "\n"
              + studyGroupFormOfEducation + "\n"
-             + studyGroupSemester;
-//             + studyGroupAdmin;
+             + studyGroupSemester + "\n"
+             + studyGroupAdmin;
     }
 }

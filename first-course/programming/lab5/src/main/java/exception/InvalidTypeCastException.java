@@ -1,6 +1,6 @@
 package exception;
 
-public class InvalidTypeCastException extends Exception {
+public class InvalidTypeCastException extends RuntimeException {
     public InvalidTypeCastException(String message) {
         super(message);
     }

@@ -1,17 +1,15 @@
 package console;
 
-import collection.Invokable;
 import collection.data.*;
 import console.command.list.Command;
+import exception.ExitException;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ConsoleManager {
@@ -47,7 +45,13 @@ public class ConsoleManager {
                 if (command.getName().equals(tokens[0])) {
 
                     if (InformationStorage.getCommandsRequestingInput().contains(command)) {
-                        informationStorage.setReceivedStudyGroup(inputElement());
+                        try {
+                            informationStorage.setReceivedStudyGroup(inputElement());
+                        }
+                        catch (ExitException exitException) {
+                            consoleHandler.sendWithNewLine(exitException.getMessage());
+                            return;
+                        }
                     }
 
                     String output = command.execute();
@@ -62,20 +66,24 @@ public class ConsoleManager {
         }
     }
 
-    private StudyGroup inputElement() throws NoSuchMethodException {
-//        consoleHandler.sendWithNewLine(">*> Чтобы выйти из режима ввода объекта, введите 'exit' <*<");
+    private StudyGroup inputElement() throws ExitException {
+        consoleHandler.sendWithNewLine(">*> Чтобы выйти из режима ввода объекта, введите 'exit'. Данные не сохранятся! <*<");
         StudyGroup studyGroup = new StudyGroup();
 
-        while (InputField("имя",
-                studyGroup,
-                studyGroup.getClass().getMethod("setName", String.class),
+        while (inputField("имя",
+                studyGroup::setName,
                 String::toString,
                 String.class
         ));
 
-        while (InputField("количество студентов",
-                studyGroup,
-                studyGroup.getClass().getMethod("setStudentsCount", Long.class),
+        while (inputField("количество студентов",
+                studyGroup::setStudentsCount,
+                Long::parseLong,
+                Long.class
+        ));
+
+        while (inputField("количество студентов на отчисление",
+                studyGroup::setShouldBeExpelled,
                 Long::parseLong,
                 Long.class
         ));
@@ -84,46 +92,30 @@ public class ConsoleManager {
 
         Coordinates coordinates = new Coordinates();
 
-        while (InputField("значение поля 'координата X'",
-                coordinates,
-                coordinates.getClass().getMethod("setX", Long.class),
+        while (inputField("значение поля 'координата X'",
+                coordinates::setX,
                 Long::parseLong,
                 long.class
         ));
 
-        while (InputField("значение поля 'координата Y'",
-                coordinates,
-                coordinates.getClass().getMethod("setY", Double.class),
+        while (inputField("значение поля 'координата Y'",
+                coordinates::setY,
                 Double::parseDouble,
                 Double.class
         ));
 
-        try {
-            studyGroup.setCoordinates(coordinates);
-        }
-        catch (Exception exception) {
-            consoleHandler.sendWithNewLine(exception.getMessage());
-        }
+        studyGroup.setCoordinates(coordinates);
 
-        while (InputField("количество студентов на отчисление",
-                studyGroup,
-                studyGroup.getClass().getMethod("setShouldBeExpelled", Long.class),
-                Long::parseLong,
-                Long.class
-        ));
-
-        while (InputField("значение поля 'форма обучения' (одно из нижеперечисленных):\n"
-                + Arrays.toString(FormOfEducation.values()),
-                studyGroup,
-                studyGroup.getClass().getMethod("setFormOfEducation", FormOfEducation.class),
+        while (inputField("значение поля 'форма обучения' (одно из нижеперечисленных)\n"
+                        + Arrays.toString(FormOfEducation.values()),
+                studyGroup::setFormOfEducation,
                 FormOfEducation::valueOf,
                 FormOfEducation.class
         ));
 
-        while (InputField("значение поля 'семестр обучения' (одно из нижеперечисленных):\n"
+        while (inputField("значение поля 'семестр обучения' (одно из нижеперечисленных)\n"
                         + Arrays.toString(Semester.values()),
-                studyGroup,
-                studyGroup.getClass().getMethod("setSemesterEnum", Semester.class),
+                studyGroup::setSemesterEnum,
                 Semester::valueOf,
                 Semester.class
         ));
@@ -132,31 +124,27 @@ public class ConsoleManager {
 
         consoleHandler.sendWithNewLine("* Введите данные старосты");
 
-        while (InputField("имя старосты",
-                person,
-                person.getClass().getMethod("setName", String.class),
+        while (inputField("имя старосты",
+                person::setName,
                 String::toString,
                 String.class
         ));
 
-        while (InputField("вес старосты",
-                person,
-                person.getClass().getMethod("setWeight", Long.class),
+        while (inputField("вес старосты",
+                person::setWeight,
                 Long::parseLong,
                 Long.class
         ));
 
-        while (InputField("номер паспорта старосты",
-                person,
-                person.getClass().getMethod("setPassportID", String.class),
+        while (inputField("номер паспорта старосты",
+                person::setPassportID,
                 String::toString,
                 String.class
         ));
 
-        while (InputField("цвет глаз старосты (один из нижеперечисленных)\n"
+        while (inputField("цвет глаз старосты (один из нижеперечисленных)\n"
                 + Arrays.toString(Color.values()),
-                person,
-                person.getClass().getMethod("setEyeColor", Color.class),
+                person::setEyeColor,
                 Color::valueOf,
                 Color.class
         ));
@@ -169,69 +157,64 @@ public class ConsoleManager {
         while (!(locationInputList.contains(locationInputAnswer = consoleHandler.receive(locationInputText).trim())));
 
         if (locationInputAnswer.equals("да") || locationInputAnswer.isBlank()) {
-            while (InputField("значение поля 'координата X'",
-                    location,
-                    location.getClass().getMethod("setX", Double.class),
+            while (inputField("значение поля 'координата X'",
+                    location::setX,
                     Double::parseDouble,
                     Double.class
             ));
 
-            while (InputField("значение поля 'координата Y'",
-                    location,
-                    location.getClass().getMethod("setY", Double.class),
+            while (inputField("значение поля 'координата Y'",
+                    location::setY,
                     Double::parseDouble,
                     Double.class
             ));
 
-            while (InputField("значение поля 'координата Z'",
-                    location,
-                    location.getClass().getMethod("setZ", Integer.class),
+            while (inputField("значение поля 'координата Z'",
+                    location::setZ,
                     Integer::parseInt,
                     Integer.class
             ));
 
-            while (InputField("название локации",
-                    location,
-                    location.getClass().getMethod("setName", String.class),
+            while (inputField("название локации",
+                    location::setName,
                     String::toString,
                     String.class
             ));
         }
 
         person.setLocation(location);
+        studyGroup.setGroupAdmin(person);
 
         return studyGroup;
     }
 
-    private <T> boolean InputField(String fieldName, Invokable invokable, Method method, Function<String, T> converter, Class<T> type) {
+    private <T> boolean inputField(String fieldName, Consumer<T> method, Function<String, T> converter, Class<T> type) throws ExitException {
         try {
             String userInput = consoleHandler.receive(MessageFormat.format("> Введите {0}", fieldName));
 
+            if (userInput.trim().equals("exit")) throw new ExitException("Выход! Введенные данные об объекте не будут сохранены!");
+
             if (userInput.isBlank()) {
-                method.invoke(invokable, (Object) null);
+                method.accept(null);
                 return false;
             }
 
-            method.invoke(invokable, castField(userInput, converter, type));
+            method.accept(castField(userInput, converter, type));
             return false;
         }
-        catch (InvocationTargetException exception) {
-            consoleHandler.sendWithNewLine(exception.getCause().getMessage());
-            return true;
-        }
-        catch (Exception exception) {
+        catch (InvalidInputException | InvalidTypeCastException exception) {
             consoleHandler.sendWithNewLine(exception.getMessage());
             return true;
         }
     }
 
-    private <T> T castField(String userInput, Function<String, T> converter, Class<T> type) throws InvalidTypeCastException {
+    private <T> T castField(String userInput, Function<String, T> converter, Class<T> type) {
         try {
             return converter.apply(userInput);
         }
         catch (Exception exception) {
             throw new InvalidTypeCastException(
-                    MessageFormat.format("Неверный ввод! Поле должно быть типа {0}", type.getSimpleName()));
+                    MessageFormat.format("Неверный ввод! Поле должно быть типа {0}!", type.getSimpleName()));
         }
     }
 }
