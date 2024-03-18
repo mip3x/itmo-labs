@@ -1,10 +1,7 @@
 package console;
 
 import collection.Invokable;
-import collection.data.Coordinates;
-import collection.data.FormOfEducation;
-import collection.data.Semester;
-import collection.data.StudyGroup;
+import collection.data.*;
 import console.command.list.Command;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
@@ -12,7 +9,9 @@ import exception.InvalidTypeCastException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 public class ConsoleManager {
@@ -64,19 +63,22 @@ public class ConsoleManager {
     }
 
     private StudyGroup inputElement() throws NoSuchMethodException {
+//        consoleHandler.sendWithNewLine(">*> Чтобы выйти из режима ввода объекта, введите 'exit' <*<");
         StudyGroup studyGroup = new StudyGroup();
 
         while (InputField("имя",
                 studyGroup,
                 studyGroup.getClass().getMethod("setName", String.class),
                 String::toString,
-                String.class));
+                String.class
+        ));
 
         while (InputField("количество студентов",
                 studyGroup,
                 studyGroup.getClass().getMethod("setStudentsCount", Long.class),
                 Long::parseLong,
-                Long.class));
+                Long.class
+        ));
 
         consoleHandler.sendWithNewLine("* Введите координаты");
 
@@ -86,13 +88,15 @@ public class ConsoleManager {
                 coordinates,
                 coordinates.getClass().getMethod("setX", Long.class),
                 Long::parseLong,
-                long.class));
+                long.class
+        ));
 
         while (InputField("значение поля 'координата Y'",
                 coordinates,
                 coordinates.getClass().getMethod("setY", Double.class),
                 Double::parseDouble,
-                Double.class));
+                Double.class
+        ));
 
         try {
             studyGroup.setCoordinates(coordinates);
@@ -106,7 +110,7 @@ public class ConsoleManager {
                 studyGroup.getClass().getMethod("setShouldBeExpelled", Long.class),
                 Long::parseLong,
                 Long.class
-                ));
+        ));
 
         while (InputField("значение поля 'форма обучения' (одно из нижеперечисленных):\n"
                 + Arrays.toString(FormOfEducation.values()),
@@ -123,6 +127,78 @@ public class ConsoleManager {
                 Semester::valueOf,
                 Semester.class
         ));
+
+        Person person = new Person();
+
+        consoleHandler.sendWithNewLine("* Введите данные старосты");
+
+        while (InputField("имя старосты",
+                person,
+                person.getClass().getMethod("setName", String.class),
+                String::toString,
+                String.class
+        ));
+
+        while (InputField("вес старосты",
+                person,
+                person.getClass().getMethod("setWeight", Long.class),
+                Long::parseLong,
+                Long.class
+        ));
+
+        while (InputField("номер паспорта старосты",
+                person,
+                person.getClass().getMethod("setPassportID", String.class),
+                String::toString,
+                String.class
+        ));
+
+        while (InputField("цвет глаз старосты (один из нижеперечисленных)\n"
+                + Arrays.toString(Color.values()),
+                person,
+                person.getClass().getMethod("setEyeColor", Color.class),
+                Color::valueOf,
+                Color.class
+        ));
+
+        Location location = new Location();
+        List<String> locationInputList = Arrays.asList("да", "нет", "");
+        String locationInputText = "* Ввод локации\nВыберите 'да', если необходим (перевод строки воспринимается как 'да') (да/нет)";
+        String locationInputAnswer;
+
+        while (!(locationInputList.contains(locationInputAnswer = consoleHandler.receive(locationInputText).trim())));
+
+        if (locationInputAnswer.equals("да") || locationInputAnswer.isBlank()) {
+            while (InputField("значение поля 'координата X'",
+                    location,
+                    location.getClass().getMethod("setX", Double.class),
+                    Double::parseDouble,
+                    Double.class
+            ));
+
+            while (InputField("значение поля 'координата Y'",
+                    location,
+                    location.getClass().getMethod("setY", Double.class),
+                    Double::parseDouble,
+                    Double.class
+            ));
+
+            while (InputField("значение поля 'координата Z'",
+                    location,
+                    location.getClass().getMethod("setZ", Integer.class),
+                    Integer::parseInt,
+                    Integer.class
+            ));
+
+            while (InputField("название локации",
+                    location,
+                    location.getClass().getMethod("setName", String.class),
+                    String::toString,
+                    String.class
+            ));
+        }
+
+        person.setLocation(location);
 
         return studyGroup;
     }
