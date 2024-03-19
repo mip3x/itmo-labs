@@ -56,6 +56,15 @@ public class CollectionManager {
 
     public String addStudyGroupToCollection(StudyGroup studyGroup) {
         studyGroupCollection.add(studyGroup);
-        return "Добавлен новый элемент в коллекцию";
+        return "Новый элемент был успешно добавлен в коллекцию";
+    }
+
+    public boolean validateID(Integer id) {
+        return studyGroupCollection.stream().anyMatch(studyGroup -> studyGroup.compareId(id));
+    }
+
+    public String removeById(Integer id) {
+        studyGroupCollection.removeIf(studyGroup -> studyGroup.compareId(id));
+        return "Объект по данному id успешно удален";
     }
 }

@@ -12,11 +12,11 @@ import java.util.ArrayList;
 public class InformationStorage {
     private static InformationStorage instance = null;
     private static List<Command> commandsList = new ArrayList<>();
-    private static List<Command> commandsRequestingInput = new ArrayList<>();
     private static final int historySize = 14;
     private static final Deque<Command> history = new ArrayDeque<>();
     private static CollectionManager collectionManager;
     private static StudyGroup receivedStudyGroup;
+    private static List<String> receivedArguments;
 
     public static InformationStorage getInstance(CollectionManager collectionManager) {
         if (instance == null) instance = new InformationStorage(collectionManager);
@@ -32,16 +32,16 @@ public class InformationStorage {
         return commandsList;
     }
 
-    public static List<Command> getCommandsRequestingInput() {
-        return commandsRequestingInput;
-    }
-
     public void addToHistory(Command command) {
         history.add(command);
     }
 
     public void setReceivedStudyGroup(StudyGroup studyGroup) {
         receivedStudyGroup = studyGroup;
+    }
+
+    public void setArguments(List<String> arguments) {
+        receivedArguments = arguments;
     }
 
     public static Deque<Command> getHistory() {
@@ -60,11 +60,15 @@ public class InformationStorage {
         return receivedStudyGroup;
     }
 
-    private void addCommands() {
-        Command addCommand = new Add();
+    public static List<String> getReceivedArguments() {
+        return receivedArguments;
+    }
 
+    private void addCommands() {
         commandsList = List.of(
-                addCommand,
+                new Add(),
+                new Update(),
+                new RemoveById(),
                 new Clear(),
                 new Exit(),
                 new Head(),
@@ -72,10 +76,6 @@ public class InformationStorage {
                 new History(),
                 new Info(),
                 new Show()
-        );
-
-        commandsRequestingInput = List.of(
-               addCommand
         );
     }
 }

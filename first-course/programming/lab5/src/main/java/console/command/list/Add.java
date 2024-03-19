@@ -4,7 +4,7 @@ import collection.CollectionManager;
 import console.InformationStorage;
 import collection.data.StudyGroup;
 
-public class Add extends Command {
+public class Add extends Command implements RequestingInput {
     private final CollectionManager collectionManager = InformationStorage.getCollectionManager();
     public Add() {
         super("add", "Добавить новый элемент в коллекцию");

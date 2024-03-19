@@ -2,6 +2,9 @@ package console;
 
 import collection.data.*;
 import console.command.list.Command;
+import console.command.list.Info;
+import console.command.list.RequestingId;
+import console.command.list.RequestingInput;
 import exception.ExitException;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
@@ -44,7 +47,19 @@ public class ConsoleManager {
             for (Command command: InformationStorage.getCommandsList()) {
                 if (command.getName().equals(tokens[0])) {
 
-                    if (InformationStorage.getCommandsRequestingInput().contains(command)) {
+                    if (tokens.length > 1) informationStorage.setArguments(List.of(tokens).subList(1, tokens.length));
+
+                    if (command instanceof RequestingId) {
+                        try {
+                            if (!((RequestingId) command).validateId()) throw new InvalidInputException("Данного id нет в базе!");
+                        }
+                        catch (InvalidInputException exception) {
+                            consoleHandler.sendWithNewLine(exception.getMessage());
+                            return;
+                        }
+                    }
+
+                    if (command instanceof RequestingInput) {
                         try {
                             informationStorage.setReceivedStudyGroup(inputElement());
                         }

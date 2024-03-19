@@ -25,6 +25,10 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.id = id;
     }
 
+    public boolean compareId(Integer id) {
+        return this.id.equals(id);
+    }
+
     public void setName(String name) {
         if (name == null || name.isBlank()) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
         this.name = name;
