@@ -21,6 +21,11 @@ public class CollectionManager {
         initializationDate = new Date();
     }
 
+    public LinkedList<StudyGroup> getStudyGroupCollection() {
+        if (studyGroupCollection.isEmpty()) return null;
+        return studyGroupCollection;
+    }
+
     public String clearCollection() {
         studyGroupCollection.clear();
         return "Коллекция была успешно очищена";
