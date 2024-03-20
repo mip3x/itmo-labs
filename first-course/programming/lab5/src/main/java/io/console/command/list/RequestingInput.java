@@ -1,4 +1,4 @@
-package console.command.list;
+package io.console.command.list;
 
 public interface RequestingInput {
 }

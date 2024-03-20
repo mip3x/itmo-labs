@@ -1,10 +1,10 @@
-package console.command.list;
+package io.console.command.list;
 
-import console.InformationStorage;
+import io.console.InformationStorage;
 import collection.CollectionManager;
 
 public class Show extends Command {
-    private final CollectionManager collectionManager = InformationStorage.getCollectionManager();
+    private final CollectionManager collectionManager = CollectionManager.getInstance();
 
     public Show() {
         super("show", "Вывести все элементы коллекции");

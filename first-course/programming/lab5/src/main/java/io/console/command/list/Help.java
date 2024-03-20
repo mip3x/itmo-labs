@@ -1,6 +1,6 @@
-package console.command.list;
+package io.console.command.list;
 
-import console.InformationStorage;
+import io.console.InformationStorage;
 
 import java.util.stream.Collectors;
 

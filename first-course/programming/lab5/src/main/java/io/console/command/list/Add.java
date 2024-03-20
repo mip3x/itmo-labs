@@ -1,13 +1,13 @@
-package console.command.list;
+package io.console.command.list;
 
 import collection.CollectionManager;
-import console.InformationStorage;
+import io.console.InformationStorage;
 import collection.data.StudyGroup;
 
 public class Add extends Command implements RequestingInput {
-    private final CollectionManager collectionManager = InformationStorage.getCollectionManager();
+    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Add() {
-        super("add", "Добавить новый элемент в коллекцию");
+        super("add {element}", "Добавить новый элемент в коллекцию");
     }
 
     @Override

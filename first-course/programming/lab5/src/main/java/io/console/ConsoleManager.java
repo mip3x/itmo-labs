@@ -1,10 +1,9 @@
-package console;
+package io.console;
 
 import collection.data.*;
-import console.command.list.Command;
-import console.command.list.Info;
-import console.command.list.RequestingId;
-import console.command.list.RequestingInput;
+import io.console.command.list.Command;
+import io.console.command.list.RequestingId;
+import io.console.command.list.RequestingInput;
 import exception.ExitException;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
@@ -20,13 +19,13 @@ public class ConsoleManager {
     private final ConsoleHandler consoleHandler;
     private final InformationStorage informationStorage;
 
-    public static ConsoleManager getInstance(InformationStorage informationStorage) {
-        if (instance == null) instance = new ConsoleManager(informationStorage);
+    public static ConsoleManager getInstance() {
+        if (instance == null) instance = new ConsoleManager();
         return instance;
     }
 
-    public ConsoleManager(InformationStorage informationStorage) {
-        this.informationStorage = informationStorage;
+    public ConsoleManager() {
+        this.informationStorage = InformationStorage.getInstance();
         this.consoleHandler = new ConsoleHandler();
     }
 
@@ -45,13 +44,14 @@ public class ConsoleManager {
             if (tokens[0].isBlank()) return;
 
             for (Command command: InformationStorage.getCommandsList()) {
-                if (command.getName().equals(tokens[0])) {
+                if (command.getName().split(" ")[0].equals(tokens[0])) {
 
                     if (tokens.length > 1) informationStorage.setArguments(List.of(tokens).subList(1, tokens.length));
 
                     if (command instanceof RequestingId) {
                         try {
-                            if (!((RequestingId) command).validateId()) throw new InvalidInputException("Данного id нет в базе!");
+                            if (!((RequestingId) command).validateId())
+                                throw new InvalidInputException("Объекта с данным id нет в коллекции!");
                         }
                         catch (InvalidInputException exception) {
                             consoleHandler.sendWithNewLine(exception.getMessage());
@@ -103,7 +103,7 @@ public class ConsoleManager {
                 Long.class
         ));
 
-        consoleHandler.sendWithNewLine("* Введите координаты");
+        consoleHandler.sendWithNewLine("* Введите координаты:");
 
         Coordinates coordinates = new Coordinates();
 
@@ -137,7 +137,7 @@ public class ConsoleManager {
 
         Person person = new Person();
 
-        consoleHandler.sendWithNewLine("* Введите данные старосты");
+        consoleHandler.sendWithNewLine("* Введите данные старосты:");
 
         while (inputField("имя старосты",
                 person::setName,

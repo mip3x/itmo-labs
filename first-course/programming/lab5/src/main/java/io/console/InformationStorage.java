@@ -1,8 +1,7 @@
-package console;
+package io.console;
 
-import collection.CollectionManager;
 import collection.data.StudyGroup;
-import console.command.list.*;
+import io.console.command.list.*;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -14,17 +13,15 @@ public class InformationStorage {
     private static List<Command> commandsList = new ArrayList<>();
     private static final int historySize = 14;
     private static final Deque<Command> history = new ArrayDeque<>();
-    private static CollectionManager collectionManager;
     private static StudyGroup receivedStudyGroup;
     private static List<String> receivedArguments;
 
-    public static InformationStorage getInstance(CollectionManager collectionManager) {
-        if (instance == null) instance = new InformationStorage(collectionManager);
+    public static InformationStorage getInstance() {
+        if (instance == null) instance = new InformationStorage();
         return instance;
     }
 
-    public InformationStorage(CollectionManager collectionManager) {
-        InformationStorage.collectionManager = collectionManager;
+    public InformationStorage() {
         addCommands();
     }
 
@@ -50,10 +47,6 @@ public class InformationStorage {
 
     public static int getHistorySize() {
         return historySize;
-    }
-
-    public static CollectionManager getCollectionManager() {
-        return collectionManager;
     }
 
     public static StudyGroup getReceivedStudyGroup() {

@@ -2,6 +2,7 @@ package collection;
 
 import java.util.LinkedList;
 import java.util.Date;
+import java.util.stream.IntStream;
 
 import collection.data.StudyGroup;
 
@@ -66,5 +67,17 @@ public class CollectionManager {
     public String removeById(Integer id) {
         studyGroupCollection.removeIf(studyGroup -> studyGroup.compareId(id));
         return "Объект по данному id успешно удален";
+    }
+
+    public String updateById(Integer id, StudyGroup studyGroup) {
+        Integer index = IntStream.range(0, studyGroupCollection.size())
+                .filter(i -> studyGroupCollection.get(i).compareId(id))
+                .findFirst()
+                .orElse(-1);
+
+        studyGroup.setId(id);
+        studyGroup.setDate(studyGroupCollection.get(index).getCreationDate());
+        studyGroupCollection.set(index, studyGroup);
+        return "Объект по заданному id был успешно обновлен!";
     }
 }

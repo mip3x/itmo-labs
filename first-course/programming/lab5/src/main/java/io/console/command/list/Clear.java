@@ -1,10 +1,9 @@
-package console.command.list;
+package io.console.command.list;
 
-import console.InformationStorage;
 import collection.CollectionManager;
 
 public class Clear extends Command {
-    private final CollectionManager collectionManager = InformationStorage.getCollectionManager();
+    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Clear() {
         super("clear", "Очистить коллекцию");
     }
