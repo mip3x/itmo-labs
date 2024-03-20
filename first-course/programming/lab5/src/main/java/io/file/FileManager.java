@@ -1,6 +1,8 @@
 package io.file;
 
 import collection.CollectionManager;
+import collection.data.Coordinates;
+import collection.data.Person;
 import collection.data.StudyGroup;
 
 import java.io.*;
@@ -35,10 +37,14 @@ public class FileManager {
                 xmlData.append(line.trim());
             }
 
-            JAXBContext context = JAXBContext.newInstance(CollectionManager.class, StudyGroup.class);
+            JAXBContext context = JAXBContext.newInstance(CollectionManager.class,
+                    StudyGroup.class,
+                    Coordinates.class,
+                    Person.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
 
             StringReader xmlReader = new StringReader(xmlData.toString());
+
             CollectionManager.getInstance().setStudyGroupCollection(
                     ((CollectionManager) unmarshaller.unmarshal(xmlReader)).getStudyGroupCollection());
 
@@ -52,7 +58,10 @@ public class FileManager {
     }
     public static void saveCollection() throws IOException, JAXBException {
         try {
-            JAXBContext context = JAXBContext.newInstance(StudyGroup.class, CollectionManager.class);
+            JAXBContext context = JAXBContext.newInstance(Person.class,
+                    Coordinates.class,
+                    StudyGroup.class,
+                    CollectionManager.class);
             Marshaller marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 

@@ -62,6 +62,7 @@ public class InformationStorage {
                 new Add(),
                 new Update(),
                 new RemoveById(),
+                new RemoveAnyByFormOfEducation(),
                 new Clear(),
                 new Exit(),
                 new Head(),
@@ -69,7 +70,8 @@ public class InformationStorage {
                 new History(),
                 new Info(),
                 new Show(),
-                new Save()
+                new Save(),
+                new GroupCountingBySemesterEnum()
         );
     }
 }

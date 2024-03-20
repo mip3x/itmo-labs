@@ -2,116 +2,127 @@
 <studyGroupCollection>
     <studyGroup>
         <coordinates>
-            <x>0</x>
-            <y>44.0</y>
+            <x>223</x>
+            <y>678.0</y>
         </coordinates>
-        <creationDate>2024-03-20T17:10:11.519+03:00</creationDate>
-        <formOfEducation>FULL_TIME_EDUCATION</formOfEducation>
-        <groupAdmin>
-            <eyeColor>RED</eyeColor>
-            <location>
-                <y>0.0</y>
-            </location>
-            <name>890</name>
-            <passportID>45689</passportID>
-            <weight>234</weight>
-        </groupAdmin>
-        <id>1316264499</id>
-        <name>mike</name>
-        <semesterEnum>THIRD</semesterEnum>
-        <shouldBeExpelled>234</shouldBeExpelled>
-        <studentsCount>679</studentsCount>
-    </studyGroup>
-    <studyGroup>
-        <coordinates>
-            <x>0</x>
-            <y>3456.0</y>
-        </coordinates>
-        <creationDate>2024-03-20T17:10:11.546+03:00</creationDate>
+        <creationDate>2024-03-20T23:31:12.178+03:00</creationDate>
         <formOfEducation>DISTANCE_EDUCATION</formOfEducation>
         <groupAdmin>
             <eyeColor>RED</eyeColor>
             <location>
-                <y>0.0</y>
+                <name>SPB</name>
+                <x>8347.0</x>
+                <y>230948.0</y>
+                <z>39485</z>
             </location>
-            <name>ksjdhf</name>
-            <passportID>938499</passportID>
-            <weight>345</weight>
+            <name>7890</name>
+            <passportID>23784</passportID>
+            <weight>1235</weight>
         </groupAdmin>
-        <id>1217635102</id>
-        <name>rob</name>
-        <semesterEnum>THIRD</semesterEnum>
-        <shouldBeExpelled>4678</shouldBeExpelled>
-        <studentsCount>9834</studentsCount>
+        <id>471055120</id>
+        <name>юра дудь</name>
+        <semester>THIRD</semester>
+        <shouldBeExpelled>90</shouldBeExpelled>
+        <studentsCount>789</studentsCount>
     </studyGroup>
     <studyGroup>
         <coordinates>
-            <x>0</x>
-            <y>112.0</y>
+            <x>89</x>
+            <y>568.0</y>
         </coordinates>
-        <creationDate>2024-03-20T17:10:11.546+03:00</creationDate>
+        <creationDate>2024-03-20T23:32:31.068+03:00</creationDate>
+        <formOfEducation>DISTANCE_EDUCATION</formOfEducation>
+        <groupAdmin>
+            <eyeColor>WHITE</eyeColor>
+            <location>
+                <name>МОСКВА</name>
+                <x>9034.0</x>
+                <y>390845.0</y>
+                <z>19283</z>
+            </location>
+            <name>sm</name>
+            <passportID>12345</passportID>
+            <weight>6789</weight>
+        </groupAdmin>
+        <id>913973191</id>
+        <name>nik2</name>
+        <semester>THIRD</semester>
+        <shouldBeExpelled>235</shouldBeExpelled>
+        <studentsCount>6790</studentsCount>
+    </studyGroup>
+    <studyGroup>
+        <coordinates>
+            <x>80</x>
+            <y>678.0</y>
+        </coordinates>
+        <creationDate>2024-03-20T23:33:56.037+03:00</creationDate>
         <formOfEducation>EVENING_CLASSES</formOfEducation>
         <groupAdmin>
-            <eyeColor>BROWN</eyeColor>
+            <eyeColor>GREEN</eyeColor>
             <location>
-                <name>xata</name>
-                <x>890.0</x>
-                <y>7668.0</y>
-                <z>234</z>
-            </location>
-            <name>serega piratik</name>
-            <passportID>47890</passportID>
-            <weight>569</weight>
-        </groupAdmin>
-        <id>1225264799</id>
-        <name>serega pirat</name>
-        <semesterEnum>THIRD</semesterEnum>
-        <shouldBeExpelled>67890</shouldBeExpelled>
-        <studentsCount>895</studentsCount>
-    </studyGroup>
-    <studyGroup>
-        <coordinates>
-            <x>0</x>
-            <y>123.0</y>
-        </coordinates>
-        <creationDate>2024-03-20T17:10:11.548+03:00</creationDate>
-        <formOfEducation>FULL_TIME_EDUCATION</formOfEducation>
-        <groupAdmin>
-            <location>
-                <y>0.0</y>
-            </location>
-            <name>биба</name>
-            <passportID>бобач</passportID>
-            <weight>2344</weight>
-        </groupAdmin>
-        <id>876614316</id>
-        <name>санчоус</name>
-        <semesterEnum>THIRD</semesterEnum>
-        <shouldBeExpelled>4578</shouldBeExpelled>
-        <studentsCount>83748</studentsCount>
-    </studyGroup>
-    <studyGroup>
-        <coordinates>
-            <x>0</x>
-            <y>-890.0</y>
-        </coordinates>
-        <creationDate>2024-03-20T17:11:11.850+03:00</creationDate>
-        <formOfEducation>DISTANCE_EDUCATION</formOfEducation>
-        <groupAdmin>
-            <location>
-                <name>BERLIN</name>
+                <name>sankt-PETERSBUUUURG</name>
                 <x>1488.0</x>
                 <y>1488.0</y>
                 <z>1488</z>
             </location>
-            <name>юра_дудь777</name>
+            <name>SLAVI4</name>
             <passportID>1488</passportID>
-            <weight>666</weight>
+            <weight>7</weight>
         </groupAdmin>
-        <id>554935482</id>
-        <name>асфальт</name>
-        <semesterEnum>THIRD</semesterEnum>
-        <shouldBeExpelled>66789</shouldBeExpelled>
-        <studentsCount>789</studentsCount>
+        <id>1716401868</id>
+        <name>замай</name>
+        <semester>SIXTH</semester>
+        <shouldBeExpelled>4365476</shouldBeExpelled>
+        <studentsCount>329484</studentsCount>
+    </studyGroup>
+    <studyGroup>
+        <coordinates>
+            <x>34</x>
+            <y>67890.0</y>
+        </coordinates>
+        <creationDate>2024-03-20T23:35:25.090+03:00</creationDate>
+        <formOfEducation>FULL_TIME_EDUCATION</formOfEducation>
+        <groupAdmin>
+            <eyeColor>WHITE</eyeColor>
+            <location>
+                <name>VIETnam</name>
+                <x>-90.0</x>
+                <y>-100.0</y>
+                <z>-110</z>
+            </location>
+            <name>UTYAAA</name>
+            <passportID>1917</passportID>
+            <weight>567</weight>
+        </groupAdmin>
+        <id>1922250601</id>
+        <name>utya</name>
+        <semester>EIGHTH</semester>
+        <shouldBeExpelled>9809</shouldBeExpelled>
+        <studentsCount>82374</studentsCount>
+    </studyGroup>
+    <studyGroup>
+        <coordinates>
+            <x>-1488</x>
+            <y>-1488.0</y>
+        </coordinates>
+        <creationDate>2024-03-20T23:36:38.948+03:00</creationDate>
+        <formOfEducation>EVENING_CLASSES</formOfEducation>
+        <groupAdmin>
+            <eyeColor>BROWN</eyeColor>
+            <location>
+                <name>PAL</name>
+                <x>-999.0</x>
+                <y>-1999.0</y>
+                <z>-11999</z>
+            </location>
+            <name>mike</name>
+            <passportID>israel</passportID>
+            <weight>78</weight>
+        </groupAdmin>
+        <id>2101403068</id>
+        <name>svtv</name>
+        <semester>null</semester>
+        <shouldBeExpelled>78</shouldBeExpelled>
+        <studentsCount>78</studentsCount>
     </studyGroup>
 </studyGroupCollection>

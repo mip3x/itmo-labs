@@ -9,6 +9,8 @@ import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
 import io.file.FileManager;
 
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +34,8 @@ public class ConsoleManager {
         try {
             FileManager.loadCollection();
         }
-        catch (Exception exception) {
+        catch (InvalidInputException | IOException | JAXBException exception) {
+            System.out.println("catched from CM");
             consoleHandler.sendWithNewLine(exception.getMessage());
         }
     }
@@ -138,7 +141,7 @@ public class ConsoleManager {
 
         while (inputField("значение поля 'семестр обучения' (одно из нижеперечисленных)\n"
                         + Arrays.toString(Semester.values()),
-                studyGroup::setSemesterEnum,
+                studyGroup::setSemester,
                 Semester::valueOf,
                 Semester.class
         ));

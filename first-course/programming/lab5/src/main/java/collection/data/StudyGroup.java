@@ -17,7 +17,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
     private Long studentsCount = null; //Значение поля должно быть больше 0, Поле может быть null
     private long shouldBeExpelled; //Значение поля должно быть больше 0
     private FormOfEducation formOfEducation; //Поле не может быть null
-    private Semester semesterEnum; //Поле не может быть null
+    private Semester semester; //Поле не может быть null
     private Person groupAdmin; //Поле не может быть null
 
     public StudyGroup() {
@@ -28,6 +28,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
     public void setId(Integer id) {
         this.id = id;
     }
+    @XmlElement
     public Integer getId() {
         return id;
     }
@@ -97,14 +98,15 @@ public class StudyGroup implements Comparable<StudyGroup> {
         return formOfEducation;
     }
 
-    public void setSemesterEnum(Semester semesterEnum) {
-        if (semesterEnum == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
-        this.semesterEnum = semesterEnum;
+    public void setSemester(Semester semester) {
+        System.out.println(semester == null);
+        if (semester == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
+        this.semester = semester;
     }
 
     @XmlElement
-    public Semester getSemesterEnum() {
-        return semesterEnum;
+    public Semester getSemester() {
+        return semester;
     }
 
     public void setGroupAdmin(Person groupAdmin) {
@@ -132,7 +134,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
         String studyGroupStudentsCount = "Количество студентов: " + studentsCount;
         String studyGroupShouldBeExpelled = "Количество студентов, которых нужно исключить: " + shouldBeExpelled;
         String studyGroupFormOfEducation = "Форма обучения: " + formOfEducation;
-        String studyGroupSemester = "Семестр обучения: " + semesterEnum;
+        String studyGroupSemester = "Семестр обучения: " + semester;
         String studyGroupAdmin = "Староста группы: \n" + groupAdmin.toString();
 
         return studyGroupName + "\n"

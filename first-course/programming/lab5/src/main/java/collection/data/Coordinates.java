@@ -17,7 +17,7 @@ public class Coordinates {
     }
 
     @XmlElement
-    public long getX() {
+    public Long getX() {
         return x;
     }
 
