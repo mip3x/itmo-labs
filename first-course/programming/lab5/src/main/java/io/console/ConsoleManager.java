@@ -7,6 +7,7 @@ import io.console.command.list.RequestingInput;
 import exception.ExitException;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
+import io.file.FileManager;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -27,6 +28,13 @@ public class ConsoleManager {
     public ConsoleManager() {
         this.informationStorage = InformationStorage.getInstance();
         this.consoleHandler = new ConsoleHandler();
+
+        try {
+            FileManager.loadCollection();
+        }
+        catch (Exception exception) {
+            consoleHandler.sendWithNewLine(exception.getMessage());
+        }
     }
 
     public void init() {
@@ -207,7 +215,8 @@ public class ConsoleManager {
         try {
             String userInput = consoleHandler.receive(MessageFormat.format("> Введите {0}", fieldName));
 
-            if (userInput.trim().equals("exit")) throw new ExitException("Выход! Введенные данные об объекте не будут сохранены!");
+            if (userInput.trim().equals("exit"))
+                throw new ExitException("Выход! Введенные данные об объекте не будут сохранены!");
 
             if (userInput.isBlank()) {
                 method.accept(null);

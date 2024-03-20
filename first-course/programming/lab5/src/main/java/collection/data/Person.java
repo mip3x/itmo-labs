@@ -2,6 +2,7 @@ package collection.data;
 
 import exception.InvalidInputException;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +19,20 @@ public class Person {
         this.name = name;
     }
 
+    @XmlElement
+    public String getName() {
+        return name;
+    }
+
     public void setWeight(Long weight) {
         if (weight == null) throw new InvalidInputException("Поле 'вес' не должно быть пустым!");
         if (weight <= 0) throw new InvalidInputException("Значение поля 'вес' должно быть больше нуля!");
         this.weight = weight;
+    }
+
+    @XmlElement
+    public Long getWeight() {
+        return weight;
     }
 
     public void setPassportID(String passportID) {
@@ -32,14 +43,29 @@ public class Person {
         passportIDs.add(passportID);
     }
 
+    @XmlElement
+    public String getPassportID() {
+        return passportID;
+    }
+
     public void setEyeColor(Color color) {
         this.eyeColor = color;
+    }
+
+    @XmlElement
+    public Color getEyeColor() {
+        return eyeColor;
     }
 
     public void setLocation(Location location) {
         this.location = location;
     }
-    
+
+    @XmlElement
+    public Location getLocation() {
+        return location;
+    }
+
     @Override
     public String toString() {
         return "Имя: " + name + "\nВес: " + weight + "\nНомер паспорта: " + passportID + "\nЦвет глаз: " + eyeColor + "\nМестонахождение: \n" + location.toString();

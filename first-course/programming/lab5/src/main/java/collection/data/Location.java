@@ -2,6 +2,7 @@ package collection.data;
 
 import exception.InvalidInputException;
 
+import javax.xml.bind.annotation.XmlElement;
 public class Location {
     private Double x; //Поле не может быть null
     private double y;
@@ -14,9 +15,19 @@ public class Location {
         this.x = x;
     }
 
+    @XmlElement
+    public Double getX() {
+        return x;
+    }
+
     public void setY(Double y) {
         if (y == null) throw new InvalidInputException("Поле 'координата Y' не должно быть пустым!");
         this.y = y;
+    }
+
+    @XmlElement
+    public Double getY() {
+        return y;
     }
 
     public void setZ(Integer z) {
@@ -24,9 +35,19 @@ public class Location {
         this.z = z;
     }
 
+    @XmlElement
+    public Integer getZ() {
+        return z;
+    }
+
     public void setName(String name) {
         if (name == null) throw new InvalidInputException("Поле 'имя' не должно быть пустым!");
         this.name = name;
+    }
+
+    @XmlElement
+    public String getName() {
+        return name;
     }
 
     @Override

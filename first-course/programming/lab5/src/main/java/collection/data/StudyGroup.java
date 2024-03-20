@@ -2,9 +2,13 @@ package collection.data;
 
 import exception.InvalidInputException;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import java.util.Date;
 import java.util.Random;
 
+@XmlRootElement(name = "studyGroup")
 public class StudyGroup implements Comparable<StudyGroup> {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
@@ -24,11 +28,15 @@ public class StudyGroup implements Comparable<StudyGroup> {
     public void setId(Integer id) {
         this.id = id;
     }
+    public Integer getId() {
+        return id;
+    }
 
     public void setDate(Date date) {
         creationDate = date;
     }
 
+    @XmlElement
     public Date getCreationDate() {
         return creationDate;
     }
@@ -42,9 +50,19 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.name = name;
     }
 
+    @XmlElement
+    public String getName() {
+        return name;
+    }
+
     public void setCoordinates(Coordinates coordinates) {
         if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
         this.coordinates = coordinates;
+    }
+
+    @XmlElement
+    public Coordinates getCoordinates() {
+        return coordinates;
     }
 
     public void setStudentsCount(Long studentsCount) {
@@ -53,10 +71,20 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.studentsCount = studentsCount;
     }
 
+    @XmlElement
+    public Long getStudentsCount() {
+        return studentsCount;
+    }
+
     public void setShouldBeExpelled(Long shouldBeExpelled) {
         if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'кол-во студентов на отчисление' не должно быть пустым!");
         if (shouldBeExpelled <= 0) throw new InvalidInputException("Количество студентов на отчисление должно быть больше нуля!");
         this.shouldBeExpelled = shouldBeExpelled;
+    }
+
+    @XmlElement
+    public Long getShouldBeExpelled() {
+        return shouldBeExpelled;
     }
 
     public void setFormOfEducation(FormOfEducation formOfEducation) {
@@ -64,14 +92,29 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.formOfEducation = formOfEducation;
     }
 
+    @XmlElement
+    public FormOfEducation getFormOfEducation() {
+        return formOfEducation;
+    }
+
     public void setSemesterEnum(Semester semesterEnum) {
         if (semesterEnum == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
         this.semesterEnum = semesterEnum;
     }
 
+    @XmlElement
+    public Semester getSemesterEnum() {
+        return semesterEnum;
+    }
+
     public void setGroupAdmin(Person groupAdmin) {
         if (groupAdmin == null) throw new InvalidInputException("Поле 'Староста группы' не должно быть пустым!");
         this.groupAdmin = groupAdmin;
+    }
+
+    @XmlElement
+    public Person getGroupAdmin() {
+        return groupAdmin;
     }
 
     @Override

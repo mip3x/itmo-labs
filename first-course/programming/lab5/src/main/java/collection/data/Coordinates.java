@@ -2,6 +2,8 @@ package collection.data;
 
 import exception.InvalidInputException;
 
+import javax.xml.bind.annotation.XmlElement;
+
 public class Coordinates {
     private long x; //Максимальное значение поля: 224
     private Double y; //Поле не может быть null
@@ -14,9 +16,19 @@ public class Coordinates {
         this.x = x;
     }
 
+    @XmlElement
+    public long getX() {
+        return x;
+    }
+
     public void setY(Double y) {
         if (y == null) throw new InvalidInputException("Поле 'координата Y' не должно быть пустым!");
         this.y = y;
+    }
+
+    @XmlElement
+    public Double getY() {
+        return y;
     }
 
     @Override

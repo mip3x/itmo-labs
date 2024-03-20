@@ -3,12 +3,15 @@ package collection;
 import java.util.LinkedList;
 import java.util.Date;
 import java.util.stream.IntStream;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import collection.data.StudyGroup;
+import collection.data.*;
 
+@XmlRootElement(name = "studyGroupCollection")
 public class CollectionManager {
     private static CollectionManager instance = null;
-    private final LinkedList<StudyGroup> studyGroupCollection;
+    private LinkedList<StudyGroup> studyGroupCollection;
     private final Date initializationDate;
 
     public static CollectionManager getInstance() {
@@ -21,9 +24,13 @@ public class CollectionManager {
         initializationDate = new Date();
     }
 
+    @XmlElement(name = "studyGroup")
     public LinkedList<StudyGroup> getStudyGroupCollection() {
-        if (studyGroupCollection.isEmpty()) return null;
         return studyGroupCollection;
+    }
+
+    public void setStudyGroupCollection(LinkedList<StudyGroup> studyGroupCollection) {
+        this.studyGroupCollection = studyGroupCollection;
     }
 
     public String clearCollection() {
@@ -83,6 +90,6 @@ public class CollectionManager {
         studyGroup.setId(id);
         studyGroup.setDate(studyGroupCollection.get(index).getCreationDate());
         studyGroupCollection.set(index, studyGroup);
-        return "Объект по заданному id был успешно обновлен!";
+        return "Объект по заданному id был успешно обновлен";
     }
 }

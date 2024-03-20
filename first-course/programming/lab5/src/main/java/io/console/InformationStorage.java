@@ -68,7 +68,8 @@ public class InformationStorage {
                 new Help(),
                 new History(),
                 new Info(),
-                new Show()
+                new Show(),
+                new Save()
         );
     }
 }

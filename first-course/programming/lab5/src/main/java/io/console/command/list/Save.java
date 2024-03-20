@@ -8,15 +8,19 @@ import java.util.LinkedList;
 
 public class Save extends Command {
     public Save() {
-        super("save", "сохраненить коллекцию в файл");
+        super("save", "сохранить коллекцию в файл");
     }
 
     @Override
     public String execute() {
-        LinkedList<StudyGroup> studyGroupCollection;
-        if ((studyGroupCollection = CollectionManager.getInstance().getStudyGroupCollection()) == null)
-            return "Коллекция пуста! Сохранение не произведено";
-        FileManager.saveCollection(studyGroupCollection);
-        return "Коллекция была успешно сохранена!";
+        if (CollectionManager.getInstance().getStudyGroupCollection() == null)
+            return "Коллекция пуста! Сохранение не произведено!";
+        try {
+            FileManager.saveCollection();
+            return "Коллекция была успешно сохранена!";
+        }
+        catch (Exception exception) {
+            return exception.getMessage();
+        }
     }
 }

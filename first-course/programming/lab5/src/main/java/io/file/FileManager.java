@@ -1,14 +1,17 @@
 package io.file;
 
+import collection.CollectionManager;
 import collection.data.StudyGroup;
 
-import java.io.File;
-import java.nio.file.Path;
+import java.io.*;
 import java.text.MessageFormat;
-import java.util.LinkedList;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 public class FileManager {
-    private static Path filePath;
+    private static String filePath;
 
     public static void setFilePath(String path) throws Exception {
         File file = new File(path);
@@ -17,15 +20,50 @@ public class FileManager {
             throw new Exception(MessageFormat.format("Файла {0} не существует!", path));
         }
 
-//                if (!file.createNewFile()) throw new Exception();
-//                throw new Exception(MessageFormat.format("Не удалось создать файл {0}!", path));
-
-        filePath = Path.of(file.getPath());
+        filePath = path;
     }
 
-    public static LinkedList<StudyGroup> loadCollection(){
-        return null;
+    public static void loadCollection() throws IOException, JAXBException {
+        try {
+            FileReader fileReader = new FileReader(filePath);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            String line;
+            StringBuilder xmlData = new StringBuilder();
+
+            while ((line = bufferedReader.readLine()) != null) {
+                xmlData.append(line.trim());
+            }
+
+            JAXBContext context = JAXBContext.newInstance(CollectionManager.class, StudyGroup.class);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+
+            StringReader xmlReader = new StringReader(xmlData.toString());
+            CollectionManager.getInstance().setStudyGroupCollection(
+                    ((CollectionManager) unmarshaller.unmarshal(xmlReader)).getStudyGroupCollection());
+
+        }
+        catch (IOException exception) {
+            throw new IOException("Ошибка при чтении файла: не достаточно прав доступа!");
+        }
+        catch (JAXBException exception) {
+            throw new JAXBException("Ошибка при чтении файла: файл пуст или данные некорректны!");
+        }
     }
-    public static void saveCollection(LinkedList<StudyGroup> collection) {
+    public static void saveCollection() throws IOException, JAXBException {
+        try {
+            JAXBContext context = JAXBContext.newInstance(StudyGroup.class, CollectionManager.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+            try {
+                FileWriter fileWriter = new FileWriter(filePath);
+                marshaller.marshal(CollectionManager.getInstance(), fileWriter);
+            } catch (IOException exception) {
+                throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
+            }
+        } catch (JAXBException exception) {
+            throw new JAXBException("Ошибка при обработке коллекции в xml!");
+        }
     }
 }
