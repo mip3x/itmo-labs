@@ -4,13 +4,11 @@ import collection.CollectionManager;
 import collection.data.Coordinates;
 import collection.data.Person;
 import collection.data.StudyGroup;
+import exception.InvalidInputException;
 
 import java.io.*;
 import java.text.MessageFormat;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 
 public class FileManager {
     private static String filePath;
@@ -42,6 +40,12 @@ public class FileManager {
                     Coordinates.class,
                     Person.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
+
+            unmarshaller.setEventHandler(event -> {
+                if (event.getLinkedException() instanceof InvalidInputException)
+                    throw new InvalidInputException(event.getMessage());
+                return true;
+            });
 
             StringReader xmlReader = new StringReader(xmlData.toString());
 

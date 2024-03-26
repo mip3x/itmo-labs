@@ -99,7 +99,6 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setSemester(Semester semester) {
-        System.out.println(semester == null);
         if (semester == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
         this.semester = semester;
     }

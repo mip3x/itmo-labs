@@ -35,7 +35,6 @@ public class ConsoleManager {
             FileManager.loadCollection();
         }
         catch (InvalidInputException | IOException | JAXBException exception) {
-            System.out.println("catched from CM");
             consoleHandler.sendWithNewLine(exception.getMessage());
         }
     }
