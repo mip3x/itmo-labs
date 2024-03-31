@@ -8,6 +8,8 @@ import exception.InvalidInputException;
 
 import java.io.*;
 import java.text.MessageFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.xml.bind.*;
 
 public class FileManager {
@@ -41,17 +43,43 @@ public class FileManager {
                     Person.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
 
-            unmarshaller.setEventHandler(event -> {
-                if (event.getLinkedException() instanceof InvalidInputException)
-                    throw new InvalidInputException(event.getMessage());
-                return true;
-            });
-
             StringReader xmlReader = new StringReader(xmlData.toString());
 
             CollectionManager.getInstance().setStudyGroupCollection(
                     ((CollectionManager) unmarshaller.unmarshal(xmlReader)).getStudyGroupCollection());
 
+            int parsedGroupsCount = CollectionManager.getInstance().getStudyGroupCollection().size();
+            List<String> exceptionMessages = new ArrayList<>();
+
+            CollectionManager.getInstance().setStudyGroupCollection(
+                    CollectionManager.getInstance().getStudyGroupCollection().stream()
+                            .filter(studyGroup -> {
+                                try {
+                                    studyGroup.validateStudyGroup();
+                                    return true;
+                                }
+                                catch (InvalidInputException exception) {
+                                    exceptionMessages.add(exception.getMessage());
+                                    return false;
+                                }
+                            })
+                            .collect(Collectors.toCollection(LinkedList<StudyGroup>::new))
+            );
+
+            int validGroupsCount = CollectionManager.getInstance().getStudyGroupCollection().size();
+
+            if (validGroupsCount == 0)
+                throw new InvalidInputException(
+                        MessageFormat.format("В файле нет ни одного валидного объекта!\n{0}",
+                                String.join("\n", exceptionMessages))
+                );
+
+            else if (validGroupsCount < parsedGroupsCount) {
+                throw new InvalidInputException(
+                        MessageFormat.format("Не все объекты файла валидны!\n{0}",
+                                String.join("\n", exceptionMessages))
+                );
+            }
         }
         catch (IOException exception) {
             throw new IOException("Ошибка при чтении файла: не достаточно прав доступа!");
@@ -72,7 +100,8 @@ public class FileManager {
             try {
                 FileWriter fileWriter = new FileWriter(filePath);
                 marshaller.marshal(CollectionManager.getInstance(), fileWriter);
-            } catch (IOException exception) {
+            }
+            catch (IOException exception) {
                 throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
             }
         } catch (JAXBException exception) {

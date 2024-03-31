@@ -47,8 +47,12 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setName(String name) {
-        if (name == null || name.isBlank()) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
+        validateName(name);
         this.name = name;
+    }
+
+    private void validateName(String name) {
+        if (name == null || name.isBlank()) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
     }
 
     @XmlElement
@@ -57,8 +61,12 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setCoordinates(Coordinates coordinates) {
-        if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
+        validateCoordinates(coordinates);
         this.coordinates = coordinates;
+    }
+
+    private void validateCoordinates(Coordinates coordinates) {
+        if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
     }
 
     @XmlElement
@@ -67,9 +75,13 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setStudentsCount(Long studentsCount) {
+        validateStudentsCount(studentsCount);
+        this.studentsCount = studentsCount;
+    }
+
+    private void validateStudentsCount(Long studentsCount) {
         if (studentsCount == null) return;
         if (studentsCount <= 0) throw new InvalidInputException("Количество студентов должно быть больше нуля!");
-        this.studentsCount = studentsCount;
     }
 
     @XmlElement
@@ -78,9 +90,13 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setShouldBeExpelled(Long shouldBeExpelled) {
+        validateShouldBeExpelled(shouldBeExpelled);
+        this.shouldBeExpelled = shouldBeExpelled;
+    }
+
+    private void validateShouldBeExpelled(Long shouldBeExpelled) {
         if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'кол-во студентов на отчисление' не должно быть пустым!");
         if (shouldBeExpelled <= 0) throw new InvalidInputException("Количество студентов на отчисление должно быть больше нуля!");
-        this.shouldBeExpelled = shouldBeExpelled;
     }
 
     @XmlElement
@@ -89,8 +105,12 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setFormOfEducation(FormOfEducation formOfEducation) {
-        if (formOfEducation == null) throw new InvalidInputException("Поле 'Форма обучения' не должно быть пустым!");
+        validateFormOfEducation(formOfEducation);
         this.formOfEducation = formOfEducation;
+    }
+
+    private void validateFormOfEducation(FormOfEducation formOfEducation) {
+        if (formOfEducation == null) throw new InvalidInputException("Поле 'Форма обучения' не должно быть пустым!");
     }
 
     @XmlElement
@@ -99,8 +119,12 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setSemester(Semester semester) {
-        if (semester == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
+        validateSemester(semester);
         this.semester = semester;
+    }
+
+    private void validateSemester(Semester semester) {
+        if (semester == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
     }
 
     @XmlElement
@@ -109,13 +133,28 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     public void setGroupAdmin(Person groupAdmin) {
-        if (groupAdmin == null) throw new InvalidInputException("Поле 'Староста группы' не должно быть пустым!");
+        validateGroupAdmin(groupAdmin);
         this.groupAdmin = groupAdmin;
+    }
+
+    private void validateGroupAdmin(Person groupAdmin) {
+        if (groupAdmin == null) throw new InvalidInputException("Поле 'Староста группы' не должно быть пустым!");
     }
 
     @XmlElement
     public Person getGroupAdmin() {
         return groupAdmin;
+    }
+
+    public boolean validateStudyGroup() {
+        this.validateName(this.getName());
+        this.validateCoordinates(this.getCoordinates());
+        this.validateStudentsCount(this.getStudentsCount());
+        this.validateShouldBeExpelled(this.getShouldBeExpelled());
+        this.validateFormOfEducation(this.getFormOfEducation());
+        this.validateSemester(this.getSemester());
+        this.validateGroupAdmin(this.getGroupAdmin());
+        return true;
     }
 
     @Override

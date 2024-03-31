@@ -82,7 +82,7 @@ public class CollectionManager {
     }
 
     public String updateById(Integer id, StudyGroup studyGroup) {
-        Integer index = IntStream.range(0, studyGroupCollection.size())
+        int index = IntStream.range(0, studyGroupCollection.size())
                 .filter(i -> studyGroupCollection.get(i).compareId(id))
                 .findFirst()
                 .orElse(-1);
