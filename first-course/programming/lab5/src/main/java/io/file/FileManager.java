@@ -59,7 +59,7 @@ public class FileManager {
                                     return true;
                                 }
                                 catch (InvalidInputException exception) {
-                                    exceptionMessages.add(exception.getMessage());
+                                    exceptionMessages.add("Поле '" + exception.getMessage().split("'")[1] + "' некорректно:\n" + exception.getMessage());
                                     return false;
                                 }
                             })

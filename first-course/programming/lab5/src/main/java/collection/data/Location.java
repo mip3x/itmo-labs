@@ -11,7 +11,7 @@ public class Location {
 
     public Location() {}
     public void setX(Double x) {
-        if (x == null) throw new InvalidInputException("Поле 'координата X' не должно быть пустым!");
+        if (x == null) throw new InvalidInputException("Поле 'Координата X' не должно быть пустым!");
         this.x = x;
     }
 
@@ -21,7 +21,7 @@ public class Location {
     }
 
     public void setY(Double y) {
-        if (y == null) throw new InvalidInputException("Поле 'координата Y' не должно быть пустым!");
+        if (y == null) throw new InvalidInputException("Поле 'Координата Y' не должно быть пустым!");
         this.y = y;
     }
 
@@ -31,7 +31,7 @@ public class Location {
     }
 
     public void setZ(Integer z) {
-        if (z == null) throw new InvalidInputException("Поле 'координата Z' не должно быть пустым!");
+        if (z == null) throw new InvalidInputException("Поле 'Координата Z' не должно быть пустым!");
         this.z = z;
     }
 
@@ -41,7 +41,7 @@ public class Location {
     }
 
     public void setName(String name) {
-        if (name == null) throw new InvalidInputException("Поле 'имя' не должно быть пустым!");
+        if (name == null) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
         this.name = name;
     }
 

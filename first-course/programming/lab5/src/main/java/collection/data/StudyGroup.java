@@ -81,7 +81,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
 
     private void validateStudentsCount(Long studentsCount) {
         if (studentsCount == null) return;
-        if (studentsCount <= 0) throw new InvalidInputException("Количество студентов должно быть больше нуля!");
+        if (studentsCount <= 0) throw new InvalidInputException("Значение поля 'Количество студентов' должно быть больше нуля!");
     }
 
     @XmlElement
@@ -95,8 +95,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     private void validateShouldBeExpelled(Long shouldBeExpelled) {
-        if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'кол-во студентов на отчисление' не должно быть пустым!");
-        if (shouldBeExpelled <= 0) throw new InvalidInputException("Количество студентов на отчисление должно быть больше нуля!");
+        if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'Количество студентов на отчисление' не должно быть пустым!");
+        if (shouldBeExpelled <= 0) throw new InvalidInputException("Значение поля 'Количество студентов на отчисление' должно быть больше нуля!");
     }
 
     @XmlElement
@@ -146,7 +146,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
         return groupAdmin;
     }
 
-    public boolean validateStudyGroup() {
+    public void validateStudyGroup() {
         this.validateName(this.getName());
         this.validateCoordinates(this.getCoordinates());
         this.validateStudentsCount(this.getStudentsCount());
@@ -154,13 +154,11 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.validateFormOfEducation(this.getFormOfEducation());
         this.validateSemester(this.getSemester());
         this.validateGroupAdmin(this.getGroupAdmin());
-        return true;
     }
 
     @Override
-    public int compareTo(StudyGroup that) {
-        if (this.studentsCount > that.studentsCount) return 1;
-        else return -1;
+    public int compareTo(StudyGroup other) {
+        return Long.compare(this.studentsCount, other.studentsCount);
     }
 
     @Override
