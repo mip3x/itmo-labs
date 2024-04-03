@@ -7,6 +7,8 @@ import collection.data.StudyGroup;
 import exception.InvalidInputException;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,9 +41,10 @@ public class FileManager {
      * @throws JAXBException Throws in case not all file's objects are valid
      */
     public static void loadCollection() throws IOException, JAXBException {
-        try {
-            FileReader fileReader = new FileReader(filePath);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
+        if (!Files.isReadable(Path.of(filePath))) throw new IOException("Ошибка при чтении файла: не достаточно прав доступа!");
+
+        try(FileReader fileReader = new FileReader(filePath);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);) {
 
             String line;
             StringBuilder xmlData = new StringBuilder();
@@ -70,8 +73,7 @@ public class FileManager {
                                 try {
                                     studyGroup.validateStudyGroup();
                                     return true;
-                                }
-                                catch (InvalidInputException exception) {
+                                } catch (InvalidInputException exception) {
                                     exceptionMessages.add("Поле '" + exception.getMessage().split("'")[1] + "' некорректно:\n" + exception.getMessage());
                                     return false;
                                 }
@@ -94,9 +96,6 @@ public class FileManager {
                 );
             }
         }
-        catch (IOException exception) {
-            throw new IOException("Ошибка при чтении файла: не достаточно прав доступа!");
-        }
         catch (JAXBException exception) {
             throw new JAXBException("Ошибка при чтении файла: файл пуст или данные некорректны!");
         }
@@ -116,13 +115,11 @@ public class FileManager {
             Marshaller marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-            try {
-                FileWriter fileWriter = new FileWriter(filePath);
-                marshaller.marshal(CollectionManager.getInstance(), fileWriter);
-            }
-            catch (IOException exception) {
-                throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
-            }
+            if (!Files.isWritable(Path.of(filePath))) throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
+
+            FileWriter fileWriter = new FileWriter(filePath);
+            marshaller.marshal(CollectionManager.getInstance(), fileWriter);
+
         } catch (JAXBException exception) {
             throw new JAXBException("Ошибка при обработке коллекции в xml!");
         }
