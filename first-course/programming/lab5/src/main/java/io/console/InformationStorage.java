@@ -73,7 +73,8 @@ public class InformationStorage {
                 new Save(),
                 new GroupCountingBySemesterEnum(),
                 new PrintDescending(),
-                new RemoveLower()
+                new RemoveLower(),
+                new ExecuteScript()
         );
     }
 }

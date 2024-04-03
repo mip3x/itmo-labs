@@ -12,7 +12,10 @@ public class History extends Command {
 
     @Override
     public String execute() {
-        return InformationStorage.getHistory().stream().limit(InformationStorage.getHistorySize())
-                .map(command -> String.format("%s%n", command.getName())).collect(Collectors.joining());
+        String result = InformationStorage.getHistory().stream()
+                .limit(InformationStorage.getHistorySize())
+                .map(command -> String.format("%s%n", command.getName()))
+                .collect(Collectors.joining());
+        return result.substring(0, result.length() - 1);
     }
 }

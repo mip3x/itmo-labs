@@ -1,7 +1,9 @@
 package io.console;
 
 import collection.data.*;
+import exception.RecursionException;
 import io.console.command.list.Command;
+import io.console.command.list.ExecuteScript;
 import io.console.command.list.RequestingId;
 import io.console.command.list.RequestingInput;
 import exception.ExitException;
@@ -21,6 +23,8 @@ public class ConsoleManager {
     private static ConsoleManager instance = null;
     private final ConsoleHandler consoleHandler;
     private final InformationStorage informationStorage;
+    private static final int MAX_RECURSION_DEPTH = 5;
+    private int currentRecursionDepth = 0;
 
     public static ConsoleManager getInstance() {
         if (instance == null) instance = new ConsoleManager();
@@ -47,7 +51,7 @@ public class ConsoleManager {
         }
     }
 
-    private void process(String inputLine) {
+    public void process(String inputLine) {
         try {
             String[] tokens = inputLine.trim().split(" ");
 
@@ -56,27 +60,23 @@ public class ConsoleManager {
             for (Command command: InformationStorage.getCommandsList()) {
                 if (command.getName().split(" ")[0].equals(tokens[0])) {
 
+                    if (command instanceof ExecuteScript) {
+                       if (currentRecursionDepth > MAX_RECURSION_DEPTH) {
+                           currentRecursionDepth = 0;
+                           throw new RecursionException("Глубина рекурсии превысила максимальную глубину рекурсии = " + MAX_RECURSION_DEPTH);
+                       }
+                       currentRecursionDepth++;
+                    };
+
                     if (tokens.length > 1) informationStorage.setArguments(List.of(tokens).subList(1, tokens.length));
 
                     if (command instanceof RequestingId) {
-                        try {
-                            if (!((RequestingId) command).validateId())
-                                throw new InvalidInputException("Объекта с данным id нет в коллекции!");
-                        }
-                        catch (InvalidInputException exception) {
-                            consoleHandler.sendWithNewLine(exception.getMessage());
-                            return;
-                        }
+                        if (!((RequestingId) command).validateId())
+                            throw new InvalidInputException("Объекта с данным id нет в коллекции!");
                     }
 
                     if (command instanceof RequestingInput) {
-                        try {
-                            informationStorage.setReceivedStudyGroup(inputElement());
-                        }
-                        catch (ExitException exitException) {
-                            consoleHandler.sendWithNewLine(exitException.getMessage());
-                            return;
-                        }
+                        informationStorage.setReceivedStudyGroup(inputElement());
                     }
 
                     String output = command.execute();
