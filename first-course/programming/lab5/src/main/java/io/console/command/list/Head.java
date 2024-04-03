@@ -1,8 +1,10 @@
 package io.console.command.list;
 
-import io.console.InformationStorage;
 import collection.CollectionManager;
 
+/**
+ * Returns the head of collection
+ */
 public class Head extends Command {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Head() {

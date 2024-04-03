@@ -2,9 +2,11 @@ package io.console.command.list;
 
 import io.console.InformationStorage;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Returns history of called commands
+ */
 public class History extends Command {
     public History() {
         super("history", "Вывести историю вызовов");

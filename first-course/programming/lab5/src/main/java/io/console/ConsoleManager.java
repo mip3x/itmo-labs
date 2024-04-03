@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Manages the console
+ * Singleton
+ */
 public class ConsoleManager {
     private static ConsoleManager instance = null;
     private final ConsoleHandler consoleHandler;
@@ -26,6 +30,10 @@ public class ConsoleManager {
     private static final int MAX_RECURSION_DEPTH = 5;
     private int currentRecursionDepth = 0;
 
+    /**
+     * Get instance of class
+     * @return instance of class
+     */
     public static ConsoleManager getInstance() {
         if (instance == null) instance = new ConsoleManager();
         return instance;
@@ -43,6 +51,9 @@ public class ConsoleManager {
         }
     }
 
+    /**
+     * Asks for user input
+     */
     public void init() {
         String inputLine;
 
@@ -51,6 +62,10 @@ public class ConsoleManager {
         }
     }
 
+    /**
+     * Process the line
+     * @param inputLine line inputted by user
+     */
     public void process(String inputLine) {
         try {
             String[] tokens = inputLine.trim().split(" ");
@@ -91,6 +106,11 @@ public class ConsoleManager {
         }
     }
 
+    /**
+     * Reads element of collection from user
+     * @return inputted element of collection
+     * @throws ExitException throws in case user stops input of element
+     */
     private StudyGroup inputElement() throws ExitException {
         consoleHandler.sendWithNewLine(">*> Чтобы выйти из режима ввода объекта, введите 'exit'. Данные не сохранятся! <*<");
         StudyGroup studyGroup = new StudyGroup();
@@ -213,6 +233,16 @@ public class ConsoleManager {
         return studyGroup;
     }
 
+    /**
+     * Manage field to input
+     * @param fieldName name of field
+     * @param method method to set field
+     * @param converter with which type to cast
+     * @param type to which type cast
+     * @return success in case field was inputted
+     * @param <T>
+     * @throws ExitException throws in case user want to exit
+     */
     private <T> boolean inputField(String fieldName, Consumer<T> method, Function<String, T> converter, Class<T> type) throws ExitException {
         try {
             String userInput = consoleHandler.receive(MessageFormat.format("> Введите {0}", fieldName));
@@ -234,6 +264,14 @@ public class ConsoleManager {
         }
     }
 
+    /**
+     * Casts user input to given type
+     * @param userInput user input
+     * @param converter with which to convert
+     * @param type which type should be
+     * @return casted field
+     * @param <T>
+     */
     private <T> T castField(String userInput, Function<String, T> converter, Class<T> type) {
         try {
             return converter.apply(userInput);

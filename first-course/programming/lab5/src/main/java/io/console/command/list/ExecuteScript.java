@@ -1,6 +1,5 @@
 package io.console.command.list;
 
-import exception.RecursionException;
 import io.console.ConsoleManager;
 import io.console.InformationStorage;
 
@@ -11,6 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Executes script
+ */
 public class ExecuteScript extends Command {
     public ExecuteScript() {
         super("execute_script file_name", "считать и исполнить скрипт из указанного файла");

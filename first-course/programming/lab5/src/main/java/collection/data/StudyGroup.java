@@ -8,6 +8,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 import java.util.Random;
 
+/**
+ * Study group - class of elements of collection
+ */
 @XmlRootElement(name = "studyGroup")
 public class StudyGroup implements Comparable<StudyGroup> {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
@@ -33,7 +36,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
         return id;
     }
 
-    public void setDate(Date date) {
+    public void setCreationDate(Date date) {
         creationDate = date;
     }
 

@@ -1,7 +1,8 @@
 package io.console.command.list;
 
-import io.console.InformationStorage;
-
+/**
+ * Exits from program
+ */
 public class Exit extends Command {
     public Exit() {
         super("exit", "Выйти из программы");

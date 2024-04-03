@@ -6,6 +6,9 @@ import io.file.FileManager;
 
 import java.util.LinkedList;
 
+/**
+ * Saves collection to file
+ */
 public class Save extends Command {
     public Save() {
         super("save", "сохранить коллекцию в файл");

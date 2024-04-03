@@ -3,6 +3,10 @@ package collection.data;
 import exception.InvalidInputException;
 
 import javax.xml.bind.annotation.XmlElement;
+
+/**
+ * Location
+ */
 public class Location {
     private Double x; //Поле не может быть null
     private double y;

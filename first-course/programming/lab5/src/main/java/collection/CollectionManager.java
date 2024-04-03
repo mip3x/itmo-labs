@@ -8,12 +8,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import collection.data.*;
 
+/**
+ * Manages collection
+ * Singleton
+ */
 @XmlRootElement(name = "studyGroupCollection")
 public class CollectionManager {
     private static CollectionManager instance = null;
     private LinkedList<StudyGroup> studyGroupCollection;
     private final Date initializationDate;
 
+    /**
+     * Get instance of class
+     * @return instance of class
+     */
     public static CollectionManager getInstance() {
         if (instance == null) instance = new CollectionManager();
         return instance;
@@ -24,20 +32,36 @@ public class CollectionManager {
         initializationDate = new Date();
     }
 
+    /**
+     * Get collection
+     * @return collection
+     */
     @XmlElement(name = "studyGroup")
     public LinkedList<StudyGroup> getStudyGroupCollection() {
         return studyGroupCollection;
     }
 
+    /**
+     * Set collection
+     * @param studyGroupCollection collection to set
+     */
     public void setStudyGroupCollection(LinkedList<StudyGroup> studyGroupCollection) {
         this.studyGroupCollection = studyGroupCollection;
     }
 
+    /**
+     * Clear collection
+     * @return message about clearing
+     */
     public String clearCollection() {
         studyGroupCollection.clear();
         return "Коллекция была успешно очищена";
     }
 
+    /**
+     * Get head of collection
+     * @return head of collection
+     */
     public String getCollectionHead() {
         try {
             return getStudyGroupInfo(studyGroupCollection.get(0));
@@ -47,6 +71,10 @@ public class CollectionManager {
         }
     }
 
+    /**
+     * Get info about all elements of collection
+     * @return info about all elements of collection
+     */
     public String getAllStudyGroupsInfo() {
         StringBuilder studyGroupsInfo = new StringBuilder();
         if (studyGroupCollection.isEmpty()) return "Невозможно получить элемент коллекции: коллекция пуста!";
@@ -56,10 +84,19 @@ public class CollectionManager {
         return result.substring(0, result.length() - 2);
     }
 
+    /**
+     * Get info about element of collection
+     * @param studyGroup element of collection
+     * @return info about element of collection
+     */
     public String getStudyGroupInfo(StudyGroup studyGroup) {
         return studyGroup.toString();
     }
 
+    /**
+     * Get info about collection
+     * @return info about collection
+     */
     public String getCollectionInfo() {
         String collectionType = "Тип коллекции: " + studyGroupCollection.getClass().getName();
         String collectionInitializationDate = "Время инициализации коллекции: " + initializationDate;
@@ -67,20 +104,41 @@ public class CollectionManager {
         return collectionType + "\n" + collectionInitializationDate + "\n" + collectionElementsNumber;
     }
 
+    /**
+     * Add element to collection
+     * @param studyGroup element to add in collection
+     * @return message about adding
+     */
     public String addStudyGroupToCollection(StudyGroup studyGroup) {
         studyGroupCollection.add(studyGroup);
         return "Новый элемент был успешно добавлен в коллекцию";
     }
 
+    /**
+     * Validate id
+     * @param id id to validate
+     * @return status of validation
+     */
     public boolean validateID(Integer id) {
         return studyGroupCollection.stream().anyMatch(studyGroup -> studyGroup.compareId(id));
     }
 
+    /**
+     * Remove element by given id
+     * @param id id of element to delete
+     * @return message about deleting
+     */
     public String removeById(Integer id) {
         studyGroupCollection.removeIf(studyGroup -> studyGroup.compareId(id));
         return "Объект по данному id успешно удален";
     }
 
+    /**
+     * Update element by id
+     * @param id id of element to update
+     * @param studyGroup element of collection
+     * @return message about updating
+     */
     public String updateById(Integer id, StudyGroup studyGroup) {
         int index = IntStream.range(0, studyGroupCollection.size())
                 .filter(i -> studyGroupCollection.get(i).compareId(id))
@@ -88,7 +146,7 @@ public class CollectionManager {
                 .orElse(-1);
 
         studyGroup.setId(id);
-        studyGroup.setDate(studyGroupCollection.get(index).getCreationDate());
+        studyGroup.setCreationDate(studyGroupCollection.get(index).getCreationDate());
         studyGroupCollection.set(index, studyGroup);
         return "Объект по заданному id был успешно обновлен";
     }

@@ -9,6 +9,9 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+/**
+ * Removes objects with given formOfEducation
+ */
 public class RemoveAnyByFormOfEducation extends Command {
     public RemoveAnyByFormOfEducation() {
         super("remove_by_FOE formOfEduction",

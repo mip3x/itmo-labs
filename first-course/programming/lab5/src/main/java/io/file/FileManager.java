@@ -12,9 +12,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.bind.*;
 
+/**
+ * Class for managing files
+ */
 public class FileManager {
     private static String filePath;
 
+    /**
+     * Sets file path to file
+     * @param path Path to file
+     * @throws Exception Throws in case file doesn't exist
+     */
     public static void setFilePath(String path) throws Exception {
         File file = new File(path);
 
@@ -25,6 +33,11 @@ public class FileManager {
         filePath = path;
     }
 
+    /**
+     * Loads collection from file
+     * @throws IOException Throws in case lack of permission to file
+     * @throws JAXBException Throws in case not all file's objects are valid
+     */
     public static void loadCollection() throws IOException, JAXBException {
         try {
             FileReader fileReader = new FileReader(filePath);
@@ -88,6 +101,12 @@ public class FileManager {
             throw new JAXBException("Ошибка при чтении файла: файл пуст или данные некорректны!");
         }
     }
+
+    /**
+     * Saves collection to file
+     * @throws IOException Throws in case lack of permission to file
+     * @throws JAXBException Throws in case error with convert collection to XML
+     */
     public static void saveCollection() throws IOException, JAXBException {
         try {
             JAXBContext context = JAXBContext.newInstance(Person.class,

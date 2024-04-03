@@ -2,6 +2,9 @@ package io.console.command.list;
 
 import collection.CollectionManager;
 
+/**
+ * Clears collection
+ */
 public class Clear extends Command {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Clear() {

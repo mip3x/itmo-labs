@@ -5,6 +5,9 @@ import collection.data.StudyGroup;
 import io.console.InformationStorage;
 import exception.InvalidInputException;
 
+/**
+ * Updates element with given id
+ */
 public class Update extends Command implements RequestingId, RequestingInput {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Update() {

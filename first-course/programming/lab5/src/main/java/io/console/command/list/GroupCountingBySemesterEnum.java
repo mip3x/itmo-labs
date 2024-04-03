@@ -9,6 +9,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Groups element of collection by semester
+ */
 public class GroupCountingBySemesterEnum extends Command {
     public GroupCountingBySemesterEnum() {
         super("group_by_semester",

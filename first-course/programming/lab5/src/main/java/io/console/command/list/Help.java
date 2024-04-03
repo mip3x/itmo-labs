@@ -4,6 +4,9 @@ import io.console.InformationStorage;
 
 import java.util.stream.Collectors;
 
+/**
+ * Returns information about commands
+ */
 public class Help extends Command {
     public Help() {
         super("help", "Вывести список всех команд");

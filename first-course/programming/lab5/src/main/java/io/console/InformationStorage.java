@@ -8,6 +8,11 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Stores information needed for commands
+ * Singleton
+ */
+
 public class InformationStorage {
     private static InformationStorage instance = null;
     private static List<Command> commandsList = new ArrayList<>();

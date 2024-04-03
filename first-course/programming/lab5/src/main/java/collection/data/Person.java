@@ -6,6 +6,9 @@ import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Person
+ */
 public class Person {
     private String name; //Поле не может быть null, Строка не может быть пустой
     private long weight; //Значение поля должно быть больше 0

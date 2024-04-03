@@ -6,6 +6,9 @@ import io.console.InformationStorage;
 
 import java.util.List;
 
+/**
+ * Removes elements lower than given
+ */
 public class RemoveLower extends Command implements RequestingInput {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
     public RemoveLower() {

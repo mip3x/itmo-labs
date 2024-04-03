@@ -4,6 +4,9 @@ import collection.CollectionManager;
 import io.console.InformationStorage;
 import collection.data.StudyGroup;
 
+/**
+ * Adds element to collection
+ */
 public class Add extends Command implements RequestingInput {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Add() {

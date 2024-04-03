@@ -4,6 +4,9 @@ import collection.CollectionManager;
 
 import java.util.Collections;
 
+/**
+ * Returns elements of collection from high to low
+ */
 public class PrintDescending extends Command {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
     public PrintDescending() {
@@ -13,6 +16,7 @@ public class PrintDescending extends Command {
     @Override
     public String execute() {
         Collections.sort(collectionManager.getStudyGroupCollection());
+        Collections.reverse(collectionManager.getStudyGroupCollection());
         return collectionManager.getAllStudyGroupsInfo();
     }
 }

@@ -4,6 +4,9 @@ import collection.CollectionManager;
 import io.console.InformationStorage;
 import exception.InvalidInputException;
 
+/**
+ * Removes element with given id
+ */
 public class RemoveById extends Command implements RequestingId {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
     public RemoveById() {

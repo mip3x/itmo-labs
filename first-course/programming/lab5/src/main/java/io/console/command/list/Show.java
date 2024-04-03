@@ -1,8 +1,10 @@
 package io.console.command.list;
 
-import io.console.InformationStorage;
 import collection.CollectionManager;
 
+/**
+ * Shows all elemets of collection
+ */
 public class Show extends Command {
     private final CollectionManager collectionManager = CollectionManager.getInstance();
 
