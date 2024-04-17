@@ -17,7 +17,7 @@ public class Application {
         applicationLogger.trace("Entering method main()");
 
         if (args.length == 0) {
-            applicationLogger.error("Недостаточно аргументов: введите путь к файлу!");
+            applicationLogger.error("Not enough arguments: enter path to the file!");
             return;
         }
 
@@ -30,7 +30,7 @@ public class Application {
         }
 
         ConsoleManager consoleManager = ConsoleManager.getInstance();
-        applicationLogger.trace("Объект ConsoleManager создан");
+        applicationLogger.trace("ConsoleManager object created!");
 
         consoleManager.init();
     }

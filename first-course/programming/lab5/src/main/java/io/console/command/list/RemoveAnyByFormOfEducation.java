@@ -4,6 +4,8 @@ import collection.CollectionManager;
 import collection.data.FormOfEducation;
 import collection.data.StudyGroup;
 import io.console.InformationStorage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import java.util.LinkedList;
  * Removes objects with given formOfEducation
  */
 public class RemoveAnyByFormOfEducation extends Command {
+    private final static Logger removeAnyByFormOfEducationLogger = LogManager.getLogger();
     public RemoveAnyByFormOfEducation() {
         super("remove_by_FOE formOfEduction",
                 MessageFormat.format("удалить из коллекции один элемент," +
@@ -26,14 +29,18 @@ public class RemoveAnyByFormOfEducation extends Command {
         try {
             formOfEducation = FormOfEducation
                     .valueOf(InformationStorage.getReceivedArguments().get(0));
+            removeAnyByFormOfEducationLogger.trace("FormOfEducation has been got");
         }
         catch (Exception exception) {
+            removeAnyByFormOfEducationLogger.error("Enter valid value for formOfEducation field!");
             return MessageFormat.
                     format( "Введите валидное значение поля formOfEducation!\n{0}",
                             Arrays.toString(FormOfEducation.values()));
         }
 
         LinkedList<StudyGroup> studyGroupCollection = CollectionManager.getInstance().getStudyGroupCollection();
+
+        removeAnyByFormOfEducationLogger.trace("RemoveAnyByFormOfEducation command executed");
         return studyGroupCollection
                 .stream()
                 .filter(studyGroup -> studyGroup.getFormOfEducation().equals(formOfEducation))

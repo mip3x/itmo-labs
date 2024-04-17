@@ -10,6 +10,8 @@ import exception.ExitException;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
 import io.file.FileManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.util.function.Function;
  * Singleton
  */
 public class ConsoleManager {
+    private static final Logger consoleManagerLogger = LogManager.getLogger();
     private static ConsoleManager instance = null;
     private final ConsoleHandler consoleHandler;
     private final InformationStorage informationStorage;
@@ -44,9 +47,11 @@ public class ConsoleManager {
         this.consoleHandler = new ConsoleHandler();
 
         try {
+            consoleManagerLogger.trace("Trying to load collection");
             FileManager.loadCollection();
         }
         catch (InvalidInputException | IOException | JAXBException exception) {
+            consoleManagerLogger.error("Loading collection error");
             consoleHandler.sendWithNewLine(exception.getMessage());
         }
     }
@@ -78,6 +83,8 @@ public class ConsoleManager {
                     if (command instanceof ExecuteScript) {
                        if (currentRecursionDepth > MAX_RECURSION_DEPTH) {
                            currentRecursionDepth = 0;
+
+                           consoleManagerLogger.error("Recursion max depth exceeded!");
                            throw new RecursionException("Глубина рекурсии превысила максимальную глубину рекурсии = " + MAX_RECURSION_DEPTH);
                        }
                        currentRecursionDepth++;
@@ -87,7 +94,10 @@ public class ConsoleManager {
 
                     if (command instanceof RequestingId) {
                         if (!((RequestingId) command).validateId())
+                        {
+                            consoleManagerLogger.error("No object with such id!");
                             throw new InvalidInputException("Объекта с данным id нет в коллекции!");
+                        }
                     }
 
                     if (command instanceof RequestingInput) {
@@ -96,12 +106,16 @@ public class ConsoleManager {
 
                     String output = command.execute();
                     informationStorage.addToHistory(command);
+                    consoleManagerLogger.trace("Command added to history");
+
                     consoleHandler.sendWithNewLine(output);
                     return;
                 }
             }
+            consoleManagerLogger.error("No such command!");
             throw new InvalidInputException("Команда не распознана!");
         } catch (Exception exception) {
+            consoleManagerLogger.error("Error processing input!");
             consoleHandler.sendWithNewLine(exception.getMessage());
         }
     }
@@ -248,7 +262,10 @@ public class ConsoleManager {
             String userInput = consoleHandler.receive(MessageFormat.format("> Введите {0}", fieldName));
 
             if (userInput.trim().equals("exit"))
+            {
+                consoleManagerLogger.error("Exit! Inputted data not saved!");
                 throw new ExitException("Выход! Введенные данные об объекте не будут сохранены!");
+            }
 
             if (userInput.isBlank()) {
                 method.accept(null);
@@ -259,6 +276,7 @@ public class ConsoleManager {
             return false;
         }
         catch (InvalidInputException | InvalidTypeCastException exception) {
+            consoleManagerLogger.error("Error in element entering!");
             consoleHandler.sendWithNewLine(exception.getMessage());
             return true;
         }
@@ -277,6 +295,7 @@ public class ConsoleManager {
             return converter.apply(userInput);
         }
         catch (Exception exception) {
+            consoleManagerLogger.error("Error casting!");
             throw new InvalidTypeCastException(
                     MessageFormat.format("Неверный ввод! Поле должно быть типа {0}!", type.getSimpleName()));
         }

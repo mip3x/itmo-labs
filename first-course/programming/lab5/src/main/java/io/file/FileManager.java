@@ -5,6 +5,8 @@ import collection.data.Coordinates;
 import collection.data.Person;
 import collection.data.StudyGroup;
 import exception.InvalidInputException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -18,6 +20,7 @@ import javax.xml.bind.*;
  * Class for managing files
  */
 public class FileManager {
+    private static final Logger fileManagerLogger = LogManager.getLogger();
     private static String filePath;
 
     /**
@@ -29,10 +32,12 @@ public class FileManager {
         File file = new File(path);
 
         if (!file.exists()) {
+            fileManagerLogger.error("File does not exist!");
             throw new Exception(MessageFormat.format("Файла {0} не существует!", path));
         }
 
         filePath = path;
+        fileManagerLogger.trace("File path has been successfully set");
     }
 
     /**
@@ -41,7 +46,10 @@ public class FileManager {
      * @throws JAXBException Throws in case not all file's objects are valid
      */
     public static void loadCollection() throws IOException, JAXBException {
-        if (!Files.isReadable(Path.of(filePath))) throw new IOException("Ошибка при чтении файла: не достаточно прав доступа!");
+        if (!Files.isReadable(Path.of(filePath))) {
+            fileManagerLogger.error("Error reading file: insufficient access rights!");
+            throw new IOException("Ошибка при чтении файла: не достаточно прав доступа!");
+        }
 
         try(FileReader fileReader = new FileReader(filePath);
             BufferedReader bufferedReader = new BufferedReader(fileReader);) {
@@ -72,8 +80,10 @@ public class FileManager {
                             .filter(studyGroup -> {
                                 try {
                                     studyGroup.validateStudyGroup();
+                                    fileManagerLogger.trace("Study group validated");
                                     return true;
                                 } catch (InvalidInputException exception) {
+                                    fileManagerLogger.error("Error reading file: fiels is incorrect!");
                                     exceptionMessages.add("Поле '" + exception.getMessage().split("'")[1] + "' некорректно:\n" + exception.getMessage());
                                     return false;
                                 }
@@ -84,12 +94,16 @@ public class FileManager {
             int validGroupsCount = CollectionManager.getInstance().getStudyGroupCollection().size();
 
             if (validGroupsCount == 0)
+            {
+                fileManagerLogger.error("There is not a single valid object in the file!");
                 throw new InvalidInputException(
                         MessageFormat.format("В файле нет ни одного валидного объекта!\n{0}",
                                 String.join("\n", exceptionMessages))
                 );
+            }
 
             else if (validGroupsCount < parsedGroupsCount) {
+                fileManagerLogger.error("Not all objects in the file are valid!");
                 throw new InvalidInputException(
                         MessageFormat.format("Не все объекты файла валидны!\n{0}",
                                 String.join("\n", exceptionMessages))
@@ -97,6 +111,7 @@ public class FileManager {
             }
         }
         catch (JAXBException exception) {
+            fileManagerLogger.error("Error reading file: The file is empty or the data is incorrect!");
             throw new JAXBException("Ошибка при чтении файла: файл пуст или данные некорректны!");
         }
     }
@@ -115,12 +130,16 @@ public class FileManager {
             Marshaller marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-            if (!Files.isWritable(Path.of(filePath))) throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
+            if (!Files.isWritable(Path.of(filePath))){
+                fileManagerLogger.error("Error writing file: insufficient access rights!");
+                throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
+            }
 
             FileWriter fileWriter = new FileWriter(filePath);
             marshaller.marshal(CollectionManager.getInstance(), fileWriter);
 
         } catch (JAXBException exception) {
+            fileManagerLogger.error("Error processing the collection in xml!");
             throw new JAXBException("Ошибка при обработке коллекции в xml!");
         }
     }

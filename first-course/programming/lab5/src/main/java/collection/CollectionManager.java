@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import collection.data.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Manages collection
@@ -14,6 +16,7 @@ import collection.data.*;
  */
 @XmlRootElement(name = "studyGroupCollection")
 public class CollectionManager {
+    private static final Logger collectionManagerLogger = LogManager.getLogger();
     private static CollectionManager instance = null;
     private LinkedList<StudyGroup> studyGroupCollection;
     private final Date initializationDate;
@@ -55,6 +58,7 @@ public class CollectionManager {
      */
     public String clearCollection() {
         studyGroupCollection.clear();
+        collectionManagerLogger.trace("Collection has been cleared");
         return "Коллекция была успешно очищена";
     }
 
@@ -64,9 +68,11 @@ public class CollectionManager {
      */
     public String getCollectionHead() {
         try {
+            collectionManagerLogger.trace("Trying to get collection head");
             return getStudyGroupInfo(studyGroupCollection.get(0));
         }
         catch (IndexOutOfBoundsException e) {
+            collectionManagerLogger.error("Collection is empty: impossible to get element!");
             return "Невозможно получить элемент коллекции: коллекция пуста!";
         }
     }
@@ -77,10 +83,15 @@ public class CollectionManager {
      */
     public String getAllStudyGroupsInfo() {
         StringBuilder studyGroupsInfo = new StringBuilder();
-        if (studyGroupCollection.isEmpty()) return "Невозможно получить элемент коллекции: коллекция пуста!";
+        if (studyGroupCollection.isEmpty()) {
+            collectionManagerLogger.warn("Collection is empty: impossible to get element!");
+            return "Невозможно получить элемент коллекции: коллекция пуста!";
+        }
         studyGroupCollection.forEach(studyGroup ->
                 studyGroupsInfo.append(getStudyGroupInfo(studyGroup)).append("\n\n"));
         String result = studyGroupsInfo.toString();
+
+        collectionManagerLogger.trace("Study groups info is gotten");
         return result.substring(0, result.length() - 2);
     }
 
