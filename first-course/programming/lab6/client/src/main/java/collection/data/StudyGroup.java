@@ -54,7 +54,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     private void validateName(String name) {
-        if (name == null || name.isBlank()) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
+//        if (name == null || name.isBlank()) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
+        if (name == null || name.isBlank()) throw new InvalidInputException("Field 'Name' should not be empty!");
     }
 
     @XmlElement
@@ -68,7 +69,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     private void validateCoordinates(Coordinates coordinates) {
-        if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
+//        if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
+        if (coordinates == null) throw new InvalidInputException("Field 'Coordinates' should not be empty!");
     }
 
     @XmlElement
@@ -83,7 +85,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
 
     private void validateStudentsCount(Long studentsCount) {
         if (studentsCount == null) return;
-        if (studentsCount <= 0) throw new InvalidInputException("Значение поля 'Количество студентов' должно быть больше нуля!");
+//        if (studentsCount <= 0) throw new InvalidInputException("Значение поля 'Количество студентов' должно быть больше нуля!");
+        if (studentsCount <= 0) throw new InvalidInputException("Value of field 'Quantity of students' should be greater than 0!");
     }
 
     @XmlElement
@@ -97,8 +100,10 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     private void validateShouldBeExpelled(Long shouldBeExpelled) {
-        if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'Количество студентов на отчисление' не должно быть пустым!");
-        if (shouldBeExpelled <= 0) throw new InvalidInputException("Значение поля 'Количество студентов на отчисление' должно быть больше нуля!");
+//        if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'Количество студентов на отчисление' не должно быть пустым!");
+        if (shouldBeExpelled == null) throw new InvalidInputException("Field 'Should be expelled' should not be empty!");
+//        if (shouldBeExpelled <= 0) throw new InvalidInputException("Значение поля 'Количество студентов на отчисление' должно быть больше нуля!");
+        if (shouldBeExpelled <= 0) throw new InvalidInputException("Value of field 'Should be expelled' should be greater than 0!");
     }
 
     @XmlElement
@@ -112,7 +117,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     private void validateFormOfEducation(FormOfEducation formOfEducation) {
-        if (formOfEducation == null) throw new InvalidInputException("Поле 'Форма обучения' не должно быть пустым!");
+//        if (formOfEducation == null) throw new InvalidInputException("Поле 'Форма обучения' не должно быть пустым!");
+        if (formOfEducation == null) throw new InvalidInputException("Field 'Form of education' should not be empty!");
     }
 
     @XmlElement
@@ -126,7 +132,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     private void validateSemester(Semester semester) {
-        if (semester == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
+//        if (semester == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
+        if (semester == null) throw new InvalidInputException("Field 'Semester' should not be empty!");
     }
 
     @XmlElement
@@ -140,7 +147,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
     }
 
     private void validateGroupAdmin(Person groupAdmin) {
-        if (groupAdmin == null) throw new InvalidInputException("Поле 'Староста группы' не должно быть пустым!");
+//        if (groupAdmin == null) throw new InvalidInputException("Поле 'Староста группы' не должно быть пустым!");
+        if (groupAdmin == null) throw new InvalidInputException("Field 'Group admin' should not be empty!");
     }
 
     @XmlElement
@@ -165,15 +173,23 @@ public class StudyGroup implements Comparable<StudyGroup> {
 
     @Override
     public String toString() {
-        String studyGroupName = "Учебная группа " + name;
+//        String studyGroupName = "Учебная группа " + name;
+        String studyGroupName = "Study group " + name;
         String studyGroupID = "id: " + id;
-        String studyGroupCoordinates = "Координаты: " + coordinates.toString();
-        String studyGroupCreationDate = "Дата создания: " + creationDate;
-        String studyGroupStudentsCount = "Количество студентов: " + studentsCount;
-        String studyGroupShouldBeExpelled = "Количество студентов, которых нужно исключить: " + shouldBeExpelled;
-        String studyGroupFormOfEducation = "Форма обучения: " + formOfEducation;
-        String studyGroupSemester = "Семестр обучения: " + semester;
-        String studyGroupAdmin = "Староста группы: \n" + groupAdmin.toString();
+//        String studyGroupCoordinates = "Координаты: " + coordinates.toString();
+        String studyGroupCoordinates = "Coordinates: " + coordinates.toString();
+//        String studyGroupCreationDate = "Дата создания: " + creationDate;
+        String studyGroupCreationDate = "Creation date: " + creationDate;
+//        String studyGroupStudentsCount = "Количество студентов: " + studentsCount;
+        String studyGroupStudentsCount = "Quantity of students: " + studentsCount;
+//        String studyGroupShouldBeExpelled = "Количество студентов, которых нужно исключить: " + shouldBeExpelled;
+        String studyGroupShouldBeExpelled = "Quantity of students that should be expelled: " + shouldBeExpelled;
+//        String studyGroupFormOfEducation = "Форма обучения: " + formOfEducation;
+        String studyGroupFormOfEducation = "Form of education: " + formOfEducation;
+//        String studyGroupSemester = "Семестр обучения: " + semester;
+        String studyGroupSemester = "Study semester: " + semester;
+//        String studyGroupAdmin = "Староста группы: \n" + groupAdmin.toString();
+        String studyGroupAdmin = "Group admin: \n" + groupAdmin.toString();
 
         return studyGroupName + "\n"
              + studyGroupID + "\n"

@@ -15,7 +15,8 @@ public class Location {
 
     public Location() {}
     public void setX(Double x) {
-        if (x == null) throw new InvalidInputException("Поле 'Координата X' не должно быть пустым!");
+//        if (x == null) throw new InvalidInputException("Поле 'Координата X' не должно быть пустым!");
+        if (x == null) throw new InvalidInputException("Field 'Coordinate X' should not be empty!");
         this.x = x;
     }
 
@@ -25,7 +26,8 @@ public class Location {
     }
 
     public void setY(Double y) {
-        if (y == null) throw new InvalidInputException("Поле 'Координата Y' не должно быть пустым!");
+//        if (y == null) throw new InvalidInputException("Поле 'Координата Y' не должно быть пустым!");
+        if (y == null) throw new InvalidInputException("Field 'Coordinate Y' should not be empty!");
         this.y = y;
     }
 
@@ -35,7 +37,8 @@ public class Location {
     }
 
     public void setZ(Integer z) {
-        if (z == null) throw new InvalidInputException("Поле 'Координата Z' не должно быть пустым!");
+//        if (z == null) throw new InvalidInputException("Поле 'Координата Z' не должно быть пустым!");
+        if (z == null) throw new InvalidInputException("Field 'Coordinate Z' should not be empty!");
         this.z = z;
     }
 
@@ -45,7 +48,8 @@ public class Location {
     }
 
     public void setName(String name) {
-        if (name == null) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
+//        if (name == null) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
+        if (name == null) throw new InvalidInputException("Field 'Name' should not be empty!");
         this.name = name;
     }
 
@@ -56,6 +60,7 @@ public class Location {
 
     @Override
     public String toString() {
-        return "X: " + x + "; Y: " + y + "; Z: " + z + "\nНазвание локации: " + name;
+//        return "X: " + x + "; Y: " + y + "; Z: " + z + "\nНазвание локации: " + name;
+        return "X: " + x + "; Y: " + y + "; Z: " + z + "\nLocation name: " + name;
     }
 }

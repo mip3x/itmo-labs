@@ -3,16 +3,29 @@ package transfer;
 import java.io.Serializable;
 
 public class Response implements Serializable {
-    private String response;
+    private String responseMessage;
+    private ResponseStatus responseStatus;
+
+    public Response() {
+    }
 
     public Response(String text) {
-        this.response = text;
-    }
-    public String getResponseText() {
-        return response;
+        this.responseMessage = text;
     }
 
-    public void setResponseText(String response) {
-        this.response = response;
+    public String getResponseMessage() {
+        return responseMessage;
+    }
+
+    public ResponseStatus getResponseStatus() {
+        return responseStatus;
+    }
+
+    public void setResponseMessage(String message) {
+        this.responseMessage = message;
+    }
+
+    public void setResponseStatus(ResponseStatus responseStatus) {
+        this.responseStatus = responseStatus;
     }
 }

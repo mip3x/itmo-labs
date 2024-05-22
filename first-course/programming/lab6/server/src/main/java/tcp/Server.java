@@ -2,11 +2,15 @@ package tcp;
 
 import collection.CollectionManager;
 import io.console.ConsoleHandler;
+import io.console.InformationStorage;
 import io.console.command.Command;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import transfer.Request;
+import transfer.Response;
+import transfer.ResponseStatus;
+import validation.Argument;
 import validation.CommandValidator;
 
 import java.io.*;
@@ -17,6 +21,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.List;
 
 public class Server implements Runnable {
     private final Logger serverLogger = LogManager.getLogger();
@@ -24,6 +29,7 @@ public class Server implements Runnable {
     private Selector selector;
     private final int port;
     private final ConsoleHandler serverConsole = new ConsoleHandler();
+    private final InformationStorage informationStorage = InformationStorage.getInstance();
     public Server(int port) {
         this.port = port;
     }
@@ -69,7 +75,7 @@ public class Server implements Runnable {
                     }
                 }
 
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
+                ByteBuffer buffer = ByteBuffer.allocate(4096);
 
                 int select = selector.selectNow();
                 if (select == 0) continue;
@@ -140,16 +146,37 @@ public class Server implements Runnable {
         }
 
         serverConsole.write(serverLogger::info, "Request by " + clientChannel + " is next: \nCOMMAND: " + request.getCommand());
+        sendResponse(clientChannel, request);
+    }
 
-        String someResponse;
+    private void sendResponse(SocketChannel clientChannel, Request request) throws IOException {
+        Response response = new Response();
 
         Command receivedCommand = CommandValidator.matchCommand(request.getCommand());
-        if (receivedCommand != null) someResponse = "command is {" + receivedCommand.getName() + "}";
-        else someResponse = "Command was not recognized!";
+        if (receivedCommand != null) {
+            response.setResponseMessage("Command is <" + receivedCommand.getName() + ">");
+            response.setResponseStatus(ResponseStatus.COMMAND_RECOGNIZED);
 
-        serverConsole.writeWithPrompt(serverLogger::info, someResponse);
+            tryToExecuteCommand(receivedCommand, response);
+        }
+        else{
+            response.setResponseMessage("Command was not recognized!");
+            response.setResponseStatus(ResponseStatus.COMMAND_NOT_RECOGNIZED);
+        }
 
-        buffer = ByteBuffer.wrap(someResponse.getBytes());
+        serverConsole.writeWithPrompt(serverLogger::info, response.getResponseMessage());
+
+        ByteBuffer buffer = ByteBuffer.wrap(SerializationUtils.serialize(response));
         clientChannel.write(buffer);
+    }
+
+    private void tryToExecuteCommand(Command command, Response response) {
+        List<Argument> argumentList = CommandValidator.getArgumentsListByCommand(command);
+        if (argumentList.isEmpty()) {
+            response.setResponseMessage(command.execute());
+            response.setResponseStatus(ResponseStatus.SUCCESS);
+        }
+        else serverLogger.trace("WE NEED ARGUMENTS");
+        informationStorage.addToHistory(command);
     }
 }

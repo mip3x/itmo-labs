@@ -75,7 +75,8 @@ public class CollectionManager {
     public String clearCollection() {
         studyGroupCollection.clear();
         collectionManagerLogger.trace("Collection has been cleared");
-        return "Коллекция была успешно очищена";
+        return "Collection has been cleared";
+//        return "Коллекция была успешно очищена";
     }
 
     /**
@@ -89,7 +90,8 @@ public class CollectionManager {
         }
         catch (IndexOutOfBoundsException e) {
             collectionManagerLogger.error("Collection is empty: impossible to get element!");
-            return "Невозможно получить элемент коллекции: коллекция пуста!";
+            return "Collection is empty: impossible to get element!";
+//            return "Невозможно получить элемент коллекции: коллекция пуста!";
         }
     }
 
@@ -101,7 +103,8 @@ public class CollectionManager {
         StringBuilder studyGroupsInfo = new StringBuilder();
         if (studyGroupCollection.isEmpty()) {
             collectionManagerLogger.warn("Collection is empty: impossible to get element!");
-            return "Невозможно получить элемент коллекции: коллекция пуста!";
+            return "Collection is empty: impossible to get element!";
+//            return "Невозможно получить элемент коллекции: коллекция пуста!";
         }
         studyGroupCollection.forEach(studyGroup ->
                 studyGroupsInfo.append(getStudyGroupInfo(studyGroup)).append("\n\n"));
@@ -125,9 +128,12 @@ public class CollectionManager {
      * @return info about collection
      */
     public String getCollectionInfo() {
-        String collectionType = "Тип коллекции: " + studyGroupCollection.getClass().getName();
-        String collectionInitializationDate = "Время инициализации коллекции: " + initializationDate;
-        String collectionElementsNumber = "Количество элементов коллекции: " + studyGroupCollection.size(); 
+//        String collectionType = "Тип коллекции: " + studyGroupCollection.getClass().getName();
+        String collectionType = "Collection type: " + studyGroupCollection.getClass().getName();
+//        String collectionInitializationDate = "Время инициализации коллекции: " + initializationDate;
+        String collectionInitializationDate = "Collection initialization time: " + initializationDate;
+//        String collectionElementsNumber = "Количество элементов коллекции: " + studyGroupCollection.size();
+        String collectionElementsNumber = "Size of collection: " + studyGroupCollection.size();
         return collectionType + "\n" + collectionInitializationDate + "\n" + collectionElementsNumber;
     }
 
@@ -138,7 +144,8 @@ public class CollectionManager {
      */
     public String addStudyGroupToCollection(StudyGroup studyGroup) {
         studyGroupCollection.add(studyGroup);
-        return "Новый элемент был успешно добавлен в коллекцию";
+//        return "Новый элемент был успешно добавлен в коллекцию";
+        return "New element was successfully added to collection";
     }
 
     /**
@@ -157,7 +164,8 @@ public class CollectionManager {
      */
     public String removeById(Integer id) {
         studyGroupCollection.removeIf(studyGroup -> studyGroup.compareId(id));
-        return "Объект по данному id успешно удален";
+//        return "Объект по данному id успешно удален";
+        return "Object with such id was successfully deleted";
     }
 
     /**
@@ -175,6 +183,7 @@ public class CollectionManager {
         studyGroup.setId(id);
         studyGroup.setCreationDate(studyGroupCollection.get(index).getCreationDate());
         studyGroupCollection.set(index, studyGroup);
-        return "Объект по заданному id был успешно обновлен";
+//        return "Объект по заданному id был успешно обновлен";
+        return "Object with given id was successfully updated";
     }
 }

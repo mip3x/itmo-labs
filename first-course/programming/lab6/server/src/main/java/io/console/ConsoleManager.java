@@ -76,7 +76,7 @@ public class ConsoleManager {
                            throw new RecursionException("Глубина рекурсии превысила максимальную глубину рекурсии = " + MAX_RECURSION_DEPTH);
                        }
                        currentRecursionDepth++;
-                    };
+                    }
 
                     if (tokens.length > 1) informationStorage.setArguments(List.of(tokens).subList(1, tokens.length));
 

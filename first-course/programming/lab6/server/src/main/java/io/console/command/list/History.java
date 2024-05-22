@@ -20,9 +20,10 @@ public class History extends Command {
     public String execute() {
         String result = InformationStorage.getHistory().stream()
                 .limit(InformationStorage.getHistorySize())
-                .map(command -> String.format("%s%n", command.getName()))
+                .map(command -> String.format("%s%n", command.getName().split(" ")[0]))
                 .collect(Collectors.joining());
         historyCommandLogger.trace("History command executed");
-        return result.substring(0, result.length() - 1);
+        if (!result.isEmpty()) return result.substring(0, result.length() - 1);
+        return "History is empty";
     }
 }

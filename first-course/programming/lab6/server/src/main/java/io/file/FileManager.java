@@ -85,7 +85,7 @@ public class FileManager {
                             .filter(studyGroup -> {
                                 try {
                                     studyGroup.validateStudyGroup();
-                                    fileManagerLogger.trace("Study group validated");
+                                    fileManagerLogger.trace("Study group " + studyGroup.getName() + " validated");
                                     return true;
                                 } catch (InvalidInputException exception) {
                                     fileManagerLogger.error("Error reading file: fiels is incorrect!");

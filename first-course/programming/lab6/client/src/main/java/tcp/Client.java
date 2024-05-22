@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import transfer.Request;
 import transfer.Response;
+import transfer.ResponseStatus;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -68,9 +69,8 @@ public class Client implements Runnable {
         clientLogger.info("Request is {}", request.getCommand());
 
         if (sendRequest(request)) response = getResponse();
-        else response = null;
 
-        if (response != null) consoleHandler.sendWithNewLine("Got response: " + response.getResponseText());
+        if (response != null) consoleHandler.sendWithNewLine("Got response: \n" + response.getResponseMessage());
     }
 
     private boolean sendRequest(Request request) {
@@ -91,15 +91,21 @@ public class Client implements Runnable {
     private Response getResponse() {
         clientLogger.trace("Getting response from the server");
 
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        ByteBuffer buffer = ByteBuffer.allocate(4096);
         try {
             int readBytes = server.read(buffer);
             if (readBytes == EOFStatus) {
                 return null;
             }
 
-            response = new Response(new String(buffer.array()).trim());
+            response = SerializationUtils.deserialize(buffer.array());
+
+            if (response.getResponseStatus() == ResponseStatus.COMMAND_NOT_RECOGNIZED) {
+                clientLogger.error(response.getResponseMessage());
+            }
+
             return response;
+
         } catch (IOException exception) {
             clientLogger.error("Error occurred when trying to get response: {}", exception.getMessage());
             closeConnection();
