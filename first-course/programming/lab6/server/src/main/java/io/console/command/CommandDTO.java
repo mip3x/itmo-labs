@@ -1,6 +1,15 @@
 package io.console.command;
 
-import java.io.Serializable;
+import collection.data.StudyGroup;
 
-public record CommandDTO(String name) implements Serializable {
+import java.io.Serializable;
+import java.util.List;
+
+public record CommandDTO(String commandName, List<String> commandArguments, StudyGroup studyGroup) implements Serializable {
+    public CommandDTO(String commandName) {
+        this(commandName, null, null);
+    }
+    public CommandDTO(String commandName, List<String> commandArguments) {
+        this(commandName, commandArguments, null);
+    }
 }

@@ -3,11 +3,12 @@ package collection.data;
 import exception.InvalidInputException;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.io.Serializable;
 
 /**
  * Location
  */
-public class Location {
+public class Location implements Serializable {
     private Double x; //Поле не может быть null
     private double y;
     private Integer z; //Поле не может быть null

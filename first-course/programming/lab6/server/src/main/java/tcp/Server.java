@@ -1,6 +1,7 @@
 package tcp;
 
 import collection.CollectionManager;
+import collection.data.StudyGroup;
 import io.console.ConsoleHandler;
 import io.console.InformationStorage;
 import io.console.command.Command;
@@ -9,9 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import transfer.Request;
 import transfer.Response;
-import transfer.ResponseStatus;
-import validation.Argument;
 import validation.CommandValidator;
+import validation.ValidationStatus;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -21,7 +21,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.List;
 
 public class Server implements Runnable {
     private final Logger serverLogger = LogManager.getLogger();
@@ -145,23 +144,34 @@ public class Server implements Runnable {
             return;
         }
 
-        serverConsole.write(serverLogger::info, "Request by " + clientChannel + " is next: \nCOMMAND: " + request.getCommand());
+        serverConsole.write(serverLogger::info, "Request by " + clientChannel + " is next: \nCOMMAND: " + request.getCommandDTO());
         sendResponse(clientChannel, request);
     }
 
     private void sendResponse(SocketChannel clientChannel, Request request) throws IOException {
+        InformationStorage.getInstance().setArguments(request.getCommandDTO().commandArguments());
+
+        StudyGroup providedStudyGroup = request.getCommandDTO().studyGroup();
+        InformationStorage.getInstance().setReceivedStudyGroup(providedStudyGroup);
+
         Response response = new Response();
 
-        Command receivedCommand = CommandValidator.matchCommand(request.getCommand());
-        if (receivedCommand != null) {
-            response.setResponseMessage("Command is <" + receivedCommand.getName() + ">");
-            response.setResponseStatus(ResponseStatus.COMMAND_RECOGNIZED);
+        CommandValidator.MatchedCommand receivedCommand = CommandValidator.validateCommand(request.getCommandDTO());
+        serverConsole.write(serverLogger::trace, String.valueOf(receivedCommand.validationStatus()));
 
-            tryToExecuteCommand(receivedCommand, response);
+        if (receivedCommand.command() == null) {
+            response.setResponseMessage(receivedCommand.validationStatusDescription());
+            response.setResponseStatus(ValidationStatus.NOT_RECOGNIZED);
         }
-        else{
-            response.setResponseMessage("Command was not recognized!");
-            response.setResponseStatus(ResponseStatus.COMMAND_NOT_RECOGNIZED);
+        else {
+            response.setResponseMessage("Command <" + receivedCommand.command().getName() + ">");
+
+            if (receivedCommand.validationStatus() == ValidationStatus.SUCCESS)
+                tryToExecuteCommand(receivedCommand.command(), response);
+            else {
+                response.setResponseStatus(receivedCommand.validationStatus());
+                response.setResponseStatusDescription(receivedCommand.validationStatusDescription());
+            }
         }
 
         serverConsole.writeWithPrompt(serverLogger::info, response.getResponseMessage());
@@ -171,12 +181,9 @@ public class Server implements Runnable {
     }
 
     private void tryToExecuteCommand(Command command, Response response) {
-        List<Argument> argumentList = CommandValidator.getArgumentsListByCommand(command);
-        if (argumentList.isEmpty()) {
-            response.setResponseMessage(command.execute());
-            response.setResponseStatus(ResponseStatus.SUCCESS);
-        }
-        else serverLogger.trace("WE NEED ARGUMENTS");
+        response.setResponseMessage(command.execute());
+        response.setResponseStatus(ValidationStatus.SUCCESS);
+
         informationStorage.addToHistory(command);
     }
 }

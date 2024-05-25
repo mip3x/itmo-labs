@@ -1,10 +1,13 @@
 package transfer;
 
+import validation.ValidationStatus;
+
 import java.io.Serializable;
 
 public class Response implements Serializable {
     private String responseMessage;
-    private ResponseStatus responseStatus;
+    private ValidationStatus responseStatus;
+    private String responseStatusDescription;
 
     public Response() {
     }
@@ -17,15 +20,22 @@ public class Response implements Serializable {
         return responseMessage;
     }
 
-    public ResponseStatus getResponseStatus() {
+    public ValidationStatus getResponseStatus() {
         return responseStatus;
+    }
+    public String getResponseStatusDescription() {
+        return responseStatusDescription;
     }
 
     public void setResponseMessage(String message) {
         this.responseMessage = message;
     }
 
-    public void setResponseStatus(ResponseStatus responseStatus) {
-        this.responseStatus = responseStatus;
+    public void setResponseStatus(ValidationStatus validationStatus) {
+        responseStatus = validationStatus;
+    }
+
+    public void setResponseStatusDescription(String responseStatusDescription) {
+        this.responseStatusDescription = responseStatusDescription;
     }
 }

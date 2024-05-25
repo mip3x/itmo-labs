@@ -3,13 +3,14 @@ package collection.data;
 import exception.InvalidInputException;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Person
  */
-public class Person {
+public class Person implements Serializable {
     private String name; //Поле не может быть null, Строка не может быть пустой
     private long weight; //Значение поля должно быть больше 0
     private String passportID; //Значение этого поля должно быть уникальным, Длина строки должна быть не меньше 4, Строка не может быть пустой, Поле может быть null

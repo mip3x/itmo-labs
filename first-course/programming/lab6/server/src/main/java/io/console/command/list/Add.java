@@ -20,7 +20,7 @@ public class Add extends Command implements RequestingInput {
     @Override
     public String execute() {
         StudyGroup studyGroup = InformationStorage.getReceivedStudyGroup();
-        addCommandLogger.trace("Add command executed");
-        return collectionManager.addStudyGroupToCollection(studyGroup);
+        if (studyGroup != null) return collectionManager.addStudyGroupToCollection(studyGroup);
+        throw new NullPointerException("studyGroup is null!");
     }
 }

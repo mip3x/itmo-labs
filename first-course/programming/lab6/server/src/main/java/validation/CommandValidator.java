@@ -17,6 +17,9 @@ public class CommandValidator {
     private static CommandValidator instance = null;
     private static HashMap<Command, List<Argument>> commandArgumentMap = new HashMap<>();
 
+    public record MatchedCommand(Command command, ValidationStatus validationStatus, String validationStatusDescription) {
+    }
+
     public static CommandValidator getInstance() {
         if (instance == null) instance = new CommandValidator();
         return instance;
@@ -27,14 +30,71 @@ public class CommandValidator {
         logger.trace("CommandArgumentMap was filled");
     }
 
-    public static Command matchCommand(CommandDTO commandDTO) {
-        return InformationStorage.getCommandsList().stream()
-                .filter(command -> (new CommandDTO(command.getName().split(" ")[0])).equals(commandDTO))
+    public static MatchedCommand validateCommand(CommandDTO commandDTO) {
+        Command matchedCommand = InformationStorage.getCommandsList().stream()
+                .filter(command -> command.getName().split(" ")[0].equals(commandDTO.commandName()))
                 .findFirst()
                 .orElse(null);
+
+        if (matchedCommand == null)
+            return new MatchedCommand(null, ValidationStatus.NOT_RECOGNIZED, "Command was not recognized!");
+
+        List<Argument> requiredArguments = getArgumentsListByCommand(matchedCommand);
+
+        if (commandDTO.commandArguments().size() < requiredArguments.size()) {
+            if (requiredArguments.contains(Argument.ELEMENT) && (commandDTO.studyGroup() == null)) {
+
+                if (requiredArguments.contains(Argument.ID)) {
+                    String idHandlingMessage = handleIDValidation(matchedCommand);
+                    if (idHandlingMessage != null) {
+                        if (commandDTO.commandArguments().isEmpty())
+                            return new MatchedCommand(matchedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
+                        return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
+                    }
+                }
+                return new MatchedCommand(matchedCommand, ValidationStatus.INPUT_REQUIRED, "input required!");
+            }
+
+            else if (commandDTO.studyGroup() != null) {
+                logger.trace("STUDY GROUP != NULL");
+                try {
+                    commandDTO.studyGroup().validateStudyGroup();
+                    return new MatchedCommand(matchedCommand, ValidationStatus.SUCCESS, null);
+                } catch (Exception exception) {
+                    return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_OBJECT, exception.getMessage());
+                }
+            }
+
+            return new MatchedCommand(matchedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
+
+        } else if (commandDTO.commandArguments().size() > requiredArguments.size()) {
+            return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ARGUMENTS, "invalid arguments!");
+        }
+
+        if (requiredArguments.contains(Argument.ID)) {
+            String idHandlingMessage = handleIDValidation(matchedCommand);
+            if (idHandlingMessage != null)
+                return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
+        }
+        else if (requiredArguments.contains(Argument.ELEMENT)) {
+            return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ARGUMENTS, "invalid arguments!");
+        }
+
+        return new MatchedCommand(matchedCommand, ValidationStatus.SUCCESS, null);
     }
 
-    public static List<Argument> getArgumentsListByCommand(Command command) {
+    private static String handleIDValidation(Command matchedCommand) {
+        try {
+            if (!((RequestingId) matchedCommand).validateId()) {
+                return "no object with such id!";
+            }
+        } catch (Exception exception) {
+            return "error occurred while concatenating id!";
+        }
+        return null;
+    }
+
+    private static List<Argument> getArgumentsListByCommand(Command command) {
         return commandArgumentMap.entrySet().stream()
                 .filter(commandListEntry -> command.getName().equals(commandListEntry.getKey().getName()))
                 .map(Map.Entry::getValue)

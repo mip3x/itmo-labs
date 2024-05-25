@@ -3,11 +3,12 @@ package collection.data;
 import exception.InvalidInputException;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.io.Serializable;
 
 /**
  * Coordinates
  */
-public class Coordinates {
+public class Coordinates implements Serializable {
     private long x; //Максимальное значение поля: 224
     private Double y; //Поле не может быть null
 

@@ -6,28 +6,16 @@ import java.io.Serializable;
 
 public class Request implements Serializable {
     private CommandDTO commandDTO;
-    private Data data;
 
     public Request(CommandDTO commandDTO) {
         this.commandDTO = commandDTO;
     }
 
-    public Request() {
-    }
-
-    public CommandDTO getCommand() {
+    public CommandDTO getCommandDTO() {
         return commandDTO;
     }
 
-    public Data getData() {
-        return data;
-    }
-
-    public void setCommand(CommandDTO commandDTO) {
+    public void setCommandDTO(CommandDTO commandDTO) {
         this.commandDTO = commandDTO;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
     }
 }
