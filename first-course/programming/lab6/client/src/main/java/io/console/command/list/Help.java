@@ -1,5 +1,6 @@
 package io.console.command.list;
 
+import collection.CollectionManager;
 import io.console.InformationStorage;
 import io.console.command.Command;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +18,7 @@ public class Help extends Command {
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         String result = InformationStorage.getCommandsList().stream()
                 .map(command -> String.format("    %-30s%-4s%s%n", command.getName(), "->", command.getDescription()))
                 .collect(Collectors.joining());

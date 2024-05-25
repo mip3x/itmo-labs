@@ -10,13 +10,12 @@ import org.apache.logging.log4j.Logger;
  */
 public class Clear extends Command {
     private static final Logger clearCommandLogger = LogManager.getLogger();
-    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Clear() {
         super("clear", "Clear collection");
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         clearCommandLogger.trace("Clear command executed");
         return collectionManager.clearCollection();
     }

@@ -11,14 +11,13 @@ import org.apache.logging.log4j.Logger;
  * Adds element to collection
  */
 public class Add extends Command implements RequestingInput {
-    private final CollectionManager collectionManager = CollectionManager.getInstance();
     private static final Logger addCommandLogger = LogManager.getLogger();
     public Add() {
         super("add {element}", "Add new element to collection");
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         StudyGroup studyGroup = InformationStorage.getReceivedStudyGroup();
         if (studyGroup != null) return collectionManager.addStudyGroupToCollection(studyGroup);
         throw new NullPointerException("studyGroup is null!");

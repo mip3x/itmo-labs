@@ -14,13 +14,12 @@ import java.util.List;
  */
 public class RemoveLower extends Command implements RequestingInput {
     private static final Logger removeLowerCommandLogger = LogManager.getLogger();
-    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public RemoveLower() {
         super("remove_lower {element}", "Delete from collection all elements which are lower than given");
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         Long studentsCount = InformationStorage.getReceivedStudyGroup().getStudentsCount();
         List<Integer> elementsToRemove = collectionManager.getStudyGroupCollection().stream()
                 .filter(studyGroup -> studyGroup.getStudentsCount() < studentsCount)

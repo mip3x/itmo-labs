@@ -15,8 +15,8 @@ public class Save extends Command {
     }
 
     @Override
-    public String execute() {
-        if (CollectionManager.getInstance().getStudyGroupCollection() == null)
+    public String execute(CollectionManager collectionManager) {
+        if (collectionManager.getStudyGroupCollection() == null)
         {
             saveCommandLogger.info("Collection is empty. Nothing to save");
             saveCommandLogger.trace("Save command executed");

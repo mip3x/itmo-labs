@@ -1,5 +1,7 @@
 package io.console.command;
 
+import collection.CollectionManager;
+
 import java.io.Serializable;
 
 /**
@@ -14,7 +16,7 @@ public abstract class Command implements Serializable {
         this.description = description;
     }
 
-    public abstract String execute();
+    public abstract String execute(CollectionManager collectionManager);
 
     public String getName() {
         return name;
@@ -22,10 +24,5 @@ public abstract class Command implements Serializable {
 
     public String getDescription() {
         return description;
-    }
-    @Override
-    public boolean equals(Object obj) {
-        if (this.name.equals(((Command)obj).getName())) return true;
-        return false;
     }
 }

@@ -25,7 +25,7 @@ public class RemoveAnyByFormOfEducation extends Command {
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         FormOfEducation formOfEducation;
         try {
             formOfEducation = FormOfEducation
@@ -39,7 +39,7 @@ public class RemoveAnyByFormOfEducation extends Command {
                             Arrays.toString(FormOfEducation.values()));
         }
 
-        LinkedList<StudyGroup> studyGroupCollection = CollectionManager.getInstance().getStudyGroupCollection();
+        LinkedList<StudyGroup> studyGroupCollection = collectionManager.getStudyGroupCollection();
 
         removeAnyByFormOfEducationLogger.trace("RemoveAnyByFormOfEducation command executed");
         return studyGroupCollection

@@ -1,5 +1,6 @@
 package io.console.command.list;
 
+import collection.CollectionManager;
 import io.console.command.Command;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +15,7 @@ public class Exit extends Command {
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         exitCommandLogger.info("Exiting program");
         System.exit(0);
         return "Exiting program";

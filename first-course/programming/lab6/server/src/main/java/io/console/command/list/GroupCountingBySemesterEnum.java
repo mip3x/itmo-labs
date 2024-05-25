@@ -23,8 +23,8 @@ public class GroupCountingBySemesterEnum extends Command {
     }
 
     @Override
-    public String execute() {
-        LinkedList<StudyGroup> studyGroupCollection = CollectionManager.getInstance().getStudyGroupCollection();
+    public String execute(CollectionManager collectionManager) {
+        LinkedList<StudyGroup> studyGroupCollection = collectionManager.getStudyGroupCollection();
         groupCountingBySemesterEnumCommandLogger.trace("StudyGroupCollection has been got");
 
         Map<Semester, Long> groupsPerSemester = studyGroupCollection.stream()

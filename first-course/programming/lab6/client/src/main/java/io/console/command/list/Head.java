@@ -10,13 +10,12 @@ import org.apache.logging.log4j.Logger;
  */
 public class Head extends Command {
     private final static Logger headCommandLogger = LogManager.getLogger();
-    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Head() {
         super("head", "Print out first element of collection");
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         headCommandLogger.trace("Head command executed");
         return collectionManager.getCollectionHead();
     }

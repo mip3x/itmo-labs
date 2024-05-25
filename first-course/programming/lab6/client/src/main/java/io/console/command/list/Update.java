@@ -13,13 +13,12 @@ import org.apache.logging.log4j.Logger;
  */
 public class Update extends Command implements RequestingId, RequestingInput {
     private static final Logger updateCommandLogger = LogManager.getLogger();
-    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Update() {
         super("update id {element}", "Update object by given id");
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         StudyGroup studyGroup = InformationStorage.getReceivedStudyGroup();
         Integer id = Integer.valueOf(InformationStorage.getReceivedArguments().get(0));
 
@@ -28,7 +27,7 @@ public class Update extends Command implements RequestingId, RequestingInput {
     }
 
     @Override
-    public boolean validateId() {
+    public boolean validateId(CollectionManager collectionManager) {
         try {
             updateCommandLogger.trace("Validating id");
             return collectionManager.validateID(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));

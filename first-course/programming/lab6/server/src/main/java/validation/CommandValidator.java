@@ -1,5 +1,6 @@
 package validation;
 
+import collection.CollectionManager;
 import collection.data.StudyGroup;
 import io.console.InformationStorage;
 import io.console.command.Command;
@@ -30,12 +31,7 @@ public class CommandValidator {
         logger.trace("CommandArgumentMap was filled");
     }
 
-    public static MatchedCommand validateCommand(Command command, List<String> providedArguments, StudyGroup providedStudyGroup) {
-        Command providedCommand = InformationStorage.getCommandsList().stream()
-                .filter(command1 -> command1.equals(command))
-                .findFirst()
-                .orElse(null);
-
+    public static MatchedCommand validateCommand(Command providedCommand, List<String> providedArguments, StudyGroup providedStudyGroup) {
         if (providedCommand == null)
             return new MatchedCommand(null, ValidationStatus.NOT_RECOGNIZED, "Command was not recognized!");
 
@@ -85,7 +81,7 @@ public class CommandValidator {
 
     private static String handleIDValidation(Command matchedCommand) {
         try {
-            if (!((RequestingId) matchedCommand).validateId()) {
+            if (!((RequestingId) matchedCommand).validateId(CollectionManager.getInstance())) {
                 return "no object with such id!";
             }
         } catch (Exception exception) {

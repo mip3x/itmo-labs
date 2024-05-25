@@ -183,10 +183,9 @@ public class Server implements Runnable {
     }
 
     private void tryToExecuteCommand(Command command, Response response) {
-        response.setResponseMessage(command.execute());
+        response.setResponseMessage(command.execute(CollectionManager.getInstance()));
         response.setResponseStatus(ValidationStatus.SUCCESS);
 
-        serverLogger.trace(command.execute());
         informationStorage.addToHistory(command);
     }
 }

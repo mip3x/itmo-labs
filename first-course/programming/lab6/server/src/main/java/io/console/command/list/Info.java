@@ -10,13 +10,12 @@ import org.apache.logging.log4j.Logger;
  */
 public class Info extends Command {
     private static final Logger infoCommandLogger = LogManager.getLogger();
-    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public Info() {
         super("info", "Print out info about collection");
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         infoCommandLogger.trace("Info command executed");
         return collectionManager.getCollectionInfo();
     }

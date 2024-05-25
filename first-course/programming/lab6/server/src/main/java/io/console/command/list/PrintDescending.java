@@ -12,13 +12,12 @@ import java.util.Collections;
  */
 public class PrintDescending extends Command {
     private static final Logger printDescendingLogger = LogManager.getLogger();
-    private final CollectionManager collectionManager = CollectionManager.getInstance();
     public PrintDescending() {
         super("print_descending", "Print elements of collection by descending");
     }
 
     @Override
-    public String execute() {
+    public String execute(CollectionManager collectionManager) {
         Collections.sort(collectionManager.getStudyGroupCollection());
         printDescendingLogger.trace("Collection sorted");
 
