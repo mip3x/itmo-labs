@@ -144,19 +144,20 @@ public class Server implements Runnable {
             return;
         }
 
-        serverConsole.write(serverLogger::info, "Request by " + clientChannel + " is next: \nCOMMAND: " + request.getCommandDTO());
+        serverConsole.write(serverLogger::info, "Request by " + clientChannel + " is next: \nCOMMAND: " + request.getCommand());
         sendResponse(clientChannel, request);
     }
 
     private void sendResponse(SocketChannel clientChannel, Request request) throws IOException {
-        InformationStorage.getInstance().setArguments(request.getCommandDTO().commandArguments().subList(1, request.getCommandDTO().commandArguments().size()));
+        InformationStorage.getInstance().setArguments(request.getCommandArguments());
 
-        StudyGroup providedStudyGroup = request.getCommandDTO().studyGroup();
+        StudyGroup providedStudyGroup = request.getStudyGroup();
         InformationStorage.getInstance().setReceivedStudyGroup(providedStudyGroup);
 
         Response response = new Response();
 
-        CommandValidator.MatchedCommand receivedCommand = CommandValidator.validateCommand(request.getCommandDTO());
+        CommandValidator.MatchedCommand receivedCommand =
+                CommandValidator.validateCommand(request.getCommand(), request.getCommandArguments(), request.getStudyGroup());
         serverConsole.write(serverLogger::trace, String.valueOf(receivedCommand.validationStatus()));
 
         if (receivedCommand.command() == null) {
@@ -176,6 +177,7 @@ public class Server implements Runnable {
 
         serverConsole.writeWithPrompt(serverLogger::info, response.getResponseMessage());
 
+//        serverLogger.trace(CollectionManager.getInstance().getAllStudyGroupsInfo());
         ByteBuffer buffer = ByteBuffer.wrap(SerializationUtils.serialize(response));
         clientChannel.write(buffer);
     }
@@ -184,6 +186,7 @@ public class Server implements Runnable {
         response.setResponseMessage(command.execute());
         response.setResponseStatus(ValidationStatus.SUCCESS);
 
+        serverLogger.trace(command.execute());
         informationStorage.addToHistory(command);
     }
 }

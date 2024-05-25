@@ -1,8 +1,8 @@
 package validation;
 
+import collection.data.StudyGroup;
 import io.console.InformationStorage;
 import io.console.command.Command;
-import io.console.command.CommandDTO;
 import io.console.command.list.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,59 +30,57 @@ public class CommandValidator {
         logger.trace("CommandArgumentMap was filled");
     }
 
-    public static MatchedCommand validateCommand(CommandDTO commandDTO) {
-        CommandDTO finalCommandDTO = commandDTO;
-        Command matchedCommand = InformationStorage.getCommandsList().stream()
-                .filter(command -> new CommandDTO(command.getName().split(" ")[0]).equals(new CommandDTO(finalCommandDTO.commandArguments().get(0))))
+    public static MatchedCommand validateCommand(Command command, List<String> providedArguments, StudyGroup providedStudyGroup) {
+        Command providedCommand = InformationStorage.getCommandsList().stream()
+                .filter(command1 -> command1.equals(command))
                 .findFirst()
                 .orElse(null);
 
-        if (matchedCommand == null)
+        if (providedCommand == null)
             return new MatchedCommand(null, ValidationStatus.NOT_RECOGNIZED, "Command was not recognized!");
-        commandDTO = new CommandDTO(commandDTO.commandArguments().subList(1, commandDTO.commandArguments().size()));
 
-        List<Argument> requiredArguments = getArgumentsListByCommand(matchedCommand);
+        List<Argument> requiredArguments = getArgumentsListByCommand(providedCommand);
 
-        if (commandDTO.commandArguments().size() < requiredArguments.size()) {
-            if (requiredArguments.contains(Argument.ELEMENT) && (commandDTO.studyGroup() == null)) {
+        if (providedArguments.size() < requiredArguments.size()) {
+            if (requiredArguments.contains(Argument.ELEMENT) && (providedStudyGroup == null)) {
 
                 if (requiredArguments.contains(Argument.ID)) {
-                    String idHandlingMessage = handleIDValidation(matchedCommand);
+                    String idHandlingMessage = handleIDValidation(providedCommand);
                     if (idHandlingMessage != null) {
-                        if ((commandDTO.commandArguments()).isEmpty())
-                            return new MatchedCommand(matchedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
-                        return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
+                        if (providedArguments.isEmpty())
+                            return new MatchedCommand(providedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
+                        return new MatchedCommand(providedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
                     }
                 }
-                return new MatchedCommand(matchedCommand, ValidationStatus.INPUT_REQUIRED, "input required!");
+                return new MatchedCommand(providedCommand, ValidationStatus.INPUT_REQUIRED, "input required!");
             }
 
-            else if (commandDTO.studyGroup() != null) {
+            else if (providedStudyGroup != null) {
                 logger.trace("STUDY GROUP != NULL");
                 try {
-                    commandDTO.studyGroup().validateStudyGroup();
-                    return new MatchedCommand(matchedCommand, ValidationStatus.SUCCESS, null);
+                    providedStudyGroup.validateStudyGroup();
+                    return new MatchedCommand(providedCommand, ValidationStatus.SUCCESS, null);
                 } catch (Exception exception) {
-                    return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_OBJECT, exception.getMessage());
+                    return new MatchedCommand(providedCommand, ValidationStatus.INVALID_OBJECT, exception.getMessage());
                 }
             }
 
-            return new MatchedCommand(matchedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
+            return new MatchedCommand(providedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
 
-        } else if (commandDTO.commandArguments().size() > requiredArguments.size()) {
-            return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ARGUMENTS, "invalid arguments!");
+        } else if (providedArguments.size() > requiredArguments.size()) {
+            return new MatchedCommand(providedCommand, ValidationStatus.INVALID_ARGUMENTS, "invalid arguments!");
         }
 
         if (requiredArguments.contains(Argument.ID)) {
-            String idHandlingMessage = handleIDValidation(matchedCommand);
+            String idHandlingMessage = handleIDValidation(providedCommand);
             if (idHandlingMessage != null)
-                return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
+                return new MatchedCommand(providedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
         }
         else if (requiredArguments.contains(Argument.ELEMENT)) {
-            return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ARGUMENTS, "invalid arguments!");
+            return new MatchedCommand(providedCommand, ValidationStatus.INVALID_ARGUMENTS, "invalid arguments!");
         }
 
-        return new MatchedCommand(matchedCommand, ValidationStatus.SUCCESS, null);
+        return new MatchedCommand(providedCommand, ValidationStatus.SUCCESS, null);
     }
 
     private static String handleIDValidation(Command matchedCommand) {

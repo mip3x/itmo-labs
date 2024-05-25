@@ -1,7 +1,8 @@
 package collection;
 
 import collection.data.StudyGroup;
-import io.file.FileManager;
+
+import io.console.file.FileManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

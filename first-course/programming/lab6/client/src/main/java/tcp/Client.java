@@ -5,11 +5,11 @@ import exception.ExitException;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
 import io.console.ConsoleHandler;
+import io.console.InformationStorage;
 import io.console.command.CommandParser;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import io.console.command.CommandDTO;
 import transfer.Request;
 import transfer.Response;
 import validation.ValidationStatus;
@@ -47,6 +47,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
+        InformationStorage.getInstance();
         consoleHandler.sendWithNewLine("""
                 Type 'exit' in order to close connection and exit from the program
                 Type 'connect in order to connect/reconnect to the server
@@ -72,11 +73,17 @@ public class Client implements Runnable {
             System.exit(0);
         }
 
-        CommandDTO parsedCommand = CommandParser.parseCommand(inputLine);
+        Request request = CommandParser.parseCommand(inputLine);
         clientLogger.trace("Command parsed");
 
-        if (parsedCommand == null) {
-            clientLogger.trace("Command is null");
+        if (request == null) {
+            clientLogger.trace("Request is null");
+            return;
+        }
+
+        if (request.getCommand() == null) {
+            clientLogger.error("Command was not recognized!");
+            consoleHandler.sendWithNewLine("Command was not recognized!");
             return;
         }
 
@@ -85,7 +92,7 @@ public class Client implements Runnable {
             return;
         }
 
-        if (parsedCommand.commandArguments().get(0).equals("execute_script")){
+        if (request.getCommand().getName().equals("execute_script")) {
             clientLogger.trace("Going to execute script...");
 
             if (currentRecursionDepth > MAX_RECURSION_DEPTH) {
@@ -96,17 +103,15 @@ public class Client implements Runnable {
 
             currentRecursionDepth++;
 
-            handleScriptExecution(parsedCommand);
+            handleScriptExecution(request);
             return;
         }
 
-        Request request = new Request(parsedCommand);
-
         clientLogger.debug("Going to send request with command...");
-        clientLogger.info("Request is {}", request.getCommandDTO());
+        clientLogger.info("Request is {}, {}, {}", request.getCommand().getName(), request.getCommandArguments(), request.getStudyGroup());
 
         if (sendRequest(request)) response = getResponse();
-        handleResponse(response, parsedCommand);
+        handleResponse(response, request);
         response = null;
     }
 
@@ -146,7 +151,7 @@ public class Client implements Runnable {
         }
     }
 
-    private void handleResponse(Response response, CommandDTO sendedCommand) {
+    private void handleResponse(Response response, Request request) {
         if (response != null) {
             ValidationStatus responseStatus = response.getResponseStatus();
 
@@ -157,16 +162,13 @@ public class Client implements Runnable {
                     try {
                         StudyGroup providedStudyGroup = inputElement();
 
-                        CommandDTO commandWithStudyGroup =
-                                new CommandDTO(sendedCommand.commandArguments(), providedStudyGroup);
-
-                        Request request = new Request(commandWithStudyGroup);
+                        request.setStudyGroup(providedStudyGroup);
 
                         clientLogger.debug("Going to send request with command...");
-                        clientLogger.info("Request is {}", request.getCommandDTO());
+                        clientLogger.info("Request is {}", request.getCommand());
 
                         if (sendRequest(request)) response = getResponse();
-                        handleResponse(response, commandWithStudyGroup);
+                        handleResponse(response, request);
                         return;
                     }
                     catch (ExitException exception) {
@@ -182,10 +184,10 @@ public class Client implements Runnable {
         }
     }
 
-    private void handleScriptExecution(CommandDTO command) {
+    private void handleScriptExecution(Request request) {
         String filePath;
         try {
-            filePath = command.commandArguments().get(0);
+            filePath = request.getCommandArguments().get(0);
             File file = new File(filePath);
 
             if (!file.exists()){

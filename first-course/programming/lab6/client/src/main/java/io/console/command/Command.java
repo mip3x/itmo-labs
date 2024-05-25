@@ -23,7 +23,6 @@ public abstract class Command implements Serializable {
     public String getDescription() {
         return description;
     }
-
     @Override
     public boolean equals(Object obj) {
         if (this.name.equals(((Command)obj).getName())) return true;
