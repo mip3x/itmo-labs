@@ -31,13 +31,15 @@ public class CommandValidator {
     }
 
     public static MatchedCommand validateCommand(CommandDTO commandDTO) {
+        CommandDTO finalCommandDTO = commandDTO;
         Command matchedCommand = InformationStorage.getCommandsList().stream()
-                .filter(command -> command.getName().split(" ")[0].equals(commandDTO.commandName()))
+                .filter(command -> new CommandDTO(command.getName().split(" ")[0]).equals(new CommandDTO(finalCommandDTO.commandArguments().get(0))))
                 .findFirst()
                 .orElse(null);
 
         if (matchedCommand == null)
             return new MatchedCommand(null, ValidationStatus.NOT_RECOGNIZED, "Command was not recognized!");
+        commandDTO = new CommandDTO(commandDTO.commandArguments().subList(1, commandDTO.commandArguments().size()));
 
         List<Argument> requiredArguments = getArgumentsListByCommand(matchedCommand);
 
@@ -47,7 +49,7 @@ public class CommandValidator {
                 if (requiredArguments.contains(Argument.ID)) {
                     String idHandlingMessage = handleIDValidation(matchedCommand);
                     if (idHandlingMessage != null) {
-                        if (commandDTO.commandArguments().isEmpty())
+                        if ((commandDTO.commandArguments()).isEmpty())
                             return new MatchedCommand(matchedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
                         return new MatchedCommand(matchedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
                     }

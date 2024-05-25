@@ -5,11 +5,11 @@ import collection.data.StudyGroup;
 import java.io.Serializable;
 import java.util.List;
 
-public record CommandDTO(String commandName, List<String> commandArguments, StudyGroup studyGroup) implements Serializable {
+public record CommandDTO(List<String> commandArguments, StudyGroup studyGroup) implements Serializable {
     public CommandDTO(String commandName) {
-        this(commandName, null, null);
+        this(List.of(commandName));
     }
-    public CommandDTO(String commandName, List<String> commandArguments) {
-        this(commandName, commandArguments, null);
+    public CommandDTO(List<String> commandArguments) {
+        this(commandArguments, null);
     }
 }

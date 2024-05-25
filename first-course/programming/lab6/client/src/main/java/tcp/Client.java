@@ -85,7 +85,7 @@ public class Client implements Runnable {
             return;
         }
 
-        if (parsedCommand.commandName().equals("execute_script")){
+        if (parsedCommand.commandArguments().get(0).equals("execute_script")){
             clientLogger.trace("Going to execute script...");
 
             if (currentRecursionDepth > MAX_RECURSION_DEPTH) {
@@ -158,7 +158,7 @@ public class Client implements Runnable {
                         StudyGroup providedStudyGroup = inputElement();
 
                         CommandDTO commandWithStudyGroup =
-                                new CommandDTO(sendedCommand.commandName(), sendedCommand.commandArguments(), providedStudyGroup);
+                                new CommandDTO(sendedCommand.commandArguments(), providedStudyGroup);
 
                         Request request = new Request(commandWithStudyGroup);
 

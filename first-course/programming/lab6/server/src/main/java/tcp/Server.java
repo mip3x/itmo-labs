@@ -149,7 +149,7 @@ public class Server implements Runnable {
     }
 
     private void sendResponse(SocketChannel clientChannel, Request request) throws IOException {
-        InformationStorage.getInstance().setArguments(request.getCommandDTO().commandArguments());
+        InformationStorage.getInstance().setArguments(request.getCommandDTO().commandArguments().subList(1, request.getCommandDTO().commandArguments().size()));
 
         StudyGroup providedStudyGroup = request.getCommandDTO().studyGroup();
         InformationStorage.getInstance().setReceivedStudyGroup(providedStudyGroup);
