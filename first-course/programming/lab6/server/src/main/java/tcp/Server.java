@@ -5,6 +5,7 @@ import collection.data.StudyGroup;
 import io.console.ConsoleHandler;
 import io.console.InformationStorage;
 import io.console.command.Command;
+import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -138,7 +139,15 @@ public class Server implements Runnable {
             return;
         }
 
-        Request request = SerializationUtils.deserialize(buffer.array());
+        Request request;
+        try {
+            request = SerializationUtils.deserialize(buffer.array());
+        }
+        catch (SerializationException serializationException) {
+            serverConsole.writeWithPrompt(serverLogger::error, serializationException.getMessage());
+            request = new Request(null, null);
+        }
+
         if (request == null) {
             serverConsole.writeWithPrompt(serverLogger::info, "NULL request");
             return;
