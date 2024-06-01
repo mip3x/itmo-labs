@@ -108,13 +108,11 @@ public class CommandValidator {
         commandArgumentMap.put(new RemoveById(), List.of(Argument.ID));
         commandArgumentMap.put(new RemoveAnyByFormOfEducation(), List.of(Argument.FORM_OF_EDUCATION));
         commandArgumentMap.put(new Clear(), Collections.emptyList());
-        commandArgumentMap.put(new Exit(), Collections.emptyList());
         commandArgumentMap.put(new Head(), Collections.emptyList());
         commandArgumentMap.put(new Help(), Collections.emptyList());
         commandArgumentMap.put(new History(), Collections.emptyList());
         commandArgumentMap.put(new Info(), Collections.emptyList());
         commandArgumentMap.put(new Show(), Collections.emptyList());
-        commandArgumentMap.put(new Save(), Collections.emptyList());
         commandArgumentMap.put(new GroupCountingBySemesterEnum(), Collections.emptyList());
         commandArgumentMap.put(new PrintDescending(), Collections.emptyList());
         commandArgumentMap.put(new RemoveLower(), List.of(Argument.ELEMENT));

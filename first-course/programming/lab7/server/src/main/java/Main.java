@@ -1,3 +1,5 @@
+import io.console.ConsoleHandler;
+import io.console.ConsoleManager;
 import io.console.InformationStorage;
 import io.file.FileManager;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +33,12 @@ public class Main {
         applicationLogger.trace("ConsoleManager object created!");
 
         Server server = new Server(1337);
+        Thread serverThread = new Thread(server, "SERVER");
         server.init();
-        server.run();
+        serverThread.start();
+
+        ConsoleManager serverConsole = new ConsoleManager(new ConsoleHandler());
+        Thread serverConsoleThread = new Thread(serverConsole, "CONSOLE");
+        serverConsoleThread.start();
     }
 }

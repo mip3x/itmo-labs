@@ -76,11 +76,11 @@ public class InformationStorage {
                 new History(),
                 new Info(),
                 new Show(),
-                new Save(),
                 new GroupCountingBySemesterEnum(),
                 new PrintDescending(),
                 new RemoveLower(),
-                new ExecuteScript()
+                new ExecuteScript(),
+                new Test()
         );
     }
 }
