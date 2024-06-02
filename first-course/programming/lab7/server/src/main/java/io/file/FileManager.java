@@ -137,7 +137,8 @@ public class FileManager {
 
             if (!Files.isWritable(Path.of(filePath))){
                 fileManagerLogger.error("Error writing file: insufficient access rights!");
-                throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
+//                throw new IOException("Ошибка при записи в файл: не достаточно прав доступа!");
+                throw new IOException("Error writing file: insufficient access rights!");
             }
 
             FileWriter fileWriter = new FileWriter(filePath);

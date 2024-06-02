@@ -1,19 +1,17 @@
 package io.console.command;
 
 import io.console.InformationStorage;
-import io.console.command.list.Help;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import transfer.Request;
+import transfer.CommandDto;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class CommandParser {
     private static Logger logger = LogManager.getLogger();
-    public static Request parseCommand(String inputLine) {
+    public static CommandDto parseCommand(String inputLine) {
         String[] tokens = inputLine.trim().split(" ");
         if (tokens[0].isBlank()) return null;
 
@@ -22,10 +20,10 @@ public class CommandParser {
                 .findFirst()
                 .orElse(null);
 
-        Request request = new Request(matchedCommand, Collections.emptyList());
+        CommandDto commandDto = new CommandDto(matchedCommand, Collections.emptyList());
 
-        if (tokens.length > 1) request.setCommandArguments(List.copyOf(List.of(Arrays.copyOfRange(tokens, 1, tokens.length))));
+        if (tokens.length > 1) commandDto.setCommandArguments(List.copyOf(List.of(Arrays.copyOfRange(tokens, 1, tokens.length))));
 
-        return request;
+        return commandDto;
     }
 }

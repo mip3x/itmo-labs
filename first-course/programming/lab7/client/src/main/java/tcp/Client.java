@@ -10,8 +10,10 @@ import io.console.command.CommandParser;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import transfer.CommandDto;
 import transfer.Request;
 import transfer.Response;
+import transfer.UserDto;
 import validation.ValidationStatus;
 
 import java.io.BufferedReader;
@@ -34,6 +36,8 @@ public class Client implements Runnable {
     private SocketChannel server;
     private final String hostname;
     private final int port;
+    private String username;
+    private String password;
     private final ConsoleHandler consoleHandler;
     private Response response;
     private static final int MAX_RECURSION_DEPTH = 5;
@@ -51,7 +55,8 @@ public class Client implements Runnable {
         consoleHandler.sendWithNewLine("""
                 Type 'exit' in order to close connection and exit from the program
                 Type 'connect in order to connect/reconnect to the server
-                Type 'disconnect' in order to disconnect from the server""");
+                Type 'disconnect' in order to disconnect from the server
+                Type 'logout' in order to exit from account""");
 
         String inputLine;
         while ((inputLine = consoleHandler.receive(true)) != null) {
@@ -60,6 +65,15 @@ public class Client implements Runnable {
     }
 
     private void process(String inputLine) {
+        if (username == null) {
+            try {
+                authUser();
+            } catch (ExitException e) {
+                clientLogger.info("Interrupted attempt of user authentication");
+                return;
+            }
+        }
+
         if (inputLine.equals("connect")) {
             connect();
             return;
@@ -72,16 +86,20 @@ public class Client implements Runnable {
             closeConnection();
             System.exit(0);
         }
+        if (inputLine.equals("logout")) {
+            logout();
+            return;
+        }
 
-        Request request = CommandParser.parseCommand(inputLine);
+        CommandDto commandDto = CommandParser.parseCommand(inputLine);
         clientLogger.trace("Command parsed");
 
-        if (request == null) {
+        if (commandDto == null) {
             clientLogger.trace("Request is null");
             return;
         }
 
-        if (request.getCommand() == null) {
+        if (commandDto.getCommand() == null) {
             clientLogger.error("Command was not recognized!");
             consoleHandler.sendWithNewLine("Command was not recognized!");
             return;
@@ -92,7 +110,9 @@ public class Client implements Runnable {
             return;
         }
 
-        if (request.getCommand().getName().equals("execute_script")) {
+        Request request = new Request(commandDto, new UserDto(username, password));
+
+        if (commandDto.getCommand().getName().equals("execute_script")) {
             clientLogger.trace("Going to execute script...");
 
             if (currentRecursionDepth > MAX_RECURSION_DEPTH) {
@@ -108,7 +128,7 @@ public class Client implements Runnable {
         }
 
         clientLogger.debug("Going to send request with command...");
-        clientLogger.info("Request is {}, {}, {}", request.getCommand().getName(), request.getCommandArguments(), request.getStudyGroup());
+        clientLogger.info("Request is {}, {}, {}", request.commandDto().getCommand(), request.commandDto().getCommandArguments(), request.commandDto().getStudyGroup());
 
         if (sendRequest(request)) response = getResponse();
         handleResponse(response, request);
@@ -162,10 +182,10 @@ public class Client implements Runnable {
                     try {
                         StudyGroup providedStudyGroup = inputElement();
 
-                        request.setStudyGroup(providedStudyGroup);
+                        request.commandDto().setStudyGroup(providedStudyGroup);
 
                         clientLogger.debug("Going to send request with command...");
-                        clientLogger.info("Request is {}", request.getCommand());
+                        clientLogger.info("Request is {}", request.commandDto().getCommand());
 
                         if (sendRequest(request)) response = getResponse();
                         handleResponse(response, request);
@@ -187,7 +207,7 @@ public class Client implements Runnable {
     private void handleScriptExecution(Request request) {
         String filePath;
         try {
-            filePath = request.getCommandArguments().get(0);
+            filePath = request.commandDto().getCommandArguments().get(0);
             File file = new File(filePath);
 
             if (!file.exists()){
@@ -219,6 +239,35 @@ public class Client implements Runnable {
             clientLogger.error("Enter valid path to the file!");
             consoleHandler.sendWithNewLine("Command <execute_script file_name>: enter valid path to the file!");
         }
+    }
+
+    private void authUser() throws ExitException {
+        while (inputField("username",
+                this::setUsername,
+                String::toString,
+                String.class));
+
+        while (inputField("password",
+                this::setPassword,
+                String::toString,
+                String.class));
+    }
+
+    private void setUsername(String username) {
+        if (username == null || username.isBlank()) throw new InvalidInputException("Username should not be empty!");
+        this.username = username;
+    }
+
+    private void setPassword(String password) {
+        if (password == null || password.isBlank()) throw new InvalidInputException("Password should not be empty!");
+        this.password = password;
+    }
+
+    private void logout() {
+        username = null;
+        password = null;
+
+        consoleHandler.sendWithNewLine("Logged out");
     }
 
     private void closeConnection() {

@@ -59,7 +59,9 @@ public class ClientHandler implements Runnable {
 
                             if (request == null) return;
                             clientHandlerConsole.write(clientHandlerLogger::info,
-                                    "Request by " + clientChannel + " is next: \nCOMMAND: " + request.getCommand());
+                                    "Request by " + clientChannel + " is next: " +
+                                            "\nUSER: " + request.userDto().getUsername() + request.userDto().getPassword() +
+                                            "\nCOMMAND: " + request.commandDto().getCommand());
 
                             Response response;
                             Callable<Response> responseCallable = () -> handleRequest(request);
@@ -132,15 +134,15 @@ public class ClientHandler implements Runnable {
     }
 
     private Response handleRequest(Request request) {
-        InformationStorage.getInstance().setArguments(request.getCommandArguments());
+        InformationStorage.getInstance().setArguments(request.commandDto().getCommandArguments());
 
-        StudyGroup providedStudyGroup = request.getStudyGroup();
+        StudyGroup providedStudyGroup = request.commandDto().getStudyGroup();
         InformationStorage.getInstance().setReceivedStudyGroup(providedStudyGroup);
 
         Response response = new Response();
 
         CommandValidator.MatchedCommand receivedCommand =
-                CommandValidator.validateCommand(request.getCommand(), request.getCommandArguments(), request.getStudyGroup());
+                CommandValidator.validateCommand(request.commandDto().getCommand(), request.commandDto().getCommandArguments(), request.commandDto().getStudyGroup());
         clientHandlerConsole.write(clientHandlerLogger::trace, String.valueOf(receivedCommand.validationStatus()));
 
         if (receivedCommand.command() == null) {
