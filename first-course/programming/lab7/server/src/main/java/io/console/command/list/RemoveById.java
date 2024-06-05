@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import exception.InvalidInputException;
 import io.console.InformationStorage;
 import io.console.command.Command;
@@ -17,16 +17,16 @@ public class RemoveById extends Command implements RequestingId {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         removeByIdCommandLogger.trace("RemoveById command executed");
-        return collectionManager.removeById(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));
+        return collectionService.removeById(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)), username);
     }
 
     @Override
-    public boolean validateId(CollectionManager collectionManager) {
+    public boolean validateId(CollectionService collectionService) {
         try {
             removeByIdCommandLogger.trace("Trying validate id");
-            return collectionManager.validateID(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));
+            return collectionService.validateId(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));
         }
         catch (Exception exception) {
             removeByIdCommandLogger.error("Enter valid id!");

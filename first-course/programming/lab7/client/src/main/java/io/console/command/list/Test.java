@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import io.console.command.Command;
 
 public class Test extends Command {
@@ -9,7 +9,7 @@ public class Test extends Command {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         return "test";
     }
 }

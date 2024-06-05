@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import collection.data.StudyGroup;
 import io.console.InformationStorage;
 import io.console.command.Command;
@@ -19,9 +19,9 @@ public class RemoveLower extends Command implements RequestingInput {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         Long studentsCount = InformationStorage.getReceivedStudyGroup().getStudentsCount();
-        List<Integer> elementsToRemove = collectionManager.getStudyGroupCollection().stream()
+        List<Integer> elementsToRemove = collectionService.getStudyGroupCollection().stream()
                 .filter(studyGroup -> studyGroup.getStudentsCount() < studentsCount)
                 .map(StudyGroup::getId)
                 .toList();
@@ -30,7 +30,7 @@ public class RemoveLower extends Command implements RequestingInput {
             removeLowerCommandLogger.info("No elements smaller than the specified one were found. Nothing has been deleted!");
             return "No elements smaller than the specified one were found. Nothing has been deleted!\"";
         }
-        elementsToRemove.forEach(collectionManager::removeById);
+        elementsToRemove.forEach(collectionService::removeById);
 
         removeLowerCommandLogger.error("RemoveLower command executed");
         return "Elements lower than given were successfully deleted!";

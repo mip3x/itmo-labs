@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import io.console.command.Command;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,8 +16,8 @@ public class Show extends Command {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         showCommandLogger.trace("Show command executed");
-        return collectionManager.getAllStudyGroupsInfo();
+        return collectionService.getAllStudyGroupsInfo();
     }
 }

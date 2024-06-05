@@ -1,10 +1,10 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 
 /**
  * Requests id
  */
 public interface RequestingId {
-    public boolean validateId(CollectionManager collectionManager);
+    public boolean validateId(CollectionService collectionService);
 }

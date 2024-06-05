@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import collection.data.FormOfEducation;
 import collection.data.StudyGroup;
 import io.console.InformationStorage;
@@ -25,7 +25,7 @@ public class RemoveAnyByFormOfEducation extends Command {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         FormOfEducation formOfEducation;
         try {
             formOfEducation = FormOfEducation
@@ -39,7 +39,7 @@ public class RemoveAnyByFormOfEducation extends Command {
                             Arrays.toString(FormOfEducation.values()));
         }
 
-        LinkedList<StudyGroup> studyGroupCollection = collectionManager.getStudyGroupCollection();
+        LinkedList<StudyGroup> studyGroupCollection = collectionService.getStudyGroupCollection();
 
         removeAnyByFormOfEducationLogger.trace("RemoveAnyByFormOfEducation command executed");
         return studyGroupCollection

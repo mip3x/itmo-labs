@@ -1,8 +1,7 @@
 package validation;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import collection.data.StudyGroup;
-import io.console.InformationStorage;
 import io.console.command.Command;
 import io.console.command.list.*;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +30,7 @@ public class CommandValidator {
         logger.trace("CommandArgumentMap was filled");
     }
 
-    public static MatchedCommand validateCommand(Command providedCommand, List<String> providedArguments, StudyGroup providedStudyGroup) {
+    public static MatchedCommand validateCommand(Command providedCommand, List<String> providedArguments, StudyGroup providedStudyGroup, String creator) {
         if (providedCommand == null)
             return new MatchedCommand(null, ValidationStatus.NOT_RECOGNIZED, "Command was not recognized!");
 
@@ -41,7 +40,7 @@ public class CommandValidator {
             if (requiredArguments.contains(Argument.ELEMENT) && (providedStudyGroup == null)) {
 
                 if (requiredArguments.contains(Argument.ID)) {
-                    String idHandlingMessage = handleIDValidation(providedCommand);
+                    String idHandlingMessage = handleIdValidation(providedCommand);
                     if (idHandlingMessage != null) {
                         if (providedArguments.isEmpty())
                             return new MatchedCommand(providedCommand, ValidationStatus.NOT_ENOUGH_ARGUMENTS, "not enough arguments!");
@@ -54,6 +53,7 @@ public class CommandValidator {
             else if (providedStudyGroup != null) {
                 logger.trace("STUDY GROUP != NULL");
                 try {
+                    providedStudyGroup.setCreator(creator);
                     providedStudyGroup.validateStudyGroup();
                     return new MatchedCommand(providedCommand, ValidationStatus.SUCCESS, null);
                 } catch (Exception exception) {
@@ -68,7 +68,7 @@ public class CommandValidator {
         }
 
         if (requiredArguments.contains(Argument.ID)) {
-            String idHandlingMessage = handleIDValidation(providedCommand);
+            String idHandlingMessage = handleIdValidation(providedCommand);
             if (idHandlingMessage != null)
                 return new MatchedCommand(providedCommand, ValidationStatus.INVALID_ID, idHandlingMessage);
         }
@@ -79,9 +79,9 @@ public class CommandValidator {
         return new MatchedCommand(providedCommand, ValidationStatus.SUCCESS, null);
     }
 
-    private static String handleIDValidation(Command matchedCommand) {
+    private static String handleIdValidation(Command matchedCommand) {
         try {
-            if (!((RequestingId) matchedCommand).validateId(CollectionManager.getInstance())) {
+            if (!((RequestingId) matchedCommand).validateId(CollectionService.getInstance())) {
                 return "no object with such id!";
             }
         } catch (Exception exception) {

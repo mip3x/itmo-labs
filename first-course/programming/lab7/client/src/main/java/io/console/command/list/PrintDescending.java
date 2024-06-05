@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import io.console.command.Command;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,14 +17,14 @@ public class PrintDescending extends Command {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
-        Collections.sort(collectionManager.getStudyGroupCollection());
+    public String execute(CollectionService collectionService, String username) {
+        Collections.sort(collectionService.getStudyGroupCollection());
         printDescendingLogger.trace("Collection sorted");
 
-        Collections.reverse(collectionManager.getStudyGroupCollection());
+        Collections.reverse(collectionService.getStudyGroupCollection());
         printDescendingLogger.trace("Collection reversed");
 
         printDescendingLogger.trace("PrintDescending command executed");
-        return collectionManager.getAllStudyGroupsInfo();
+        return collectionService.getAllStudyGroupsInfo();
     }
 }

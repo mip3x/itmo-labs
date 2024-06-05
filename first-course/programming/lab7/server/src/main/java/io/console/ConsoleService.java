@@ -1,16 +1,15 @@
 package io.console;
 
-import collection.CollectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
-public class ConsoleManager implements Runnable {
+public class ConsoleService implements Runnable {
     private final Logger consoleManagerLogger = LogManager.getLogger();
     private final ConsoleHandler consoleHandler;
 
-    public ConsoleManager(ConsoleHandler consoleHandler) {
+    public ConsoleService(ConsoleHandler consoleHandler) {
         this.consoleHandler = consoleHandler;
     }
 
@@ -22,11 +21,8 @@ public class ConsoleManager implements Runnable {
                 String inputLine = consoleHandler.receive();
 
                 if (inputLine.equals("save")) {
-                    String message = CollectionManager.getInstance().saveCollection();
-                    consoleHandler.write(consoleManagerLogger::info, message);
+                    consoleHandler.write(consoleManagerLogger::info, "Deprecated command");
                 } else if (inputLine.equals("exit")) {
-                    String message = CollectionManager.getInstance().saveCollection();
-                    consoleHandler.write(consoleManagerLogger::info, message);
                     consoleHandler.write(consoleManagerLogger::info, "Server stopped");
                     System.exit(0);
                 } else {

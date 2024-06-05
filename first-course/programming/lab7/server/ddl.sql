@@ -64,5 +64,6 @@ CREATE TABLE study_groups (
     form_of_education form_of_education NOT NULL,
     semester semester NOT NULL,
     admin_id INTEGER REFERENCES persons(id) NOT NULL,
+    creator_id INTEGER REFERENCES users(id) NOT NULL
     CHECK (length(name) > 0)
 );

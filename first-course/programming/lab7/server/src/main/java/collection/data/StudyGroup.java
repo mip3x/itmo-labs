@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Random;
 
 /**
  * Study group - class of elements of collection
@@ -22,10 +21,10 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     private FormOfEducation formOfEducation; //Поле не может быть null
     private Semester semester; //Поле не может быть null
     private Person groupAdmin; //Поле не может быть null
+    private String creator;
 
     public StudyGroup() {
         creationDate = new Date();
-        setId(new Random().nextInt(Integer.MAX_VALUE) + 1);
     }
 
     public void setId(Integer id) {
@@ -85,7 +84,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateStudentsCount(Long studentsCount) {
-        if (studentsCount == null) return;
+        if (studentsCount == null) throw new InvalidInputException("Value of field 'Quantity of students' should not be empty!");
 //        if (studentsCount <= 0) throw new InvalidInputException("Значение поля 'Количество студентов' должно быть больше нуля!");
         if (studentsCount <= 0) throw new InvalidInputException("Value of field 'Quantity of students' should be greater than 0!");
     }
@@ -157,6 +156,19 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         return groupAdmin;
     }
 
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        validateCreator(creator);
+        this.creator = creator;
+    }
+
+    public void validateCreator(String creator) {
+        if (creator == null || creator.isBlank()) throw new InvalidInputException("Field 'Creator' should not be empty!");
+    }
+
     public void validateStudyGroup() {
         this.validateName(this.getName());
         this.validateCoordinates(this.getCoordinates());
@@ -165,6 +177,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         this.validateFormOfEducation(this.getFormOfEducation());
         this.validateSemester(this.getSemester());
         this.validateGroupAdmin(this.getGroupAdmin());
+        this.validateCreator(this.getCreator());
     }
 
     @Override

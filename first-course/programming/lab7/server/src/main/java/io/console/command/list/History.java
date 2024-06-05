@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import io.console.InformationStorage;
 import io.console.command.Command;
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +18,7 @@ public class History extends Command {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         String result = InformationStorage.getHistory().stream()
                 .limit(InformationStorage.getHistorySize())
                 .map(command -> String.format("%s%n", command.getName().split(" ")[0]))

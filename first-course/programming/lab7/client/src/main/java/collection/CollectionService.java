@@ -1,14 +1,12 @@
 package collection;
 
 import collection.data.StudyGroup;
-import io.file.FileManager;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedList;
@@ -19,9 +17,9 @@ import java.util.stream.IntStream;
  * Singleton
  */
 @XmlRootElement(name = "studyGroupCollection")
-public class CollectionManager implements Serializable {
-    private static final Logger collectionManagerLogger = LogManager.getLogger();
-    private static CollectionManager instance = null;
+public class CollectionService implements Serializable {
+    private static final Logger collectionServiceLogger = LogManager.getLogger();
+    private static CollectionService instance = null;
     private LinkedList<StudyGroup> studyGroupCollection;
     private final Date initializationDate;
 
@@ -29,12 +27,12 @@ public class CollectionManager implements Serializable {
      * Get instance of class
      * @return instance of class
      */
-    public static CollectionManager getInstance() {
-        if (instance == null) instance = new CollectionManager();
+    public static CollectionService getInstance() {
+        if (instance == null) instance = new CollectionService();
         return instance;
     }
 
-    public CollectionManager() {
+    public CollectionService() {
         studyGroupCollection = new LinkedList<>();
         initializationDate = new Date();
     }
@@ -57,25 +55,12 @@ public class CollectionManager implements Serializable {
     }
 
     /**
-     * Save collection
-     */
-    public String saveCollection() {
-        try {
-            FileManager.saveCollection();
-            return "Collection was successfully saved";
-        } catch (IOException | JAXBException exception) {
-            collectionManagerLogger.error(exception);
-            return exception.getMessage();
-        }
-    }
-
-    /**
      * Clear collection
      * @return message about clearing
      */
     public String clearCollection() {
         studyGroupCollection.clear();
-        collectionManagerLogger.trace("Collection has been cleared");
+        collectionServiceLogger.trace("Collection has been cleared");
         return "Collection has been cleared";
 //        return "Коллекция была успешно очищена";
     }
@@ -86,11 +71,11 @@ public class CollectionManager implements Serializable {
      */
     public String getCollectionHead() {
         try {
-            collectionManagerLogger.trace("Trying to get collection head");
+            collectionServiceLogger.trace("Trying to get collection head");
             return getStudyGroupInfo(studyGroupCollection.get(0));
         }
         catch (IndexOutOfBoundsException e) {
-            collectionManagerLogger.error("Collection is empty: impossible to get element!");
+            collectionServiceLogger.error("Collection is empty: impossible to get element!");
             return "Collection is empty: impossible to get element!";
 //            return "Невозможно получить элемент коллекции: коллекция пуста!";
         }
@@ -103,7 +88,7 @@ public class CollectionManager implements Serializable {
     public String getAllStudyGroupsInfo() {
         StringBuilder studyGroupsInfo = new StringBuilder();
         if (studyGroupCollection.isEmpty()) {
-            collectionManagerLogger.warn("Collection is empty: impossible to get element!");
+            collectionServiceLogger.warn("Collection is empty: impossible to get element!");
             return "Collection is empty: impossible to get element!";
 //            return "Невозможно получить элемент коллекции: коллекция пуста!";
         }
@@ -111,7 +96,7 @@ public class CollectionManager implements Serializable {
                 studyGroupsInfo.append(getStudyGroupInfo(studyGroup)).append("\n\n"));
         String result = studyGroupsInfo.toString();
 
-        collectionManagerLogger.trace("Study groups info is gotten");
+        collectionServiceLogger.trace("Study groups info is gotten");
         return result.substring(0, result.length() - 2);
     }
 
@@ -144,7 +129,6 @@ public class CollectionManager implements Serializable {
      * @return message about adding
      */
     public String addStudyGroupToCollection(StudyGroup studyGroup) {
-        studyGroupCollection.add(studyGroup);
 //        return "Новый элемент был успешно добавлен в коллекцию";
         return "New element was successfully added to collection";
     }

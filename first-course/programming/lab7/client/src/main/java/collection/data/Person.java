@@ -78,6 +78,7 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
+        if (location == null) return "Name: " + name + "\nWeight: " + weight + "\nPassport ID: " + passportID + "\nEye color: " + eyeColor + "\nLocation: null";
 //        return "Имя: " + name + "\nВес: " + weight + "\nНомер паспорта: " + passportID + "\nЦвет глаз: " + eyeColor + "\nМестонахождение: \n" + location.toString();
         return "Name: " + name + "\nWeight: " + weight + "\nPassport ID: " + passportID + "\nEye color: " + eyeColor + "\nLocation: \n" + location.toString();
     }

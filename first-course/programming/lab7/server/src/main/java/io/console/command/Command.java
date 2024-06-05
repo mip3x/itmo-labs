@@ -1,6 +1,6 @@
 package io.console.command;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 
 import java.io.Serializable;
 
@@ -16,7 +16,7 @@ public abstract class Command implements Serializable {
         this.description = description;
     }
 
-    public abstract String execute(CollectionManager collectionManager);
+    public abstract String execute(CollectionService collectionService, String username);
 
     public String getName() {
         return name;

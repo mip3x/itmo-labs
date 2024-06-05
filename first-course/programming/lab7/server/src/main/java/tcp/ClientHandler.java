@@ -1,10 +1,11 @@
 package tcp;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import collection.data.StudyGroup;
 import io.console.ConsoleHandler;
 import io.console.InformationStorage;
 import io.console.command.Command;
+import io.database.DataBaseService;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
@@ -57,11 +58,8 @@ public class ClientHandler implements Runnable {
                         try {
                             Request request = getRequest(buffer);
 
-                            if (request == null) return;
                             clientHandlerConsole.write(clientHandlerLogger::info,
-                                    "Request by " + clientChannel + " is next: " +
-                                            "\nUSER: " + request.userDto().getUsername() + request.userDto().getPassword() +
-                                            "\nCOMMAND: " + request.commandDto().getCommand());
+                                    "Request by " + clientChannel);
 
                             Response response;
                             Callable<Response> responseCallable = () -> handleRequest(request);
@@ -128,21 +126,45 @@ public class ClientHandler implements Runnable {
             request = SerializationUtils.deserialize(buffer.array());
         } catch (SerializationException serializationException) {
             clientHandlerConsole.writeWithPrompt(clientHandlerLogger::error, serializationException.getMessage());
-            request = new Request(null, null);
+            request = null;
         }
         return request;
     }
 
     private Response handleRequest(Request request) {
+        if (request == null) return new Response("Unknown request!", ValidationStatus.NOT_RECOGNIZED);
+
+        Response response = new Response();
+
+        boolean userExistence = DataBaseService.checkUserExistence(request.userDto().getUsername());
+        boolean registrationRequired = request.userDto().isRegistrationRequired();
+        boolean userRegistrationStatus = false;
+
+        clientHandlerLogger.info("USER EXISTS: {}\nREGISTRATION REQUIRED: {}", userExistence, registrationRequired);
+
+        if (userExistence && registrationRequired)
+            return new Response("User with such username already exists!", ValidationStatus.USER_ALREADY_EXISTS);
+        if (!userExistence && registrationRequired)
+            userRegistrationStatus = DataBaseService.saveUser(request.userDto().getUsername(), request.userDto().getPassword());
+        if (userExistence && !DataBaseService.validateUserPassword(request.userDto().getUsername(), request.userDto().getPassword()))
+            return new Response("Invalid user data provided!", ValidationStatus.INVALID_USER_DATA);
+        if (registrationRequired && !userRegistrationStatus)
+            return new Response("Error registering", ValidationStatus.INVALID_USER_DATA);
+        if (!userExistence && !registrationRequired)
+            return new Response("No account with such id was found: invalid user data provided!", ValidationStatus.INVALID_USER_DATA);
+
+        clientHandlerLogger.info("Client successfully authorized");
+
         InformationStorage.getInstance().setArguments(request.commandDto().getCommandArguments());
 
         StudyGroup providedStudyGroup = request.commandDto().getStudyGroup();
         InformationStorage.getInstance().setReceivedStudyGroup(providedStudyGroup);
 
-        Response response = new Response();
-
         CommandValidator.MatchedCommand receivedCommand =
-                CommandValidator.validateCommand(request.commandDto().getCommand(), request.commandDto().getCommandArguments(), request.commandDto().getStudyGroup());
+                CommandValidator.validateCommand(request.commandDto().getCommand(),
+                        request.commandDto().getCommandArguments(),
+                        request.commandDto().getStudyGroup(),
+                        request.userDto().getUsername());
         clientHandlerConsole.write(clientHandlerLogger::trace, String.valueOf(receivedCommand.validationStatus()));
 
         if (receivedCommand.command() == null) {
@@ -152,7 +174,7 @@ public class ClientHandler implements Runnable {
             response.setResponseMessage("Command <" + receivedCommand.command().getName() + ">");
 
             if (receivedCommand.validationStatus() == ValidationStatus.SUCCESS)
-                tryToExecuteCommand(receivedCommand.command(), response);
+                tryToExecuteCommand(receivedCommand.command(), response, request.userDto().getUsername());
             else {
                 response.setResponseStatus(receivedCommand.validationStatus());
                 response.setResponseStatusDescription(receivedCommand.validationStatusDescription());
@@ -166,8 +188,10 @@ public class ClientHandler implements Runnable {
         clientChannel.write(buffer);
     }
 
-    private void tryToExecuteCommand(Command command, Response response) {
-        response.setResponseMessage(command.execute(CollectionManager.getInstance()));
+    private void tryToExecuteCommand(Command command, Response response, String username) {
+        clientHandlerLogger.trace("Trying to execute command...");
+
+        response.setResponseMessage(command.execute(CollectionService.getInstance(), username));
         response.setResponseStatus(ValidationStatus.SUCCESS);
 
         informationStorage.addToHistory(command);

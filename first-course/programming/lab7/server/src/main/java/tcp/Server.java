@@ -36,7 +36,7 @@ public class Server implements Runnable {
 
             selector = Selector.open();
 
-            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT); // subscribe on accept
+            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         } catch (IOException exception) {
             serverConsole.writeWithNewLine(serverLogger::error, exception.getMessage());

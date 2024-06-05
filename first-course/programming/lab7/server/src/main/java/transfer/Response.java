@@ -16,6 +16,11 @@ public class Response implements Serializable {
         this.responseMessage = text;
     }
 
+    public Response(String text, ValidationStatus validationStatus) {
+        this.responseMessage = text;
+        this.responseStatus = validationStatus;
+    }
+
     public String getResponseMessage() {
         return responseMessage;
     }

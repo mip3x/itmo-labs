@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import collection.data.Semester;
 import collection.data.StudyGroup;
 import io.console.command.Command;
@@ -23,8 +23,8 @@ public class GroupCountingBySemesterEnum extends Command {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
-        LinkedList<StudyGroup> studyGroupCollection = collectionManager.getStudyGroupCollection();
+    public String execute(CollectionService collectionService, String username) {
+        LinkedList<StudyGroup> studyGroupCollection = collectionService.getStudyGroupCollection();
         groupCountingBySemesterEnumCommandLogger.trace("StudyGroupCollection has been got");
 
         Map<Semester, Long> groupsPerSemester = studyGroupCollection.stream()

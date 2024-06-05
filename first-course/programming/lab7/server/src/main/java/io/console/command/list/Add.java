@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import collection.data.StudyGroup;
 import io.console.InformationStorage;
 import io.console.command.Command;
@@ -17,9 +17,10 @@ public class Add extends Command implements RequestingInput {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         StudyGroup studyGroup = InformationStorage.getReceivedStudyGroup();
-        if (studyGroup != null) return collectionManager.addStudyGroupToCollection(studyGroup);
+        addCommandLogger.trace("StudyGroup received...");
+        if (studyGroup != null) return collectionService.addStudyGroup(studyGroup);
         throw new NullPointerException("studyGroup is null!");
     }
 }

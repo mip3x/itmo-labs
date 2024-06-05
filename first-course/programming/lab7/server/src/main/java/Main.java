@@ -1,8 +1,7 @@
 import io.console.ConsoleHandler;
-import io.console.ConsoleManager;
+import io.console.ConsoleService;
 import io.console.InformationStorage;
-import io.database.DBManager;
-import io.file.FileManager;
+import io.database.DataBaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tcp.Server;
@@ -26,11 +25,11 @@ public class Main {
             String dbUser = dbConnectionArguments.getProperty("DB.USER");
             String dbPassword = dbConnectionArguments.getProperty("DB.PASSWORD");
 
-            if (!DBManager.getInstance().establishConnection(dbUrl, dbUser, dbPassword))
+            if (!DataBaseService.establishConnection(dbUrl, dbUser, dbPassword))
                 return;
 
-            FileManager.setFilePath("server/collection.xml");
-            FileManager.loadCollection();
+            DataBaseService.loadCollection();
+            applicationLogger.info("Collection was loaded");
 
             InformationStorage.getInstance();
             CommandValidator.getInstance();
@@ -47,7 +46,7 @@ public class Main {
         server.init();
         serverThread.start();
 
-        ConsoleManager serverConsole = new ConsoleManager(new ConsoleHandler());
+        ConsoleService serverConsole = new ConsoleService(new ConsoleHandler());
         Thread serverConsoleThread = new Thread(serverConsole, "CONSOLE");
         serverConsoleThread.start();
     }

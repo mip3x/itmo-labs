@@ -38,6 +38,7 @@ public class Client implements Runnable {
     private final int port;
     private String username;
     private String password;
+    private boolean registrationRequired;
     private final ConsoleHandler consoleHandler;
     private Response response;
     private static final int MAX_RECURSION_DEPTH = 5;
@@ -65,15 +66,6 @@ public class Client implements Runnable {
     }
 
     private void process(String inputLine) {
-        if (username == null) {
-            try {
-                authUser();
-            } catch (ExitException e) {
-                clientLogger.info("Interrupted attempt of user authentication");
-                return;
-            }
-        }
-
         if (inputLine.equals("connect")) {
             connect();
             return;
@@ -82,13 +74,22 @@ public class Client implements Runnable {
             closeConnection();
             return;
         }
+        if (inputLine.equals("logout")) {
+            logout();
+            consoleHandler.sendWithNewLine("Logged out");
+            return;
+        }
         if (inputLine.equals("exit")) {
             closeConnection();
             System.exit(0);
         }
-        if (inputLine.equals("logout")) {
-            logout();
-            return;
+        if (username == null) {
+            try {
+                authUser();
+            } catch (ExitException e) {
+                clientLogger.info("Interrupted attempt of user authentication");
+                return;
+            }
         }
 
         CommandDto commandDto = CommandParser.parseCommand(inputLine);
@@ -110,7 +111,7 @@ public class Client implements Runnable {
             return;
         }
 
-        Request request = new Request(commandDto, new UserDto(username, password));
+        Request request = new Request(commandDto, new UserDto(username, password, registrationRequired));
 
         if (commandDto.getCommand().getName().equals("execute_script")) {
             clientLogger.trace("Going to execute script...");
@@ -180,9 +181,12 @@ public class Client implements Runnable {
 
                 if (responseStatus == ValidationStatus.INPUT_REQUIRED) {
                     try {
+                        registrationRequired = false;
+
                         StudyGroup providedStudyGroup = inputElement();
 
                         request.commandDto().setStudyGroup(providedStudyGroup);
+                        request.userDto().setRegistrationRequired(registrationRequired);
 
                         clientLogger.debug("Going to send request with command...");
                         clientLogger.info("Request is {}", request.commandDto().getCommand());
@@ -196,11 +200,20 @@ public class Client implements Runnable {
                     }
                 }
 
-                String newResponseMessage = response.getResponseMessage() + ": " + response.getResponseStatusDescription();
+                String newResponseMessage = response.getResponseMessage();
+                if (response.getResponseStatusDescription() != null) newResponseMessage += ": " + response.getResponseStatusDescription();
                 response.setResponseMessage(newResponseMessage);
             }
 
             consoleHandler.sendWithNewLine("Got response: \n" + response.getResponseMessage());
+
+            if (responseStatus != ValidationStatus.USER_ALREADY_EXISTS
+                    && responseStatus != ValidationStatus.INVALID_USER_DATA
+                    && responseStatus != ValidationStatus.REGISTRATION_ERROR) {
+                registrationRequired = false;
+                return;
+            }
+            logout();
         }
     }
 
@@ -242,6 +255,17 @@ public class Client implements Runnable {
     }
 
     private void authUser() throws ExitException {
+        registrationRequired = false;
+
+        List<String> registrationInputList = Arrays.asList("y", "n", "");
+        String registrationRequiredText = ">*> Registration <*<\nChoose 'y', if required (new line interpreted as 'n') (y/n)";
+        String registrationRequiredAnswer;
+
+        while (!(registrationInputList.contains(registrationRequiredAnswer = consoleHandler.receive(registrationRequiredText).trim())));
+
+        if (registrationRequiredAnswer.equals("y"))
+            registrationRequired = true;
+
         while (inputField("username",
                 this::setUsername,
                 String::toString,
@@ -254,20 +278,18 @@ public class Client implements Runnable {
     }
 
     private void setUsername(String username) {
-        if (username == null || username.isBlank()) throw new InvalidInputException("Username should not be empty!");
-        this.username = username;
+        if (username == null || username.trim().isBlank()) throw new InvalidInputException("Username should not be empty!");
+        this.username = username.trim();
     }
 
     private void setPassword(String password) {
-        if (password == null || password.isBlank()) throw new InvalidInputException("Password should not be empty!");
-        this.password = password;
+        if (password == null || password.trim().isBlank()) throw new InvalidInputException("Password should not be empty!");
+        this.password = password.trim();
     }
 
     private void logout() {
         username = null;
         password = null;
-
-        consoleHandler.sendWithNewLine("Logged out");
     }
 
     private void closeConnection() {
@@ -380,16 +402,17 @@ public class Client implements Runnable {
                 Color.class
         ));
 
-        Location location = new Location();
+        Location location = null;
 //        List<String> locationInputList = Arrays.asList("да", "нет", "");
-        List<String> locationInputList = Arrays.asList("yes", "no", "");
+        List<String> locationInputList = Arrays.asList("y", "n", "");
 //        String locationInputText = "* Ввод локации\nВыберите 'да', если необходим (перевод строки воспринимается как 'да') (да/нет)";
-        String locationInputText = "* Location input\nChoose 'yes', if required (new line interpreted as 'yes') (yes/no)";
+        String locationInputText = "* Location input\nChoose 'y', if required (new line interpreted as 'y') (y/n)";
         String locationInputAnswer;
 
         while (!(locationInputList.contains(locationInputAnswer = consoleHandler.receive(locationInputText).trim())));
 
-        if (locationInputAnswer.equals("да") || locationInputAnswer.isBlank()) {
+        if (locationInputAnswer.equals("y") || locationInputAnswer.isBlank()) {
+            location = new Location();
 //            while (inputField("значение поля 'координата X'",
             while (inputField("value of field 'coordinate X'",
                     location::setX,
@@ -465,28 +488,29 @@ public class Client implements Runnable {
 
     private StudyGroup getTestStudyGroup() {
         StudyGroup providedStudyGroup = new StudyGroup();
-        providedStudyGroup.setName("JURA DUDE");
+        providedStudyGroup.setName("HUBA BUBA");
         providedStudyGroup.setStudentsCount(758L);
         providedStudyGroup.setShouldBeExpelled(2342L);
         providedStudyGroup.setFormOfEducation(FormOfEducation.EVENING_CLASSES);
         providedStudyGroup.setSemester(Semester.SECOND);
 
         Coordinates coordinates = new Coordinates();
-        coordinates.setX(1L);
-        coordinates.setY(123d);
+        coordinates.setX(12L);
+        coordinates.setY(13d);
 
         Person person = new Person();
         person.setName("dudeDUDE");
-        person.setPassportID("1488");
+        person.setPassportID("77777");
         person.setWeight(89L);
-        person.setEyeColor(Color.BROWN);
+//        person.setEyeColor(Color.BROWN);
 
-        Location location = new Location();
-        location.setX(123d);
-        location.setY(564d);
-        location.setX(564d);
-        location.setName("usa");
-        person.setLocation(location);
+//        Location location = new Location();
+//        location.setX(123d);
+//        location.setY(564d);
+//        location.setZ(564);
+//        location.setName("usa");
+//        person.setLocation(location);
+        person.setLocation(null);
 
         providedStudyGroup.setCoordinates(coordinates);
         providedStudyGroup.setGroupAdmin(person);

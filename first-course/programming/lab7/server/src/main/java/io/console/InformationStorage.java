@@ -77,8 +77,7 @@ public class InformationStorage {
                 new Show(),
                 new GroupCountingBySemesterEnum(),
                 new PrintDescending(),
-                new RemoveLower(),
-                new ExecuteScript()
+                new RemoveLower()
         );
     }
 }

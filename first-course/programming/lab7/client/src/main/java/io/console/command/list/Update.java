@@ -1,6 +1,6 @@
 package io.console.command.list;
 
-import collection.CollectionManager;
+import collection.CollectionService;
 import collection.data.StudyGroup;
 import exception.InvalidInputException;
 import io.console.InformationStorage;
@@ -18,19 +18,19 @@ public class Update extends Command implements RequestingId, RequestingInput {
     }
 
     @Override
-    public String execute(CollectionManager collectionManager) {
+    public String execute(CollectionService collectionService, String username) {
         StudyGroup studyGroup = InformationStorage.getReceivedStudyGroup();
         Integer id = Integer.valueOf(InformationStorage.getReceivedArguments().get(0));
 
         updateCommandLogger.trace("Update command executed");
-        return collectionManager.updateById(id, studyGroup);
+        return collectionService.updateById(id, studyGroup);
     }
 
     @Override
-    public boolean validateId(CollectionManager collectionManager) {
+    public boolean validateId(CollectionService collectionService) {
         try {
             updateCommandLogger.trace("Validating id");
-            return collectionManager.validateID(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));
+            return collectionService.validateID(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));
         }
         catch (Exception exception) {
             updateCommandLogger.error("Enter valid id!");
