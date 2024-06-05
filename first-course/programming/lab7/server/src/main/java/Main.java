@@ -1,7 +1,7 @@
-import io.console.ConsoleHandler;
-import io.console.ConsoleService;
-import io.console.InformationStorage;
-import io.database.DataBaseService;
+import console.ConsoleHandler;
+import console.ConsoleService;
+import command.InformationStorage;
+import database.DataBaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tcp.Server;

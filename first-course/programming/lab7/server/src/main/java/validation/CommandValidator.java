@@ -2,8 +2,8 @@ package validation;
 
 import collection.CollectionService;
 import collection.data.StudyGroup;
-import io.console.command.Command;
-import io.console.command.list.*;
+import command.Command;
+import command.list.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -2,10 +2,10 @@ package tcp;
 
 import collection.CollectionService;
 import collection.data.StudyGroup;
-import io.console.ConsoleHandler;
-import io.console.InformationStorage;
-import io.console.command.Command;
-import io.database.DataBaseService;
+import console.ConsoleHandler;
+import command.InformationStorage;
+import command.Command;
+import database.DataBaseService;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;

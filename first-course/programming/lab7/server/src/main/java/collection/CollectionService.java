@@ -1,7 +1,7 @@
 package collection;
 
 import collection.data.StudyGroup;
-import io.database.DataBaseService;
+import database.DataBaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

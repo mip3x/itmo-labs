@@ -1,4 +1,4 @@
-import io.console.ConsoleHandler;
+import console.ConsoleHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tcp.Client;
