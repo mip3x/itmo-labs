@@ -2,7 +2,6 @@ package collection.data;
 
 import exception.InvalidInputException;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ public class Person implements Serializable {
         this.name = name;
     }
 
-    @XmlElement
     public String getName() {
         return name;
     }
@@ -37,7 +35,6 @@ public class Person implements Serializable {
         this.weight = weight;
     }
 
-    @XmlElement
     public Long getWeight() {
         return weight;
     }
@@ -53,7 +50,6 @@ public class Person implements Serializable {
         passportIDs.add(passportID);
     }
 
-    @XmlElement
     public String getPassportID() {
         return passportID;
     }
@@ -62,7 +58,6 @@ public class Person implements Serializable {
         this.eyeColor = color;
     }
 
-    @XmlElement
     public Color getEyeColor() {
         return eyeColor;
     }
@@ -71,7 +66,6 @@ public class Person implements Serializable {
         this.location = location;
     }
 
-    @XmlElement
     public Location getLocation() {
         return location;
     }

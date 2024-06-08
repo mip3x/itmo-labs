@@ -2,7 +2,6 @@ package collection.data;
 
 import exception.InvalidInputException;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 
 /**
@@ -21,7 +20,6 @@ public class Location implements Serializable {
         this.x = x;
     }
 
-    @XmlElement
     public Double getX() {
         return x;
     }
@@ -32,7 +30,6 @@ public class Location implements Serializable {
         this.y = y;
     }
 
-    @XmlElement
     public Double getY() {
         return y;
     }
@@ -43,7 +40,6 @@ public class Location implements Serializable {
         this.z = z;
     }
 
-    @XmlElement
     public Integer getZ() {
         return z;
     }
@@ -54,7 +50,6 @@ public class Location implements Serializable {
         this.name = name;
     }
 
-    @XmlElement
     public String getName() {
         return name;
     }

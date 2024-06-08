@@ -5,8 +5,6 @@ import collection.data.StudyGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedList;
@@ -16,7 +14,6 @@ import java.util.stream.IntStream;
  * Manages collection
  * Singleton
  */
-@XmlRootElement(name = "studyGroupCollection")
 public class CollectionService implements Serializable {
     private static final Logger collectionServiceLogger = LogManager.getLogger();
     private static CollectionService instance = null;
@@ -41,7 +38,6 @@ public class CollectionService implements Serializable {
      * Get collection
      * @return collection
      */
-    @XmlElement(name = "studyGroup")
     public LinkedList<StudyGroup> getStudyGroupCollection() {
         return studyGroupCollection;
     }

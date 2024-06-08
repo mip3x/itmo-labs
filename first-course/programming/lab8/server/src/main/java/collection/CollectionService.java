@@ -5,8 +5,6 @@ import database.DataBaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
@@ -15,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 
-@XmlRootElement(name = "studyGroupCollection")
 public class CollectionService implements Serializable {
     private static final Logger collectionServiceLogger = LogManager.getLogger();
     private static CollectionService instance = null;
@@ -34,7 +31,6 @@ public class CollectionService implements Serializable {
         initializationDate = new Date();
     }
 
-    @XmlElement(name = "studyGroup")
     public List<StudyGroup> getCollection() {
         return studyGroupCollection;
     }

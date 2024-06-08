@@ -2,15 +2,12 @@ package collection.data;
 
 import exception.InvalidInputException;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Study group - class of elements of collection
  */
-@XmlRootElement(name = "studyGroup")
 public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
@@ -30,7 +27,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
-    @XmlElement
+
     public Integer getId() {
         return id;
     }
@@ -39,7 +36,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         creationDate = date;
     }
 
-    @XmlElement
     public Date getCreationDate() {
         return creationDate;
     }
@@ -58,7 +54,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         if (name == null || name.isBlank()) throw new InvalidInputException("Field 'Name' should not be empty!");
     }
 
-    @XmlElement
     public String getName() {
         return name;
     }
@@ -73,7 +68,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         if (coordinates == null) throw new InvalidInputException("Field 'Coordinates' should not be empty!");
     }
 
-    @XmlElement
     public Coordinates getCoordinates() {
         return coordinates;
     }
@@ -89,7 +83,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         if (studentsCount <= 0) throw new InvalidInputException("Value of field 'Quantity of students' should be greater than 0!");
     }
 
-    @XmlElement
     public Long getStudentsCount() {
         return studentsCount;
     }
@@ -106,7 +99,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         if (shouldBeExpelled <= 0) throw new InvalidInputException("Value of field 'Should be expelled' should be greater than 0!");
     }
 
-    @XmlElement
     public Long getShouldBeExpelled() {
         return shouldBeExpelled;
     }
@@ -121,7 +113,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         if (formOfEducation == null) throw new InvalidInputException("Field 'Form of education' should not be empty!");
     }
 
-    @XmlElement
     public FormOfEducation getFormOfEducation() {
         return formOfEducation;
     }
@@ -136,7 +127,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         if (semester == null) throw new InvalidInputException("Field 'Semester' should not be empty!");
     }
 
-    @XmlElement
     public Semester getSemester() {
         return semester;
     }
@@ -151,7 +141,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         if (groupAdmin == null) throw new InvalidInputException("Field 'Group admin' should not be empty!");
     }
 
-    @XmlElement
     public Person getGroupAdmin() {
         return groupAdmin;
     }
