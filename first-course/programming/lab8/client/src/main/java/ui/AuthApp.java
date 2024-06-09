@@ -30,6 +30,7 @@ public class AuthApp extends Application {
             Scene scene = new Scene(root, 600, 400);
             primaryStage.setScene(scene);
             primaryStage.setTitle(bundle.getString("auth.title"));
+            primaryStage.setResizable(false);
             primaryStage.show();
         } catch (IOException exception) {
             exception.printStackTrace();

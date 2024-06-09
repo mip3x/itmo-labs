@@ -154,7 +154,7 @@ public class ClientHandler implements Runnable {
             return new Response("No account with such id was found: invalid user data provided!", ValidationStatus.INVALID_USER_DATA, "NO_ACC");
 
         clientHandlerLogger.info("Client successfully authorized");
-        if (request.commandDto() == null) return new Response("Client successfully authorized", ValidationStatus.SUCCESS);
+        if (request.commandDto() == null) return new Response("Client successfully authorized", ValidationStatus.SUCCESS, CollectionService.getInstance().getCollection());
 
         InformationStorage.getInstance().setArguments(request.commandDto().getCommandArguments());
 

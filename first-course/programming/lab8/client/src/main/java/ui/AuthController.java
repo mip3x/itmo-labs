@@ -1,7 +1,9 @@
 package ui;
 
+import collection.data.StudyGroup;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -16,12 +18,10 @@ import transfer.Response;
 import validation.ValidationStatus;
 
 import java.io.IOException;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class AuthController {
-    private Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
     @FXML
     private VBox root;
     @FXML
@@ -38,11 +38,15 @@ public class AuthController {
     private ComboBox<Locale> languageSelector;
     @FXML
     private Label errorLabel;
-    private ResourceBundle bundle;
+    private static ResourceBundle bundle;
     private Locale currentLocale;
     private Stage stage;
     private boolean isLogin = true;
     private final Client client = new Client();
+
+    public static ResourceBundle getBundle() {
+        return bundle;
+    }
 
     @FXML
     public void initialize() {
@@ -102,7 +106,7 @@ public class AuthController {
                 return;
             }
 
-            if (response.getStatus() == ValidationStatus.SUCCESS) openNewWindow();
+            if (response.getStatus() == ValidationStatus.SUCCESS) openNewWindow(response.getCollection());
             else if (response.getStatus() == ValidationStatus.USER_ALREADY_EXISTS)
                 errorLabel.setText(bundle.getString("error.user.already.exists"));
             else if (response.getStatus() == ValidationStatus.INVALID_USER_DATA) {
@@ -158,13 +162,22 @@ public class AuthController {
         }
     }
 
-    private void openNewWindow() {
+    private void openNewWindow(LinkedList<StudyGroup> collection) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/your/package/new_window.fxml"));
-            VBox newRoot = fxmlLoader.load();
+            logger.info(collection);
+
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main.fxml"));
+            fxmlLoader.load();
+
+            Parent newRoot = fxmlLoader.getRoot();
+
+            MainController mainController = fxmlLoader.getController();
+            mainController.setCollection(collection);
+
             Stage newStage = new Stage();
             newStage.setScene(new Scene(newRoot));
-            newStage.setTitle(bundle.getString("new.window.title"));
+//            newStage.setTitle(bundle.getString("new.window.title"));
+            newStage.setResizable(false);
             newStage.show();
             stage.close();
         } catch (IOException e) {

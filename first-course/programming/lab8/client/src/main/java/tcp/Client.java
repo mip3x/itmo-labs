@@ -15,10 +15,7 @@ import transfer.Response;
 import dto.UserDto;
 import validation.ValidationStatus;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -139,7 +136,15 @@ public class Client {
                 return null;
             }
 
-            response = SerializationUtils.deserialize(buffer.array());
+            try {
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer.array());
+                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+                response = (Response) objectInputStream.readObject();
+            } catch (ClassNotFoundException exception) {
+                exception.printStackTrace();
+                clientLogger.error(exception.getMessage());
+                response = null;
+            }
 
             return response;
 

@@ -31,8 +31,8 @@ public class CollectionService implements Serializable {
         initializationDate = new Date();
     }
 
-    public List<StudyGroup> getCollection() {
-        return studyGroupCollection;
+    public LinkedList<StudyGroup> getCollection() {
+        return (LinkedList<StudyGroup>) studyGroupCollection;
     }
 
     public void setCollection(LinkedList<StudyGroup> studyGroupCollection) {

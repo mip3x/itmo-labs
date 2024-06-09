@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.MainController">
+    <top>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Table" onAction="#showTablePage"/>
+            <Button text="Utils" onAction="#showUtilsPage"/>
+            <Button text="Animations" onAction="#showAnimationsPage"/>
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="tableView">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" />
+                <TableColumn fx:id="nameColumn" text="Name" />
+                <TableColumn fx:id="xColumn" text="X" />
+                <TableColumn fx:id="yColumn" text="Y" />
+                <TableColumn fx:id="creationDateColumn" text="Creation Date" />
+                <TableColumn fx:id="studentsCountColumn" text="Students Count" />
+                <TableColumn fx:id="shouldBeExpelledColumn" text="Should Be Expelled" />
+                <TableColumn fx:id="formOfEducationColumn" text="Form of Education" />
+                <TableColumn fx:id="semesterColumn" text="Semester" />
+                <TableColumn fx:id="groupAdminNameColumn" text="Group Admin Name" />
+                <TableColumn fx:id="groupAdminWeightColumn" text="Group Admin Weight" />
+                <TableColumn fx:id="groupAdminPassportIdColumn" text="Group Admin Passport Id" />
+                <TableColumn fx:id="groupAdminEyeColorColumn" text="Group Admin Eye Color" />
+                <TableColumn fx:id="groupAdminXColumn" text="Group Admin X" />
+                <TableColumn fx:id="groupAdminYColumn" text="Group Admin Y" />
+                <TableColumn fx:id="groupAdminZColumn" text="Group Admin Z" />
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>
