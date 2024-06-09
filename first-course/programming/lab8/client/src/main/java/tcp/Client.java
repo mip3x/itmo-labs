@@ -4,7 +4,6 @@ import collection.data.*;
 import exception.ExitException;
 import exception.InvalidInputException;
 import exception.InvalidTypeCastException;
-import console.ConsoleHandler;
 import command.InformationStorage;
 import command.CommandParser;
 import org.apache.commons.lang3.SerializationUtils;
@@ -30,44 +29,26 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Client implements Runnable {
+public class Client {
     private final int EOFStatus = -1;
     Logger clientLogger = LogManager.getLogger();
     private SocketChannel server;
-    private final String hostname;
-    private final int port;
+    private final String hostname = "localhost";
+    private final int port = 1337;
     private String username;
     private String password;
     private boolean registrationRequired;
-    private final ConsoleHandler consoleHandler;
     private Response response;
     private static final int MAX_RECURSION_DEPTH = 5;
     private int currentRecursionDepth = 0;
 
-    public Client(String hostname, int port, ConsoleHandler consoleHandler) {
-        this.hostname = hostname;
-        this.port = port;
-        this.consoleHandler = consoleHandler;
-    }
-
-    @Override
-    public void run() {
+    public Client() {
         InformationStorage.getInstance();
-        consoleHandler.sendWithNewLine("""
-                Type 'exit' in order to close connection and exit from the program
-                Type 'connect in order to connect/reconnect to the server
-                Type 'disconnect' in order to disconnect from the server
-                Type 'logout' in order to exit from account""");
-
-        String inputLine;
-        while ((inputLine = consoleHandler.receive(true)) != null) {
-            process(inputLine);
-        }
     }
 
     private void process(String inputLine) {
         if (inputLine.equals("connect")) {
-            connect();
+//            connect();
             return;
         }
         if (inputLine.equals("disconnect")) {
@@ -76,20 +57,12 @@ public class Client implements Runnable {
         }
         if (inputLine.equals("logout")) {
             logout();
-            consoleHandler.sendWithNewLine("Logged out");
+            clientLogger.info("Logged out");
             return;
         }
         if (inputLine.equals("exit")) {
             closeConnection();
             System.exit(0);
-        }
-        if (username == null) {
-            try {
-                authUser();
-            } catch (ExitException e) {
-                clientLogger.info("Interrupted attempt of user authentication");
-                return;
-            }
         }
 
         CommandDto commandDto = CommandParser.parseCommand(inputLine);
@@ -102,7 +75,6 @@ public class Client implements Runnable {
 
         if (commandDto.getCommand() == null) {
             clientLogger.error("Command was not recognized!");
-            consoleHandler.sendWithNewLine("Command was not recognized!");
             return;
         }
 
@@ -132,8 +104,14 @@ public class Client implements Runnable {
         clientLogger.info("Request is {}, {}, {}", request.commandDto().getCommand(), request.commandDto().getCommandArguments(), request.commandDto().getStudyGroup());
 
         if (sendRequest(request)) response = getResponse();
-        handleResponse(response, request);
+//        handleResponse(response, request);
         response = null;
+    }
+
+    public Response handleUser(String username, String password, boolean registrationRequired) {
+        Request request = new Request(null, new UserDto(username, password, registrationRequired));
+        if (sendRequest(request)) return handleResponse(getResponse());
+        return null;
     }
 
     private boolean sendRequest(Request request) {
@@ -146,7 +124,7 @@ public class Client implements Runnable {
             return true;
         } catch (IOException | NullPointerException exception) {
             clientLogger.error("Error occurred when sending request: {}", exception.getMessage());
-            closeConnection();
+            closeConnection()   ;
             return false;
         }
     }
@@ -172,49 +150,23 @@ public class Client implements Runnable {
         }
     }
 
-    private void handleResponse(Response response, Request request) {
+    private Response handleResponse(Response response) {
         if (response != null) {
-            ValidationStatus responseStatus = response.getResponseStatus();
+            ValidationStatus responseStatus = response.getStatus();
 
             if (responseStatus != ValidationStatus.NOT_RECOGNIZED && responseStatus != ValidationStatus.SUCCESS) {
-                clientLogger.error(response.getResponseMessage());
+                clientLogger.error(response.getMessage());
 
-                if (responseStatus == ValidationStatus.INPUT_REQUIRED) {
-                    try {
-                        registrationRequired = false;
-
-                        StudyGroup providedStudyGroup = inputElement();
-
-                        request.commandDto().setStudyGroup(providedStudyGroup);
-                        request.userDto().setRegistrationRequired(registrationRequired);
-
-                        clientLogger.debug("Going to send request with command...");
-                        clientLogger.info("Request is {}", request.commandDto().getCommand());
-
-                        if (sendRequest(request)) response = getResponse();
-                        handleResponse(response, request);
-                        return;
-                    }
-                    catch (ExitException exception) {
-                        return;
-                    }
-                }
-
-                String newResponseMessage = response.getResponseMessage();
-                if (response.getResponseStatusDescription() != null) newResponseMessage += ": " + response.getResponseStatusDescription();
-                response.setResponseMessage(newResponseMessage);
+                String newResponseMessage = response.getMessage();
+                if (response.getStatusDescription() != null)
+                    newResponseMessage += ": " + response.getStatusDescription();
+                response.setMessage(newResponseMessage);
             }
 
-            consoleHandler.sendWithNewLine("Got response: \n" + response.getResponseMessage());
-
-            if (responseStatus != ValidationStatus.USER_ALREADY_EXISTS
-                    && responseStatus != ValidationStatus.INVALID_USER_DATA
-                    && responseStatus != ValidationStatus.REGISTRATION_ERROR) {
-                registrationRequired = false;
-                return;
-            }
-            logout();
+            clientLogger.info("Got response: \n" + response.getMessage());
+            return response;
         }
+        return null;
     }
 
     private void handleScriptExecution(Request request) {
@@ -223,7 +175,7 @@ public class Client implements Runnable {
             filePath = request.commandDto().getCommandArguments().get(0);
             File file = new File(filePath);
 
-            if (!file.exists()){
+            if (!file.exists()) {
                 clientLogger.trace("File with script does not exist!");
                 throw new Exception();
             }
@@ -241,50 +193,13 @@ public class Client implements Runnable {
 
                 commandsToExecute.forEach(this::process);
                 clientLogger.trace("Commands from script have been sent to execute");
-            }
-            catch (IOException exception) {
+            } catch (IOException exception) {
                 clientLogger.error("Error reading file: insufficient access rights!");
-                consoleHandler.sendWithNewLine("Error reading file: insufficient access rights!");
             }
 
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             clientLogger.error("Enter valid path to the file!");
-            consoleHandler.sendWithNewLine("Command <execute_script file_name>: enter valid path to the file!");
         }
-    }
-
-    private void authUser() throws ExitException {
-        registrationRequired = false;
-
-        List<String> registrationInputList = Arrays.asList("y", "n", "");
-        String registrationRequiredText = ">*> Registration <*<\nChoose 'y', if required (new line interpreted as 'n') (y/n)";
-        String registrationRequiredAnswer;
-
-        while (!(registrationInputList.contains(registrationRequiredAnswer = consoleHandler.receive(registrationRequiredText).trim())));
-
-        if (registrationRequiredAnswer.equals("y"))
-            registrationRequired = true;
-
-        while (inputField("username",
-                this::setUsername,
-                String::toString,
-                String.class));
-
-        while (inputField("password",
-                this::setPassword,
-                String::toString,
-                String.class));
-    }
-
-    private void setUsername(String username) {
-        if (username == null || username.trim().isBlank()) throw new InvalidInputException("Username should not be empty!");
-        this.username = username.trim();
-    }
-
-    private void setPassword(String password) {
-        if (password == null || password.trim().isBlank()) throw new InvalidInputException("Password should not be empty!");
-        this.password = password.trim();
     }
 
     private void logout() {
@@ -292,7 +207,7 @@ public class Client implements Runnable {
         password = null;
     }
 
-    private void closeConnection() {
+    public void closeConnection() {
         try {
             if (server != null) server.close();
 
@@ -302,39 +217,32 @@ public class Client implements Runnable {
         }
     }
 
-    private void connect() {
-        try {
-            server = SocketChannel.open(new InetSocketAddress(hostname, port));
-            clientLogger.info("Successfully connected to server");
-        } catch (IOException exception) {
-            clientLogger.warn("Couldn't connect to the server. Type 'connect' to reconnect");
-            closeConnection();
-        }
+    public void connect() throws IOException {
+        server = SocketChannel.open(new InetSocketAddress(hostname, port));
     }
 
     private StudyGroup inputElement() throws ExitException {
-        consoleHandler.sendWithNewLine(">*> To exit the object input mode, type 'exit'. The data will not be saved! <*<");
         StudyGroup studyGroup = new StudyGroup();
 
         while (inputField("name",
                 studyGroup::setName,
                 String::toString,
                 String.class
-        ));
+        )) ;
 
         while (inputField("quantity of students",
                 studyGroup::setStudentsCount,
                 Long::parseLong,
                 Long.class
-        ));
+        )) ;
 
         while (inputField("quantity of students that should be expelled",
                 studyGroup::setShouldBeExpelled,
                 Long::parseLong,
                 Long.class
-        ));
+        )) ;
 
-        consoleHandler.sendWithNewLine("* Enter the coordinates:");
+//        consoleHandler.sendWithNewLine("* Enter the coordinates:");
 
         Coordinates coordinates = new Coordinates();
 
@@ -342,13 +250,13 @@ public class Client implements Runnable {
                 coordinates::setX,
                 Long::parseLong,
                 long.class
-        ));
+        )) ;
 
         while (inputField("the value of the 'Y coordinate' field",
                 coordinates::setY,
                 Double::parseDouble,
                 Double.class
-        ));
+        )) ;
 
         studyGroup.setCoordinates(coordinates);
 
@@ -358,7 +266,7 @@ public class Client implements Runnable {
                 studyGroup::setFormOfEducation,
                 FormOfEducation::valueOf,
                 FormOfEducation.class
-        ));
+        )) ;
 
 //        while (inputField("значение поля 'семестр обучения' (одно из нижеперечисленных)\n"
         while (inputField("value of field 'semester' (one from list below)\n"
@@ -366,33 +274,32 @@ public class Client implements Runnable {
                 studyGroup::setSemester,
                 Semester::valueOf,
                 Semester.class
-        ));
+        )) ;
 
         Person person = new Person();
 
 //        consoleHandler.sendWithNewLine("* Введите данные старосты:");
-        consoleHandler.sendWithNewLine("* Input admins data:");
 
 //        while (inputField("имя старосты",
         while (inputField("admins name",
                 person::setName,
                 String::toString,
                 String.class
-        ));
+        )) ;
 
 //        while (inputField("вес старосты",
         while (inputField("admins weight",
                 person::setWeight,
                 Long::parseLong,
                 Long.class
-        ));
+        )) ;
 
 //        while (inputField("номер паспорта старосты",
         while (inputField("admins passport number",
                 person::setPassportID,
                 String::toString,
                 String.class
-        ));
+        )) ;
 
 //        while (inputField("цвет глаз старосты (один из нижеперечисленных)\n"
         while (inputField("eyes' color of admin (one from list below)\n"
@@ -400,7 +307,7 @@ public class Client implements Runnable {
                 person::setEyeColor,
                 Color::valueOf,
                 Color.class
-        ));
+        )) ;
 
         Location location = null;
 //        List<String> locationInputList = Arrays.asList("да", "нет", "");
@@ -409,38 +316,35 @@ public class Client implements Runnable {
         String locationInputText = "* Location input\nChoose 'y', if required (new line interpreted as 'y') (y/n)";
         String locationInputAnswer;
 
-        while (!(locationInputList.contains(locationInputAnswer = consoleHandler.receive(locationInputText).trim())));
 
-        if (locationInputAnswer.equals("y") || locationInputAnswer.isBlank()) {
-            location = new Location();
+        location = new Location();
 //            while (inputField("значение поля 'координата X'",
-            while (inputField("value of field 'coordinate X'",
-                    location::setX,
-                    Double::parseDouble,
-                    Double.class
-            ));
+        while (inputField("value of field 'coordinate X'",
+                location::setX,
+                Double::parseDouble,
+                Double.class
+        )) ;
 
 //            while (inputField("значение поля 'координата Y'",
-            while (inputField("value of field 'coordinate Y'",
-                    location::setY,
-                    Double::parseDouble,
-                    Double.class
-            ));
+        while (inputField("value of field 'coordinate Y'",
+                location::setY,
+                Double::parseDouble,
+                Double.class
+        )) ;
 
 //            while (inputField("значение поля 'координата Z'",
-            while (inputField("value of field 'coordinate Z'",
-                    location::setZ,
-                    Integer::parseInt,
-                    Integer.class
-            ));
+        while (inputField("value of field 'coordinate Z'",
+                location::setZ,
+                Integer::parseInt,
+                Integer.class
+        )) ;
 
 //            while (inputField("название локации",
-            while (inputField("location name",
-                    location::setName,
-                    String::toString,
-                    String.class
-            ));
-        }
+        while (inputField("location name",
+                location::setName,
+                String::toString,
+                String.class
+        )) ;
 
         person.setLocation(location);
         studyGroup.setGroupAdmin(person);
@@ -450,10 +354,10 @@ public class Client implements Runnable {
 
     private <T> boolean inputField(String fieldName, Consumer<T> method, Function<String, T> converter, Class<T> type) throws ExitException {
         try {
-            String userInput = consoleHandler.receive(MessageFormat.format("> Enter {0}", fieldName));
+//            String userInput = consoleHandler.receive(MessageFormat.format("> Enter {0}", fieldName));
+            String userInput = "";
 
-            if (userInput.trim().equals("exit"))
-            {
+            if (userInput.trim().equals("exit")) {
                 clientLogger.error("Exit! Inputted data not saved!");
 //                throw new ExitException("Выход! Введенные данные об объекте не будут сохранены!");
                 throw new ExitException("Exit! Inputted data not saved!");
@@ -466,10 +370,8 @@ public class Client implements Runnable {
 
             method.accept(castField(userInput, converter, type));
             return false;
-        }
-        catch (InvalidInputException | InvalidTypeCastException exception) {
-            clientLogger.error("Error in element entering!");
-            consoleHandler.sendWithNewLine(exception.getMessage());
+        } catch (InvalidInputException | InvalidTypeCastException exception) {
+            clientLogger.error("Error in element entering: " + exception.getMessage());
             return true;
         }
     }
@@ -477,8 +379,7 @@ public class Client implements Runnable {
     private <T> T castField(String userInput, Function<String, T> converter, Class<T> type) {
         try {
             return converter.apply(userInput);
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             clientLogger.error("Error casting!");
             throw new InvalidTypeCastException(
                     MessageFormat.format("Invalid input! Field should be type of {0}!", type.getSimpleName()));

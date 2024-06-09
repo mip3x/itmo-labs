@@ -5,42 +5,48 @@ import validation.ValidationStatus;
 import java.io.Serializable;
 
 public class Response implements Serializable {
-    private String responseMessage;
-    private ValidationStatus responseStatus;
-    private String responseStatusDescription;
+    private String message;
+    private ValidationStatus status;
+    private String statusDescription;
 
     public Response() {
     }
 
     public Response(String text) {
-        this.responseMessage = text;
+        this.message = text;
     }
 
     public Response(String text, ValidationStatus validationStatus) {
-        this.responseMessage = text;
-        this.responseStatus = validationStatus;
+        this.message = text;
+        this.status = validationStatus;
     }
 
-    public String getResponseMessage() {
-        return responseMessage;
+    public Response(String text, ValidationStatus validationStatus, String statusDescription) {
+        this.message = text;
+        this.status = validationStatus;
+        this.statusDescription = statusDescription;
     }
 
-    public ValidationStatus getResponseStatus() {
-        return responseStatus;
-    }
-    public String getResponseStatusDescription() {
-        return responseStatusDescription;
+    public String getMessage() {
+        return message;
     }
 
-    public void setResponseMessage(String message) {
-        this.responseMessage = message;
+    public ValidationStatus getStatus() {
+        return status;
+    }
+    public String getStatusDescription() {
+        return statusDescription;
     }
 
-    public void setResponseStatus(ValidationStatus validationStatus) {
-        responseStatus = validationStatus;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public void setResponseStatusDescription(String responseStatusDescription) {
-        this.responseStatusDescription = responseStatusDescription;
+    public void setStatus(ValidationStatus validationStatus) {
+        status = validationStatus;
+    }
+
+    public void setStatusDescription(String statusDescription) {
+        this.statusDescription = statusDescription;
     }
 }

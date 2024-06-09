@@ -76,7 +76,7 @@ public class ClientHandler implements Runnable {
                                 return;
                             }
 
-                            clientHandlerConsole.writeWithPrompt(clientHandlerLogger::info, response.getResponseMessage());
+                            clientHandlerConsole.writeWithPrompt(clientHandlerLogger::info, response.getMessage());
 
                             new Thread(() -> {
                                 try {
@@ -149,11 +149,12 @@ public class ClientHandler implements Runnable {
         if (userExistence && !DataBaseService.validateUserPassword(request.userDto().getUsername(), request.userDto().getPassword()))
             return new Response("Invalid user data provided!", ValidationStatus.INVALID_USER_DATA);
         if (registrationRequired && !userRegistrationStatus)
-            return new Response("Error registering", ValidationStatus.INVALID_USER_DATA);
+            return new Response("Error registering", ValidationStatus.REGISTRATION_ERROR);
         if (!userExistence && !registrationRequired)
-            return new Response("No account with such id was found: invalid user data provided!", ValidationStatus.INVALID_USER_DATA);
+            return new Response("No account with such id was found: invalid user data provided!", ValidationStatus.INVALID_USER_DATA, "NO_ACC");
 
         clientHandlerLogger.info("Client successfully authorized");
+        if (request.commandDto() == null) return new Response("Client successfully authorized", ValidationStatus.SUCCESS);
 
         InformationStorage.getInstance().setArguments(request.commandDto().getCommandArguments());
 
@@ -168,16 +169,16 @@ public class ClientHandler implements Runnable {
         clientHandlerConsole.write(clientHandlerLogger::trace, String.valueOf(receivedCommand.validationStatus()));
 
         if (receivedCommand.command() == null) {
-            response.setResponseMessage(receivedCommand.validationStatusDescription());
-            response.setResponseStatus(ValidationStatus.NOT_RECOGNIZED);
+            response.setMessage(receivedCommand.validationStatusDescription());
+            response.setStatus(ValidationStatus.NOT_RECOGNIZED);
         } else {
-            response.setResponseMessage("Command <" + receivedCommand.command().getName() + ">");
+            response.setMessage("Command <" + receivedCommand.command().getName() + ">");
 
             if (receivedCommand.validationStatus() == ValidationStatus.SUCCESS)
                 tryToExecuteCommand(receivedCommand.command(), response, request.userDto().getUsername());
             else {
-                response.setResponseStatus(receivedCommand.validationStatus());
-                response.setResponseStatusDescription(receivedCommand.validationStatusDescription());
+                response.setStatus(receivedCommand.validationStatus());
+                response.setStatusDescription(receivedCommand.validationStatusDescription());
             }
         }
         return response;
@@ -191,8 +192,8 @@ public class ClientHandler implements Runnable {
     private void tryToExecuteCommand(Command command, Response response, String username) {
         clientHandlerLogger.trace("Trying to execute command...");
 
-        response.setResponseMessage(command.execute(CollectionService.getInstance(), username));
-        response.setResponseStatus(ValidationStatus.SUCCESS);
+        response.setMessage(command.execute(CollectionService.getInstance(), username));
+        response.setStatus(ValidationStatus.SUCCESS);
 
         informationStorage.addToHistory(command);
     }
