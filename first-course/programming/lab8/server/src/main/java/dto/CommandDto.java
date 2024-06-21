@@ -4,12 +4,18 @@ import collection.data.StudyGroup;
 import command.Command;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 public class CommandDto implements Serializable {
     private Command command;
     private List<String> commandArguments;
     private StudyGroup studyGroup;
+
+    public CommandDto(Command command) {
+        this.command = command;
+        this.commandArguments = Collections.emptyList();
+    }
 
     public CommandDto(Command command, List<String> commandArguments) {
         this.command = command;

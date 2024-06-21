@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Removes objects with given formOfEducation
@@ -39,17 +39,15 @@ public class RemoveAnyByFormOfEducation extends Command {
                             Arrays.toString(FormOfEducation.values()));
         }
 
-        LinkedList<StudyGroup> studyGroupCollection = collectionService.getStudyGroupCollection();
+        List<StudyGroup> studyGroupCollection = collectionService.getCollection();
 
         removeAnyByFormOfEducationLogger.trace("RemoveAnyByFormOfEducation command executed");
         return studyGroupCollection
                 .stream()
-                .filter(studyGroup -> studyGroup.getFormOfEducation().equals(formOfEducation))
+                .filter(studyGroup -> studyGroup.getFormOfEducation().equals(formOfEducation) &&
+                        studyGroup.getCreator().equals(username))
                 .findAny()
-                .map(studyGroup -> {
-                    studyGroupCollection.remove(studyGroup);
-                    return "Object was successfully deleted";
-                })
-                .orElse("Object with the same value of 'formOfEducation' field isn't found!");
+                .map(studyGroup -> collectionService.removeById(studyGroup.getId(), username))
+                .orElse("Object with the same value of 'formOfEducation' and creator wasn't found!");
     }
 }

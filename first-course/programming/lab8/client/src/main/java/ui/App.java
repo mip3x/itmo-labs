@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class AuthApp extends Application {
+public class App extends Application {
     public static void main(String[] args) {
         launch(args);
     }

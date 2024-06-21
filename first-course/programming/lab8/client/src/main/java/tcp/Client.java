@@ -16,9 +16,7 @@ import dto.UserDto;
 import validation.ValidationStatus;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,68 +24,58 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Client {
-    private final int EOFStatus = -1;
-    Logger clientLogger = LogManager.getLogger();
-    private SocketChannel server;
-    private final String hostname = "localhost";
-    private final int port = 1337;
-    private String username;
-    private String password;
+public class Client extends AbstractClient {
+    private final Logger logger = LogManager.getLogger();
+    private static Client instance = null;
+    private User user;
     private boolean registrationRequired;
-    private Response response;
     private static final int MAX_RECURSION_DEPTH = 5;
     private int currentRecursionDepth = 0;
+
+    public static Client getInstance() {
+        if (instance == null) instance = new Client();
+        return instance;
+    }
 
     public Client() {
         InformationStorage.getInstance();
     }
 
-    private void process(String inputLine) {
-        if (inputLine.equals("connect")) {
-//            connect();
-            return;
-        }
-        if (inputLine.equals("disconnect")) {
-            closeConnection();
-            return;
-        }
-        if (inputLine.equals("logout")) {
-            logout();
-            clientLogger.info("Logged out");
-            return;
-        }
-        if (inputLine.equals("exit")) {
-            closeConnection();
-            System.exit(0);
-        }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
+    public User getUser() {
+        return user;
+    }
+
+    private void process(String inputLine) {
         CommandDto commandDto = CommandParser.parseCommand(inputLine);
-        clientLogger.trace("Command parsed");
+        logger.trace("Command parsed");
 
         if (commandDto == null) {
-            clientLogger.trace("Request is null");
+            logger.trace("Request is null");
             return;
         }
 
         if (commandDto.getCommand() == null) {
-            clientLogger.error("Command was not recognized!");
+            logger.error("Command was not recognized!");
             return;
         }
 
         if (server == null || !server.isConnected()) {
-            clientLogger.error("Not connected to the server: impossible to form a request!");
+            logger.error("Not connected to the server: impossible to form a request!");
             return;
         }
 
-        Request request = new Request(commandDto, new UserDto(username, password, registrationRequired));
+        Request request = new Request(commandDto, new UserDto(user, registrationRequired));
 
         if (commandDto.getCommand().getName().equals("execute_script")) {
-            clientLogger.trace("Going to execute script...");
+            logger.trace("Going to execute script...");
 
             if (currentRecursionDepth > MAX_RECURSION_DEPTH) {
                 currentRecursionDepth = 0;
-                clientLogger.error("Recursion max depth exceeded = " + MAX_RECURSION_DEPTH);
+                logger.error("Recursion max depth exceeded = " + MAX_RECURSION_DEPTH);
                 return;
             }
 
@@ -97,61 +85,34 @@ public class Client {
             return;
         }
 
-        clientLogger.debug("Going to send request with command...");
-        clientLogger.info("Request is {}, {}, {}", request.commandDto().getCommand(), request.commandDto().getCommandArguments(), request.commandDto().getStudyGroup());
+        logger.debug("Going to send request with command...");
+        logger.info("Request is {}, {}, {}", request.commandDto().getCommand(), request.commandDto().getCommandArguments(), request.commandDto().getStudyGroup());
 
-        if (sendRequest(request)) response = getResponse();
+//        if (sendRequest(request)) response = getResponse();
 //        handleResponse(response, request);
-        response = null;
+//        response = null;
     }
 
-    public Response handleUser(String username, String password, boolean registrationRequired) {
-        Request request = new Request(null, new UserDto(username, password, registrationRequired));
+    public Response handleRequest(CommandDto commandDto, UserDto userDto) {
+        Request request = new Request(commandDto, userDto);
         if (sendRequest(request)) return handleResponse(getResponse());
         return null;
     }
 
     private boolean sendRequest(Request request) {
-        clientLogger.trace("Serializing request");
+        logger.trace("Serializing request");
         ByteBuffer buffer = ByteBuffer.wrap(SerializationUtils.serialize(request));
 
-        clientLogger.trace("Sending request to the server");
+        logger.trace("Sending request to the server");
         try {
             server.write(buffer);
+
+            logger.trace(request.commandDto() + " " + request.userDto().getUser());
             return true;
         } catch (IOException | NullPointerException exception) {
-            clientLogger.error("Error occurred when sending request: {}", exception.getMessage());
-            closeConnection()   ;
-            return false;
-        }
-    }
-
-    private Response getResponse() {
-        clientLogger.trace("Getting response from the server");
-
-        ByteBuffer buffer = ByteBuffer.allocate(4096);
-        try {
-            int readBytes = server.read(buffer);
-            if (readBytes == EOFStatus) {
-                return null;
-            }
-
-            try {
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer.array());
-                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-                response = (Response) objectInputStream.readObject();
-            } catch (ClassNotFoundException exception) {
-                exception.printStackTrace();
-                clientLogger.error(exception.getMessage());
-                response = null;
-            }
-
-            return response;
-
-        } catch (IOException exception) {
-            clientLogger.error("Error occurred when trying to get response: {}", exception.getMessage());
+            logger.error("Error occurred when sending request: {}", exception.getMessage());
             closeConnection();
-            return null;
+            return false;
         }
     }
 
@@ -160,7 +121,7 @@ public class Client {
             ValidationStatus responseStatus = response.getStatus();
 
             if (responseStatus != ValidationStatus.NOT_RECOGNIZED && responseStatus != ValidationStatus.SUCCESS) {
-                clientLogger.error(response.getMessage());
+                logger.error(response.getMessage());
 
                 String newResponseMessage = response.getMessage();
                 if (response.getStatusDescription() != null)
@@ -168,7 +129,7 @@ public class Client {
                 response.setMessage(newResponseMessage);
             }
 
-            clientLogger.info("Got response: \n" + response.getMessage());
+            logger.info("Got response: RS: {} RM: {}", response.getStatus(), response.getMessage());
             return response;
         }
         return null;
@@ -181,7 +142,7 @@ public class Client {
             File file = new File(filePath);
 
             if (!file.exists()) {
-                clientLogger.trace("File with script does not exist!");
+                logger.trace("File with script does not exist!");
                 throw new Exception();
             }
 
@@ -197,33 +158,18 @@ public class Client {
                 }
 
                 commandsToExecute.forEach(this::process);
-                clientLogger.trace("Commands from script have been sent to execute");
+                logger.trace("Commands from script have been sent to execute");
             } catch (IOException exception) {
-                clientLogger.error("Error reading file: insufficient access rights!");
+                logger.error("Error reading file: insufficient access rights!");
             }
 
         } catch (Exception exception) {
-            clientLogger.error("Enter valid path to the file!");
+            logger.error("Enter valid path to the file!");
         }
     }
 
     private void logout() {
-        username = null;
-        password = null;
-    }
-
-    public void closeConnection() {
-        try {
-            if (server != null) server.close();
-
-            clientLogger.info("Connection is closed");
-        } catch (IOException exception) {
-            clientLogger.error("Couldn't close connection!");
-        }
-    }
-
-    public void connect() throws IOException {
-        server = SocketChannel.open(new InetSocketAddress(hostname, port));
+        user = null;
     }
 
     private StudyGroup inputElement() throws ExitException {
@@ -363,7 +309,7 @@ public class Client {
             String userInput = "";
 
             if (userInput.trim().equals("exit")) {
-                clientLogger.error("Exit! Inputted data not saved!");
+                logger.error("Exit! Inputted data not saved!");
 //                throw new ExitException("Выход! Введенные данные об объекте не будут сохранены!");
                 throw new ExitException("Exit! Inputted data not saved!");
             }
@@ -376,7 +322,7 @@ public class Client {
             method.accept(castField(userInput, converter, type));
             return false;
         } catch (InvalidInputException | InvalidTypeCastException exception) {
-            clientLogger.error("Error in element entering: " + exception.getMessage());
+            logger.error("Error in element entering: " + exception.getMessage());
             return true;
         }
     }
@@ -385,7 +331,7 @@ public class Client {
         try {
             return converter.apply(userInput);
         } catch (Exception exception) {
-            clientLogger.error("Error casting!");
+            logger.error("Error casting!");
             throw new InvalidTypeCastException(
                     MessageFormat.format("Invalid input! Field should be type of {0}!", type.getSimpleName()));
 //                    MessageFormat.format("Неверный ввод! Поле должно быть типа {0}!", type.getSimpleName()));

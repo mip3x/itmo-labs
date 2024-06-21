@@ -115,6 +115,6 @@ public class CommandValidator {
         commandArgumentMap.put(new Show(), Collections.emptyList());
         commandArgumentMap.put(new GroupCountingBySemesterEnum(), Collections.emptyList());
         commandArgumentMap.put(new PrintDescending(), Collections.emptyList());
-        commandArgumentMap.put(new RemoveLower(), List.of(Argument.ELEMENT));
+        commandArgumentMap.put(new RemoveLower(), List.of(Argument.NUMBER));
     }
 }

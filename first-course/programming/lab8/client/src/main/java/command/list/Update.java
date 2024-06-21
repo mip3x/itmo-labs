@@ -3,8 +3,8 @@ package command.list;
 import collection.CollectionService;
 import collection.data.StudyGroup;
 import command.Command;
-import exception.InvalidInputException;
 import command.InformationStorage;
+import exception.InvalidInputException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +30,7 @@ public class Update extends Command implements RequestingId, RequestingInput {
     public boolean validateId(CollectionService collectionService) {
         try {
             updateCommandLogger.trace("Validating id");
-            return collectionService.validateID(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));
+            return collectionService.validateId(Integer.valueOf(InformationStorage.getReceivedArguments().get(0)));
         }
         catch (Exception exception) {
             updateCommandLogger.error("Enter valid id!");

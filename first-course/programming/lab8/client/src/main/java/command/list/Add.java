@@ -2,8 +2,8 @@ package command.list;
 
 import collection.CollectionService;
 import collection.data.StudyGroup;
-import command.InformationStorage;
 import command.Command;
+import command.InformationStorage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +19,8 @@ public class Add extends Command implements RequestingInput {
     @Override
     public String execute(CollectionService collectionService, String username) {
         StudyGroup studyGroup = InformationStorage.getReceivedStudyGroup();
-        if (studyGroup != null) return collectionService.addStudyGroupToCollection(studyGroup);
+        addCommandLogger.trace("StudyGroup received...");
+        if (studyGroup != null) return collectionService.addStudyGroup(studyGroup);
         throw new NullPointerException("studyGroup is null!");
     }
 }

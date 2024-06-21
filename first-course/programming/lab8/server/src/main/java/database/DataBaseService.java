@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
@@ -29,12 +30,20 @@ public class DataBaseService {
     private static final String LOAD_PERSON = "SELECT * FROM persons WHERE id = ?";
     private static final String LOAD_LOCATION = "SELECT * FROM locations WHERE id = ?";
     private static final String LOAD_CREATOR = "SELECT * FROM users WHERE id = ?";
-    private static final String UPDATE_STUDY_GROUP = "UPDATE study_groups SET name = ?, coordinates_id = ?," +
+    private static final String UPDATE_STUDY_GROUP = "UPDATE study_groups SET name = ?," +
             " creation_date = ?, students_count = ?, should_be_expelled = ?," +
-            " form_of_education = ?::form_of_education, semester = ?::semester, admin_id = ?" +
+            " form_of_education = ?::form_of_education, semester = ?::semester" +
             " WHERE (id = ? AND creator_id IN (SELECT id FROM users WHERE username = ?))";
+    private static final String UPDATE_COORDINATES = "UPDATE coordinates SET x = ?, y = ? WHERE id = ?";
+    private static final String UPDATE_PERSON = "UPDATE persons SET name = ?, weight = ?, passport_id = ? WHERE id = ?";
+    private static final String UPDATE_PERSON_LOCATION = "UPDATE persons SET location_id = ? WHERE id = ?";
+    private static final String UPDATE_PERSON_EYE_COLOR = "UPDATE persons SET eye_color = ?::color WHERE id = ?";
+    private static final String UPDATE_LOCATION = "UPDATE locations SET x = ?, y = ?, z = ?, name = ? WHERE id = ?";
     private static final String REMOVE_STUDY_GROUP = "DELETE FROM study_groups WHERE id = ? AND " +
             "creator_id = (SELECT id FROM users WHERE username = ?)";
+    private static final String GET_COORDINATES_ID_BY_SG_ID = "SELECT coordinates_id FROM study_groups WHERE study_groups.id = ?";
+    private static final String GET_ADMIN_ID_BY_SG_ID = "SELECT admin_id FROM study_groups WHERE study_groups.id = ?";
+    private static final String GET_LOCATION_ID_BY_SG_ID = "SELECT location_id FROM persons WHERE persons.id = (SELECT admin_id FROM study_groups WHERE study_groups.id = ?)";
     private static final Logger logger = LogManager.getLogger();
     private static Connection connection;
 
@@ -69,43 +78,149 @@ public class DataBaseService {
     }
 
     public static boolean updateStudyGroup(StudyGroup providedStudyGroup, int id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_STUDY_GROUP)) {
-            preparedStatement.setString(1, providedStudyGroup.getName());
+        try {
+            connection.setAutoCommit(false);
 
-            int coordinatesID = saveCoordinates(providedStudyGroup.getCoordinates());
-            if (coordinatesID == -1) {
-                logger.error("Error occurred while trying to add coordinates to studyGroup");
+            int coordinatesId = getCoordinatesId(id);
+            if (coordinatesId == -1) {
+                logger.error("Error occurred while trying to update studyGroup!");
                 return false;
             }
 
-            preparedStatement.setInt(2, coordinatesID);
-            preparedStatement.setTimestamp(3, new Timestamp(providedStudyGroup.getCreationDate().getTime()));
+            try (PreparedStatement coordinatesStatement = connection.prepareStatement(UPDATE_COORDINATES)) {
+                coordinatesStatement.setLong(1, providedStudyGroup.getCoordinates().getX());
+                coordinatesStatement.setDouble(2, providedStudyGroup.getCoordinates().getY());
+                coordinatesStatement.setInt(3, coordinatesId);
+                coordinatesStatement.executeUpdate();
+            }
 
-            if (providedStudyGroup.getStudentsCount() != null) preparedStatement.setLong(4, providedStudyGroup.getStudentsCount());
-            else preparedStatement.setNull(4, Types.BIGINT);
+            int locationId = getLocationId(id);
 
-            preparedStatement.setLong(5, providedStudyGroup.getShouldBeExpelled());
-            preparedStatement.setObject(6, providedStudyGroup.getFormOfEducation().toString());
-            preparedStatement.setObject(7, providedStudyGroup.getSemester().toString());
+            if (locationId == 0 && providedStudyGroup.getGroupAdmin().getLocation() != null) locationId = saveLocation(providedStudyGroup.getGroupAdmin().getLocation());
 
-            int adminID = savePerson(providedStudyGroup.getGroupAdmin());
-            if (adminID == -1) {
-                logger.error("Error occurred while trying to add admin to studyGroup");
+            if (locationId == -1) {
+                logger.error("Error occurred while trying to update studyGroup!");
                 return false;
             }
 
-            preparedStatement.setInt(8, adminID);
+            if (providedStudyGroup.getGroupAdmin().getLocation() != null) {
+                try (PreparedStatement locationStatement = connection.prepareStatement(UPDATE_LOCATION)) {
+                    locationStatement.setDouble(1, providedStudyGroup.getGroupAdmin().getLocation().getX());
+                    locationStatement.setDouble(2, providedStudyGroup.getGroupAdmin().getLocation().getY());
+                    locationStatement.setInt(3, providedStudyGroup.getGroupAdmin().getLocation().getZ());
+                    locationStatement.setString(4, providedStudyGroup.getGroupAdmin().getLocation().getName());
+                    locationStatement.setInt(5, locationId);
+                    locationStatement.executeUpdate();
+                }
+            }
 
-            preparedStatement.setInt(9, id);
-            preparedStatement.setString(10, providedStudyGroup.getCreator());
+            int adminId = getAdminId(id);
+            if (adminId == -1) {
+                logger.error("Error occurred while trying to update studyGroup!");
+                return false;
+            }
 
-            preparedStatement.executeUpdate();
+            try (PreparedStatement personStatement = connection.prepareStatement(UPDATE_PERSON)) {
+                personStatement.setString(1, providedStudyGroup.getGroupAdmin().getName());
+                personStatement.setLong(2, providedStudyGroup.getGroupAdmin().getWeight());
+                personStatement.setString(3, providedStudyGroup.getGroupAdmin().getPassportID());
+
+                if (providedStudyGroup.getGroupAdmin().getEyeColor() != null) {
+                    try (PreparedStatement personEyeColorStatement = connection.prepareStatement(UPDATE_PERSON_EYE_COLOR)) {
+                        personEyeColorStatement.setObject(1, providedStudyGroup.getGroupAdmin().getEyeColor().toString());
+                        personEyeColorStatement.setInt(2, adminId);
+                        personEyeColorStatement.executeUpdate();
+                    }
+                }
+
+                if (providedStudyGroup.getGroupAdmin().getLocation() != null) {
+                    try (PreparedStatement personLocationStatement = connection.prepareStatement(UPDATE_PERSON_LOCATION)) {
+                        personLocationStatement.setInt(1, locationId);
+                        personLocationStatement.setInt(2, adminId);
+                        personLocationStatement.executeUpdate();
+                    }
+                }
+
+                personStatement.setInt(4, adminId);
+                personStatement.executeUpdate();
+            }
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_STUDY_GROUP)) {
+                preparedStatement.setString(1, providedStudyGroup.getName());
+                preparedStatement.setTimestamp(2, new Timestamp(providedStudyGroup.getCreationDate().getTime()));
+
+                if (providedStudyGroup.getStudentsCount() != null)
+                    preparedStatement.setLong(3, providedStudyGroup.getStudentsCount());
+                else
+                    preparedStatement.setNull(3, Types.BIGINT);
+
+                preparedStatement.setLong(4, providedStudyGroup.getShouldBeExpelled());
+                preparedStatement.setObject(5, providedStudyGroup.getFormOfEducation().toString());
+                preparedStatement.setObject(6, providedStudyGroup.getSemester().toString());
+                preparedStatement.setInt(7, id);
+                preparedStatement.setString(8, providedStudyGroup.getCreator());
+
+                preparedStatement.executeUpdate();
+            }
+
+            connection.commit();
             return true;
 
         } catch (SQLException exception) {
-            logger.error("Error occurred while trying to update studyGroup: " + exception.getMessage());
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackException) {
+                logger.error("Error occurred while trying to commit transaction: " + rollbackException.getMessage());
+            }
+            logger.error("Error occurred while trying to update study group:" + exception.getMessage());
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException exception) {
+                logger.error("Error occurred while trying to update study group:" + exception.getMessage());
+            }
         }
         return false;
+    }
+
+    private static int getCoordinatesId(int id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(GET_COORDINATES_ID_BY_SG_ID, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setInt(1, id);
+
+            ResultSet result = preparedStatement.executeQuery();
+
+            if (result.next()) return result.getInt("coordinates_id");
+
+        } catch (SQLException exception) {
+            logger.error("Error occurred while trying to get coordinates: " + exception.getMessage());
+        }
+        return -1;
+    }
+
+    private static int getLocationId(int id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(GET_LOCATION_ID_BY_SG_ID, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setInt(1, id);
+            ResultSet result = preparedStatement.executeQuery();
+
+            if (result.next()) return result.getInt("location_id");
+
+        } catch (SQLException exception) {
+            logger.error("Error occurred while trying to get location: " + exception.getMessage());
+        }
+        return -1;
+    }
+
+    private static int getAdminId(int id) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(GET_ADMIN_ID_BY_SG_ID, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setInt(1, id);
+            ResultSet result = preparedStatement.executeQuery();
+
+            if (result.next()) return result.getInt("admin_id");
+
+        } catch (SQLException exception) {
+            logger.error("Error occurred while trying to get admin: " + exception.getMessage());
+        }
+        return -1;
     }
 
     public static void loadCollection() {
@@ -117,7 +232,7 @@ public class DataBaseService {
                 StudyGroup studyGroup = new StudyGroup();
                 studyGroup.setId(result.getInt("id"));
                 studyGroup.setName(result.getString("name"));
-                studyGroup.setCreationDate(result.getTimestamp("creation_date"));
+                studyGroup.setCreationDate(Date.from(result.getTimestamp("creation_date").toInstant()));
                 studyGroup.setCoordinates(loadCoordinates(result.getInt("coordinates_id")));
                 studyGroup.setStudentsCount(result.getLong("students_count"));
                 studyGroup.setShouldBeExpelled(result.getLong("should_be_expelled"));
@@ -338,11 +453,11 @@ public class DataBaseService {
         return false;
     }
 
-    public static boolean saveUser(String username, String password) {
+    public static boolean saveUser(User user) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER)) {
-            preparedStatement.setString(1, username);
+            preparedStatement.setString(1, user.username());
 
-            String hashedPassword = getHashedPassword(password);
+            String hashedPassword = getHashedPassword(user.password());
             if (hashedPassword == null) return false;
 
             preparedStatement.setString(2, hashedPassword);
@@ -355,15 +470,15 @@ public class DataBaseService {
         return false;
     }
 
-    public static boolean validateUserPassword(String username, String password) {
+    public static boolean validateUserPassword(User user) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(CHECK_USER_PASSWORD)) {
-            preparedStatement.setString(1, username);
+            preparedStatement.setString(1, user.username());
             ResultSet result = preparedStatement.executeQuery();
             String storedHashedPassword;
 
             if (result.next()) {
                 storedHashedPassword = result.getString("hashed_password");
-                String hashedProvidedPassword = getHashedPassword(password);
+                String hashedProvidedPassword = getHashedPassword(user.password());
 
                 if (hashedProvidedPassword == null) return false;
                 return storedHashedPassword.equals(hashedProvidedPassword);

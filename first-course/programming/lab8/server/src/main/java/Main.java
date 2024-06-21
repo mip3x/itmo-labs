@@ -1,3 +1,4 @@
+import command.list.Update;
 import console.ConsoleHandler;
 import console.ConsoleService;
 import command.InformationStorage;
@@ -5,6 +6,7 @@ import database.DataBaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tcp.Server;
+import tcp.Updater;
 import validation.CommandValidator;
 
 import java.io.FileReader;
@@ -41,10 +43,19 @@ public class Main {
 
         applicationLogger.trace("ConsoleManager object created!");
 
-        Server server = new Server(1337);
+        Server server = Server.getInstance();
+        server.setPort(1488);
         Thread serverThread = new Thread(server, "SERVER");
+
+        Updater updater = Updater.getInstance();
+        updater.setPort(1489);
+        Thread updaterThread = new Thread(updater, "UPDATER");
+
         server.init();
         serverThread.start();
+
+        updater.init();
+        updaterThread.start();
 
         ConsoleService serverConsole = new ConsoleService(new ConsoleHandler());
         Thread serverConsoleThread = new Thread(serverConsole, "CONSOLE");

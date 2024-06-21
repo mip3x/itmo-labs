@@ -1,19 +1,21 @@
 package ui;
 
+import collection.CollectionService;
 import collection.data.StudyGroup;
+import collection.data.User;
+import dto.UserDto;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tcp.Client;
+import tcp.Updater;
 import transfer.Response;
 import validation.ValidationStatus;
 
@@ -39,18 +41,29 @@ public class AuthController {
     @FXML
     private Label errorLabel;
     private static ResourceBundle bundle;
-    private Locale currentLocale;
+    private static Locale currentLocale;
     private Stage stage;
-    private boolean isLogin = true;
-    private final Client client = new Client();
+    private boolean registrationRequired = false;
+    private final Client client = Client.getInstance();
+    private final Updater updater = Updater.getInstance();
+    private final String HOSTNAME = "localhost";
+    private final int SERVER_PORT = 1488;
+    private final int UPDATER_PORT = 1489;
 
     public static ResourceBundle getBundle() {
         return bundle;
     }
 
+    public static void setBundle(ResourceBundle newBundle) {
+        bundle = newBundle;
+    }
+
     @FXML
     public void initialize() {
-        currentLocale = new Locale("ru", "RU");
+        client.setHostname(HOSTNAME);
+        client.setPort(SERVER_PORT);
+
+        if (currentLocale == null) currentLocale = new Locale("ru", "RU");
         bundle = ResourceBundle.getBundle("locale", currentLocale);
 
         languageSelector.getItems().addAll(
@@ -81,43 +94,46 @@ public class AuthController {
         });
 
         switchPageButton.setOnAction(event -> {
-            isLogin = !isLogin;
+            registrationRequired = !registrationRequired;
             updateTexts();
         });
 
-        actionButton.setOnAction(event -> {
-            if (!validateUsername(usernameField.getText()) || !validatePassword(passwordField.getText())) {
-                errorLabel.setText(bundle.getString("error.fill.all.fields"));
-                return;
-            }
-
-            if (!tryToConnect()) {
-                errorLabel.setText(bundle.getString("error.server.unavailable"));
-                return;
-            }
-
-            Response response;
-            if (isLogin)
-                response = client.handleUser(usernameField.getText(), passwordField.getText(), false);
-            else response = client.handleUser(usernameField.getText(), passwordField.getText(), true);
-
-            if (response == null) {
-                errorLabel.setText(bundle.getString("error.server.unavailable"));
-                return;
-            }
-
-            if (response.getStatus() == ValidationStatus.SUCCESS) openNewWindow(response.getCollection());
-            else if (response.getStatus() == ValidationStatus.USER_ALREADY_EXISTS)
-                errorLabel.setText(bundle.getString("error.user.already.exists"));
-            else if (response.getStatus() == ValidationStatus.INVALID_USER_DATA) {
-                if (response.getStatusDescription() != null)
-                    errorLabel.setText(bundle.getString("error.no.account.with.such.id"));
-                else
-                    errorLabel.setText(bundle.getString("error.invalid.user.data.provided"));
-            }
-        });
+        actionButton.setOnAction(event -> handleAuthAction());
 
         updateTexts();
+    }
+
+    private void handleAuthAction() {
+        if (!validateUsername(usernameField.getText()) || !validatePassword(passwordField.getText())) {
+            errorLabel.setText(bundle.getString("error.fill.all.fields"));
+            return;
+        }
+
+        if (!tryToConnect()) {
+            errorLabel.setText(bundle.getString("error.server.unavailable"));
+            return;
+        }
+
+        client.setUser(new User(usernameField.getText(), passwordField.getText()));
+
+        Response response;
+        response = client.handleRequest(null, new UserDto(client.getUser(), registrationRequired));
+
+        if (response == null) {
+            logger.error("RESPONSE IS NULL");
+            errorLabel.setText(bundle.getString("error.server.unavailable"));
+            return;
+        }
+
+        if (response.getStatus() == ValidationStatus.SUCCESS) openNewWindow(response.getCollection());
+        else if (response.getStatus() == ValidationStatus.USER_ALREADY_EXISTS)
+            errorLabel.setText(bundle.getString("error.user.already.exists"));
+        else if (response.getStatus() == ValidationStatus.INVALID_USER_DATA) {
+            if (response.getStatusDescription() != null)
+                errorLabel.setText(bundle.getString("error.no.account.with.such.id"));
+            else
+                errorLabel.setText(bundle.getString("error.invalid.user.data.provided"));
+        }
     }
 
     private boolean validateUsername(String username) {
@@ -132,6 +148,7 @@ public class AuthController {
         try {
             client.connect();
             logger.info("Connected to the server successfully");
+
             return true;
         } catch (IOException exception) {
             client.closeConnection();
@@ -145,67 +162,55 @@ public class AuthController {
     }
 
     private void updateTexts() {
-        errorLabel.setText(""); // Сбросить текст ошибки при обновлении
-        if (isLogin) {
-            titleLabel.setText(bundle.getString("auth.title"));
-            switchPageButton.setText(bundle.getString("switch.to.register"));
-            actionButton.setText(bundle.getString("login"));
-        } else {
+        errorLabel.setText("");
+        if (registrationRequired) {
             titleLabel.setText(bundle.getString("register.title"));
             switchPageButton.setText(bundle.getString("switch.to.login"));
             actionButton.setText(bundle.getString("register"));
+        } else {
+            titleLabel.setText(bundle.getString("auth.title"));
+            switchPageButton.setText(bundle.getString("switch.to.register"));
+            actionButton.setText(bundle.getString("login"));
         }
         usernameField.setPromptText(bundle.getString("username.prompt"));
         passwordField.setPromptText(bundle.getString("password.prompt"));
         if (stage != null) {
-            stage.setTitle(isLogin ? bundle.getString("auth.title") : bundle.getString("register.title"));
+            stage.setTitle(registrationRequired ? bundle.getString("auth.title") : bundle.getString("register.title"));
         }
     }
 
     private void openNewWindow(LinkedList<StudyGroup> collection) {
         try {
-            logger.info(collection);
+            CollectionService.getInstance().setCollection(collection);
+            logger.trace("CS collection size from AC: " + collection.size());
 
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main.fxml"));
-            fxmlLoader.load();
+            FXMLLoader mainLoader = new FXMLLoader(getClass().getResource("main.fxml"));
+            mainLoader.load();
 
-            Parent newRoot = fxmlLoader.getRoot();
+            updater.setHostname(HOSTNAME);
+            updater.setPort(UPDATER_PORT);
+            updater.setMainController(mainLoader.getController());
 
-            MainController mainController = fxmlLoader.getController();
-            mainController.setCollection(collection);
+            logger.error("PROBLEM WITH UPDATER");
+            Thread updaterThread = new Thread(updater, "UPDATER");
+            try {
+                updater.connect();
+            } catch (IOException exception) {
+                logger.error("Error occurred while trying to connect updater: " + exception.getMessage());
+            }
+            updaterThread.start();
 
+            Parent newRoot = mainLoader.getRoot();
             Stage newStage = new Stage();
+
             newStage.setScene(new Scene(newRoot));
-//            newStage.setTitle(bundle.getString("new.window.title"));
+            newStage.setTitle(bundle.getString("table.window.title"));
             newStage.setResizable(false);
             newStage.show();
             stage.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            logger.error("Error occurred while trying to open main windows: " + exception.getMessage());
         }
     }
 
-    private static class LocaleListCell extends javafx.scene.control.ListCell<Locale> {
-        private final ImageView imageView = new ImageView();
-
-        @Override
-        protected void updateItem(Locale item, boolean empty) {
-            super.updateItem(item, empty);
-            if (item == null || empty) {
-                setGraphic(null);
-                setText(null);
-            } else {
-                try {
-                    String iconPath = "/icons/" + item.getLanguage() + ".jpg";
-                    Image icon = new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath)));
-                    imageView.setImage(icon);
-                    setText(item.getDisplayLanguage(item));
-                    setGraphic(imageView);
-                } catch (Exception e) {
-                    setText(item.getDisplayLanguage(item) + " (icon not found)");
-                    setGraphic(null);
-                }
-            }
-        }
-    }
 }

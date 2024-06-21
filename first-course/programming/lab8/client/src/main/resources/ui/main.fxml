@@ -6,13 +6,15 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.MainController">
     <top>
         <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Button text="Table" onAction="#showTablePage"/>
-            <Button text="Utils" onAction="#showUtilsPage"/>
-            <Button text="Animations" onAction="#showAnimationsPage"/>
+            <Button fx:id="tableButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="infoButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="animationsButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <ComboBox fx:id="languageSelector" style="-fx-background-radius: 10;"/>
+            <Button fx:id="exitButton" minWidth="150" style="-fx-background-radius: 10;"/>
         </HBox>
     </top>
     <center>
-        <TableView fx:id="tableView">
+        <TableView fx:id="tableView" onMouseClicked="#handleTableClick">
             <columns>
                 <TableColumn fx:id="idColumn" text="ID" />
                 <TableColumn fx:id="nameColumn" text="Name" />
@@ -27,10 +29,20 @@
                 <TableColumn fx:id="groupAdminWeightColumn" text="Group Admin Weight" />
                 <TableColumn fx:id="groupAdminPassportIdColumn" text="Group Admin Passport Id" />
                 <TableColumn fx:id="groupAdminEyeColorColumn" text="Group Admin Eye Color" />
-                <TableColumn fx:id="groupAdminXColumn" text="Group Admin X" />
-                <TableColumn fx:id="groupAdminYColumn" text="Group Admin Y" />
-                <TableColumn fx:id="groupAdminZColumn" text="Group Admin Z" />
+                <TableColumn fx:id="locationNameColumn" text="Location name" />
+                <TableColumn fx:id="locationXColumn" text="Location X" />
+                <TableColumn fx:id="locationYColumn" text="Location Y" />
+                <TableColumn fx:id="locationZColumn" text="Location Z" />
             </columns>
         </TableView>
     </center>
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <Button fx:id="addButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="editButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteAllLowerButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteAnyByFOE" minWidth="150" style="-fx-background-radius: 10;"/>
+        </HBox>
+    </bottom>
 </BorderPane>

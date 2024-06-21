@@ -15,8 +15,7 @@ public class Location implements Serializable {
 
     public Location() {}
     public void setX(Double x) {
-//        if (x == null) throw new InvalidInputException("Поле 'Координата X' не должно быть пустым!");
-        if (x == null) throw new InvalidInputException("Field 'Coordinate X' should not be empty!");
+        if (x == null) throw new InvalidInputException("error.sg.ga.location.x");
         this.x = x;
     }
 
@@ -25,8 +24,7 @@ public class Location implements Serializable {
     }
 
     public void setY(Double y) {
-//        if (y == null) throw new InvalidInputException("Поле 'Координата Y' не должно быть пустым!");
-        if (y == null) throw new InvalidInputException("Field 'Coordinate Y' should not be empty!");
+        if (y == null) throw new InvalidInputException("error.sg.ga.location.y");
         this.y = y;
     }
 
@@ -35,8 +33,7 @@ public class Location implements Serializable {
     }
 
     public void setZ(Integer z) {
-//        if (z == null) throw new InvalidInputException("Поле 'Координата Z' не должно быть пустым!");
-        if (z == null) throw new InvalidInputException("Field 'Coordinate Z' should not be empty!");
+        if (z == null) throw new InvalidInputException("error.sg.ga.location.y");
         this.z = z;
     }
 

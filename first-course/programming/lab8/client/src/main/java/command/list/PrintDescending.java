@@ -18,10 +18,10 @@ public class PrintDescending extends Command {
 
     @Override
     public String execute(CollectionService collectionService, String username) {
-        Collections.sort(collectionService.getStudyGroupCollection());
+        Collections.sort(collectionService.getCollection());
         printDescendingLogger.trace("Collection sorted");
 
-        Collections.reverse(collectionService.getStudyGroupCollection());
+        Collections.reverse(collectionService.getCollection());
         printDescendingLogger.trace("Collection reversed");
 
         printDescendingLogger.trace("PrintDescending command executed");

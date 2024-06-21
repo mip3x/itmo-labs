@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.concurrent.*;
 
 public class ClientHandler implements Runnable {
-    private final Logger clientHandlerLogger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
     private final ConsoleHandler clientHandlerConsole = new ConsoleHandler();
     private SocketChannel clientChannel;
     private final InformationStorage informationStorage = InformationStorage.getInstance();
@@ -38,7 +38,7 @@ public class ClientHandler implements Runnable {
             clientChannel.configureBlocking(false);
             clientChannel.register(selector, SelectionKey.OP_READ);
         } catch (IOException exception) {
-            clientHandlerConsole.writeWithNewLine(clientHandlerLogger::error,
+            clientHandlerConsole.writeWithNewLine(logger::error,
                     "Error occurred while handling client: " + exception.getMessage());
         }
     }
@@ -58,7 +58,7 @@ public class ClientHandler implements Runnable {
                         try {
                             Request request = getRequest(buffer);
 
-                            clientHandlerConsole.write(clientHandlerLogger::info,
+                            clientHandlerConsole.write(logger::info,
                                     "Request by " + clientChannel);
 
                             Response response;
@@ -70,25 +70,27 @@ public class ClientHandler implements Runnable {
 
                             try {
                                 response = responseFutureTask.get();
+                                logger.trace("HANDLED RESPONSE");
                             } catch (Exception exception) {
-                                clientHandlerConsole.writeWithPromptNewLine(clientHandlerLogger::error,
+                                exception.printStackTrace();
+                                clientHandlerConsole.writeWithPromptNewLine(logger::error,
                                         "Error occurred while handling request: " + exception.getMessage());
                                 return;
                             }
 
-                            clientHandlerConsole.writeWithPrompt(clientHandlerLogger::info, response.getMessage());
+                            clientHandlerConsole.writeWithPrompt(logger::info, response.getMessage());
 
                             new Thread(() -> {
                                 try {
                                     sendResponse(response);
                                 } catch (IOException exception) {
-                                    clientHandlerConsole.writeWithPromptNewLine(clientHandlerLogger::error,
+                                    clientHandlerConsole.writeWithPromptNewLine(logger::error,
                                             "Error occurred while trying to send response: " + exception.getMessage());
                                 }
                             }).start();
 
                         } catch (IOException exception) {
-                            clientHandlerConsole.writeWithPromptNewLine(clientHandlerLogger::error,
+                            clientHandlerConsole.writeWithPromptNewLine(logger::error,
                                     "Error occurred when handling client: " + exception.getMessage());
                             return;
                         }
@@ -96,20 +98,21 @@ public class ClientHandler implements Runnable {
                     selectedKeys.remove();
                 }
             } catch (IOException exception) {
-                clientHandlerConsole.writeWithNewLine(clientHandlerLogger::error,
+                clientHandlerConsole.writeWithNewLine(logger::error,
                         "Server error: " + exception.getMessage());
             }
         }
     }
 
     private Request getRequest(ByteBuffer buffer) throws IOException {
-        clientHandlerConsole.writeWithNewLine(clientHandlerLogger::trace, "Reading from client " + clientChannel);
+        clientHandlerConsole.writeWithNewLine(logger::trace, "Reading from client " + clientChannel);
         int readBytes;
 
         try {
             readBytes = clientChannel.read(buffer);
         } catch (IOException exception) {
-            clientHandlerConsole.writeWithPrompt(clientHandlerLogger::error, "Error occurred when trying to read request: " + exception.getMessage());
+            exception.printStackTrace();
+            clientHandlerConsole.writeWithPrompt(logger::error, "Error occurred when trying to read request: " + exception.getMessage());
             clientChannel.close();
             return null;
         }
@@ -117,7 +120,7 @@ public class ClientHandler implements Runnable {
         int EOFStatus = -1;
         if (readBytes == EOFStatus) {
             clientChannel.close();
-            clientHandlerConsole.writeWithPrompt(clientHandlerLogger::info, "Client closed");
+            clientHandlerConsole.writeWithPrompt(logger::info, "Client closed");
             return null;
         }
 
@@ -125,7 +128,7 @@ public class ClientHandler implements Runnable {
         try {
             request = SerializationUtils.deserialize(buffer.array());
         } catch (SerializationException serializationException) {
-            clientHandlerConsole.writeWithPrompt(clientHandlerLogger::error, serializationException.getMessage());
+            clientHandlerConsole.writeWithPrompt(logger::error, serializationException.getMessage());
             request = null;
         }
         return request;
@@ -136,25 +139,27 @@ public class ClientHandler implements Runnable {
 
         Response response = new Response();
 
-        boolean userExistence = DataBaseService.checkUserExistence(request.userDto().getUsername());
+        boolean userExistence = DataBaseService.checkUserExistence(request.userDto().getUser().username());
         boolean registrationRequired = request.userDto().isRegistrationRequired();
         boolean userRegistrationStatus = false;
 
-        clientHandlerLogger.info("USER EXISTS: {}\nREGISTRATION REQUIRED: {}", userExistence, registrationRequired);
+        logger.info("USER EXISTS: {}\nREGISTRATION REQUIRED: {}", userExistence, registrationRequired);
 
         if (userExistence && registrationRequired)
             return new Response("User with such username already exists!", ValidationStatus.USER_ALREADY_EXISTS);
         if (!userExistence && registrationRequired)
-            userRegistrationStatus = DataBaseService.saveUser(request.userDto().getUsername(), request.userDto().getPassword());
-        if (userExistence && !DataBaseService.validateUserPassword(request.userDto().getUsername(), request.userDto().getPassword()))
+            userRegistrationStatus = DataBaseService.saveUser(request.userDto().getUser());
+        if (userExistence && !DataBaseService.validateUserPassword(request.userDto().getUser()))
             return new Response("Invalid user data provided!", ValidationStatus.INVALID_USER_DATA);
         if (registrationRequired && !userRegistrationStatus)
             return new Response("Error registering", ValidationStatus.REGISTRATION_ERROR);
         if (!userExistence && !registrationRequired)
             return new Response("No account with such id was found: invalid user data provided!", ValidationStatus.INVALID_USER_DATA, "NO_ACC");
 
-        clientHandlerLogger.info("Client successfully authorized");
+        logger.info("Client successfully authorized");
         if (request.commandDto() == null) return new Response("Client successfully authorized", ValidationStatus.SUCCESS, CollectionService.getInstance().getCollection());
+
+        logger.info("Command is not null: trying to execute");
 
         InformationStorage.getInstance().setArguments(request.commandDto().getCommandArguments());
 
@@ -165,8 +170,8 @@ public class ClientHandler implements Runnable {
                 CommandValidator.validateCommand(request.commandDto().getCommand(),
                         request.commandDto().getCommandArguments(),
                         request.commandDto().getStudyGroup(),
-                        request.userDto().getUsername());
-        clientHandlerConsole.write(clientHandlerLogger::trace, String.valueOf(receivedCommand.validationStatus()));
+                        request.userDto().getUser().username());
+        clientHandlerConsole.write(logger::trace, String.valueOf(receivedCommand.validationStatus()));
 
         if (receivedCommand.command() == null) {
             response.setMessage(receivedCommand.validationStatusDescription());
@@ -175,7 +180,7 @@ public class ClientHandler implements Runnable {
             response.setMessage("Command <" + receivedCommand.command().getName() + ">");
 
             if (receivedCommand.validationStatus() == ValidationStatus.SUCCESS)
-                tryToExecuteCommand(receivedCommand.command(), response, request.userDto().getUsername());
+                tryToExecuteCommand(receivedCommand.command(), response, request.userDto().getUser().username());
             else {
                 response.setStatus(receivedCommand.validationStatus());
                 response.setStatusDescription(receivedCommand.validationStatusDescription());
@@ -190,10 +195,12 @@ public class ClientHandler implements Runnable {
     }
 
     private void tryToExecuteCommand(Command command, Response response, String username) {
-        clientHandlerLogger.trace("Trying to execute command...");
+        logger.trace("Trying to execute command...");
 
-        response.setMessage(command.execute(CollectionService.getInstance(), username));
-        response.setStatus(ValidationStatus.SUCCESS);
+        String commandResponse = command.execute(CollectionService.getInstance(), username);
+        response.setMessage(commandResponse);
+        response.setStatus(commandResponse.contains("!") ?
+                ValidationStatus.EXECUTION_ERROR : ValidationStatus.SUCCESS);
 
         informationStorage.addToHistory(command);
     }

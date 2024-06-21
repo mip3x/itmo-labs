@@ -14,16 +14,17 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Server implements Runnable {
-    private final Logger serverLogger = LogManager.getLogger();
+public class Server extends AbstractServer implements Runnable {
+    private final Logger logger = LogManager.getLogger();
+    private static Server instance = null;
     private Selector selector;
-    private final int port;
-    private final ConsoleHandler serverConsole = new ConsoleHandler();
+    private final ConsoleHandler console = new ConsoleHandler();
     private final int THREADS_CONST = 5;
     private final ExecutorService threadPool = Executors.newFixedThreadPool(THREADS_CONST);
 
-    public Server(int port) {
-        this.port = port;
+    public static Server getInstance() {
+        if (instance == null) instance = new Server();
+        return instance;
     }
 
     public void init() {
@@ -32,15 +33,15 @@ public class Server implements Runnable {
             serverSocketChannel.configureBlocking(false);
             serverSocketChannel.bind(new InetSocketAddress(port));
 
-            serverConsole.write(serverLogger::trace, "Server bound on port " + port);
+            console.write(logger::trace, "Server bound on port " + port);
 
             selector = Selector.open();
 
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        } catch (IOException exception) {
-            serverConsole.writeWithNewLine(serverLogger::error, exception.getMessage());
-            System.exit(1);
+        } catch (Exception exception) {
+            console.writeWithNewLine(logger::error, exception.getMessage());
+            System.exit(-1);
         }
     }
 
@@ -56,23 +57,24 @@ public class Server implements Runnable {
                     selectedKeys.remove();
                 }
             } catch (IOException exception) {
-                serverConsole.writeWithNewLine(serverLogger::error,
+                console.writeWithNewLine(logger::error,
                         "Server error: " + exception.getMessage());
             }
         }
     }
 
-    private void acceptConnection(SelectionKey selectedKey) {
-        serverConsole.writeWithNewLine(serverLogger::trace, "Trying to accept connection...");
+    @Override
+    protected void acceptConnection(SelectionKey selectedKey) {
+        console.writeWithNewLine(logger::trace, "Trying to accept connection...");
 
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectedKey.channel();
         try {
             SocketChannel clientSocketChannel = serverSocketChannel.accept();
             threadPool.execute(new ClientHandler(clientSocketChannel));
 
-            serverConsole.writeWithPrompt(serverLogger::info, "Client connection accepted");
+            console.writeWithPrompt(logger::info, "Client connection accepted");
         } catch (IOException exception) {
-            serverConsole.writeWithPrompt(serverLogger::error, "Error occurred when trying to accept connection: " + exception.getMessage());
+            console.writeWithPrompt(logger::error, "Error occurred when trying to accept connection: " + exception.getMessage());
         }
     }
 }

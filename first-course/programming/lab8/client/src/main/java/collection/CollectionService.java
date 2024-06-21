@@ -1,7 +1,6 @@
 package collection;
 
 import collection.data.StudyGroup;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,20 +9,12 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.stream.IntStream;
 
-/**
- * Manages collection
- * Singleton
- */
 public class CollectionService implements Serializable {
     private static final Logger collectionServiceLogger = LogManager.getLogger();
     private static CollectionService instance = null;
     private LinkedList<StudyGroup> studyGroupCollection;
     private final Date initializationDate;
 
-    /**
-     * Get instance of class
-     * @return instance of class
-     */
     public static CollectionService getInstance() {
         if (instance == null) instance = new CollectionService();
         return instance;
@@ -34,37 +25,14 @@ public class CollectionService implements Serializable {
         initializationDate = new Date();
     }
 
-    /**
-     * Get collection
-     * @return collection
-     */
-    public LinkedList<StudyGroup> getStudyGroupCollection() {
+    public LinkedList<StudyGroup> getCollection() {
         return studyGroupCollection;
     }
 
-    /**
-     * Set collection
-     * @param studyGroupCollection collection to set
-     */
-    public void setStudyGroupCollection(LinkedList<StudyGroup> studyGroupCollection) {
+    public void setCollection(LinkedList<StudyGroup> studyGroupCollection) {
         this.studyGroupCollection = studyGroupCollection;
     }
 
-    /**
-     * Clear collection
-     * @return message about clearing
-     */
-    public String clearCollection() {
-        studyGroupCollection.clear();
-        collectionServiceLogger.trace("Collection has been cleared");
-        return "Collection has been cleared";
-//        return "Коллекция была успешно очищена";
-    }
-
-    /**
-     * Get head of collection
-     * @return head of collection
-     */
     public String getCollectionHead() {
         try {
             collectionServiceLogger.trace("Trying to get collection head");
@@ -77,10 +45,6 @@ public class CollectionService implements Serializable {
         }
     }
 
-    /**
-     * Get info about all elements of collection
-     * @return info about all elements of collection
-     */
     public String getAllStudyGroupsInfo() {
         StringBuilder studyGroupsInfo = new StringBuilder();
         if (studyGroupCollection.isEmpty()) {
@@ -96,75 +60,75 @@ public class CollectionService implements Serializable {
         return result.substring(0, result.length() - 2);
     }
 
-    /**
-     * Get info about element of collection
-     * @param studyGroup element of collection
-     * @return info about element of collection
-     */
     public String getStudyGroupInfo(StudyGroup studyGroup) {
         return studyGroup.toString();
     }
 
-    /**
-     * Get info about collection
-     * @return info about collection
-     */
     public String getCollectionInfo() {
-//        String collectionType = "Тип коллекции: " + studyGroupCollection.getClass().getName();
         String collectionType = "Collection type: " + studyGroupCollection.getClass().getName();
-//        String collectionInitializationDate = "Время инициализации коллекции: " + initializationDate;
         String collectionInitializationDate = "Collection initialization time: " + initializationDate;
-//        String collectionElementsNumber = "Количество элементов коллекции: " + studyGroupCollection.size();
         String collectionElementsNumber = "Size of collection: " + studyGroupCollection.size();
         return collectionType + "\n" + collectionInitializationDate + "\n" + collectionElementsNumber;
     }
 
-    /**
-     * Add element to collection
-     * @param studyGroup element to add in collection
-     * @return message about adding
-     */
-    public String addStudyGroupToCollection(StudyGroup studyGroup) {
-//        return "Новый элемент был успешно добавлен в коллекцию";
-        return "New element was successfully added to collection";
+    public String addStudyGroup(StudyGroup studyGroup) {
+        String responseMessage;
+//        int studyGroupId = DataBaseService.saveStudyGroup(studyGroup);
+//        if (studyGroupId != -1) {
+//            studyGroup.setId(studyGroupId);
+//            studyGroupCollection.add(studyGroup);
+//
+//        "Новый элемент был успешно добавлен в коллекцию";
+            responseMessage = "New element was successfully added to collection";
+//        }
+//        else {
+//            collectionServiceLogger.error("Error occurred while saving study group to database!");
+//            responseMessage = "Error occurred while saving study group to database!";
+//        }
+        return responseMessage;
     }
 
-    /**
-     * Validate id
-     * @param id id to validate
-     * @return status of validation
-     */
-    public boolean validateID(Integer id) {
+    public boolean validateId(Integer id) {
         return studyGroupCollection.stream().anyMatch(studyGroup -> studyGroup.compareId(id));
     }
 
-    /**
-     * Remove element by given id
-     * @param id id of element to delete
-     * @return message about deleting
-     */
-    public String removeById(Integer id) {
-        studyGroupCollection.removeIf(studyGroup -> studyGroup.compareId(id));
+    public String removeById(Integer id, String username) {
+        String responseMessage;
+//        if (DataBaseService.removeStudyGroup(id, username)) {
+//            int index = IntStream.range(0, studyGroupCollection.size())
+//                    .filter(i -> studyGroupCollection.get(i).compareId(id))
+//                    .findFirst()
+//                    .orElse(-1);
+//            if (studyGroupCollection.get(index).getCreator().equals(username)) {
+//                studyGroupCollection.removeIf(studyGroup -> studyGroup.compareId(id));
+                responseMessage = "Object with id=" + id + " was successfully deleted";
+//            }
+//            else responseMessage = "You cannot delete object with id=" + id + ", because you are not its creator!";
+//        }
+//        else responseMessage = "Error occurred while trying to delete object with id=" + id + " from database";
 //        return "Объект по данному id успешно удален";
-        return "Object with such id was successfully deleted";
+        return responseMessage;
     }
 
-    /**
-     * Update element by id
-     * @param id id of element to update
-     * @param studyGroup element of collection
-     * @return message about updating
-     */
-    public String updateById(Integer id, StudyGroup studyGroup) {
-        int index = IntStream.range(0, studyGroupCollection.size())
-                .filter(i -> studyGroupCollection.get(i).compareId(id))
-                .findFirst()
-                .orElse(-1);
-
-        studyGroup.setId(id);
-        studyGroup.setCreationDate(studyGroupCollection.get(index).getCreationDate());
-        studyGroupCollection.set(index, studyGroup);
-//        return "Объект по заданному id был успешно обновлен";
-        return "Object with given id was successfully updated";
+    public String updateById(Integer id, StudyGroup providedStudyGroup) {
+//        locker.lock();
+        String responseMessage;
+//        if (DataBaseService.updateStudyGroup(providedStudyGroup, id)) {
+//            int index = IntStream.range(0, studyGroupCollection.size())
+//                    .filter(i -> studyGroupCollection.get(i).compareId(id))
+//                    .findFirst()
+//                    .orElse(-1);
+//
+//            if (providedStudyGroup.getCreator().equals(studyGroupCollection.get(index).getCreator())) {
+//                providedStudyGroup.setId(id);
+//                studyGroupCollection.set(index, providedStudyGroup);
+                responseMessage = "Object with id=" + id + " was successfully updated";
+//            }
+//            else responseMessage = "You cannot modify object with id=" + id + ", because you are not its creator!";
+//        }
+//        else responseMessage = "Error occurred while trying to modify element with id=" + id + " in database";
+////        return "Объект по заданному id был успешно обновлен";
+//        locker.unlock();
+        return responseMessage;
     }
 }

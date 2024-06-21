@@ -1,6 +1,7 @@
 package validation;
 
 public enum ValidationStatus {
+    EXECUTION_ERROR,
     SUCCESS,
     INVALID_OBJECT,
     INVALID_ARGUMENTS,

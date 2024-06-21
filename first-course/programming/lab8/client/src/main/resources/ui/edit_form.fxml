@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.EditFormController" spacing="10" alignment="CENTER" prefWidth="350">
+    <TextField fx:id="nameField" promptText="%sg.name.prompt" maxWidth="300"/>
+    <TextField fx:id="xField" promptText="%sg.x.prompt" maxWidth="300"/>
+    <TextField fx:id="yField" promptText="%sg.y.prompt" maxWidth="300"/>
+    <TextField fx:id="studentsCountField" promptText="%sg.students_count.prompt" maxWidth="300"/>
+    <TextField fx:id="shouldBeExpelledField" promptText="%sg.should_be_expelled.prompt" maxWidth="300"/>
+    <ComboBox fx:id="formOfEducationBox" maxWidth="300"/>
+    <ComboBox fx:id="semesterBox" maxWidth="300"/>
+    <TextField fx:id="groupAdminNameField" promptText="%sg.group_admin_name.prompt" maxWidth="300"/>
+    <TextField fx:id="groupAdminWeightField" promptText="%sg.group_admin_weight.prompt" maxWidth="300"/>
+    <TextField fx:id="groupAdminPassportIdField" promptText="%sg.group_admin_passport_id.prompt" maxWidth="300"/>
+    <ComboBox fx:id="groupAdminEyeColorBox" maxWidth="300"/>
+    <TextField fx:id="locationNameField" promptText="%sg.location_name.prompt" maxWidth="300"/>
+    <TextField fx:id="locationXField" promptText="%sg.location_x.prompt" maxWidth="300"/>
+    <TextField fx:id="locationYField" promptText="%sg.location_y.prompt" maxWidth="300"/>
+    <TextField fx:id="locationZField" promptText="%sg.location_z.prompt" maxWidth="300"/>
+    <Button fx:id="saveButton" minWidth="150" style="-fx-background-radius: 10;"/>
+    <Button fx:id="cancelButton" minWidth="150" style="-fx-background-radius: 10;"/>
+</VBox>

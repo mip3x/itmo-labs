@@ -12,7 +12,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
-    private transient Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
+    private Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
     private Long studentsCount = null; //Значение поля должно быть больше 0, Поле может быть null
     private long shouldBeExpelled; //Значение поля должно быть больше 0
     private FormOfEducation formOfEducation; //Поле не может быть null

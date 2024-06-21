@@ -1,24 +1,20 @@
 package dto;
 
+import collection.data.User;
+
 import java.io.Serializable;
 
 public class UserDto implements Serializable {
-    private final String username;
-    private final String password;
+    private final User user;
     private boolean registrationRequired;
 
-    public UserDto(String username, String password, boolean registrationRequired) {
-        this.username = username;
-        this.password = password;
+    public UserDto(User user, boolean registrationRequired) {
+        this.user = user;
         this.registrationRequired = registrationRequired;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
+    public User getUser() {
+        return user;
     }
 
     public boolean isRegistrationRequired() {

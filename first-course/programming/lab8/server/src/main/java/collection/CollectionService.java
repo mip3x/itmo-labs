@@ -4,6 +4,7 @@ import collection.data.StudyGroup;
 import database.DataBaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tcp.Updater;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -47,7 +48,6 @@ public class CollectionService implements Serializable {
         catch (IndexOutOfBoundsException e) {
             collectionServiceLogger.error("Collection is empty: impossible to get element!");
             return "Collection is empty: impossible to get element!";
-//            return "Невозможно получить элемент коллекции: коллекция пуста!";
         }
     }
 
@@ -58,7 +58,6 @@ public class CollectionService implements Serializable {
             collectionServiceLogger.warn("Collection is empty: impossible to get element!");
             locker.unlock();
             return "Collection is empty: impossible to get element!";
-//            return "Невозможно получить элемент коллекции: коллекция пуста!";
         }
         studyGroupCollection.forEach(studyGroup ->
                 studyGroupsInfo.append(getStudyGroupInfo(studyGroup)).append("\n\n"));
@@ -74,11 +73,8 @@ public class CollectionService implements Serializable {
     }
 
     public String getCollectionInfo() {
-//        String collectionType = "Тип коллекции: " + studyGroupCollection.getClass().getName();
         String collectionType = "Collection type: " + studyGroupCollection.getClass().getName();
-//        String collectionInitializationDate = "Время инициализации коллекции: " + initializationDate;
         String collectionInitializationDate = "Collection initialization time: " + initializationDate;
-//        String collectionElementsNumber = "Количество элементов коллекции: " + studyGroupCollection.size();
         String collectionElementsNumber = "Size of collection: " + studyGroupCollection.size();
         return collectionType + "\n" + collectionInitializationDate + "\n" + collectionElementsNumber;
     }
@@ -91,8 +87,8 @@ public class CollectionService implements Serializable {
             studyGroup.setId(studyGroupId);
             studyGroupCollection.add(studyGroup);
 
-//        "Новый элемент был успешно добавлен в коллекцию";
             responseMessage = "New element was successfully added to collection";
+            updateCollection();
         }
         else {
             collectionServiceLogger.error("Error occurred while saving study group to database!");
@@ -117,11 +113,11 @@ public class CollectionService implements Serializable {
             if (studyGroupCollection.get(index).getCreator().equals(username)) {
                 studyGroupCollection.removeIf(studyGroup -> studyGroup.compareId(id));
                 responseMessage = "Object with id=" + id + " was successfully deleted";
+                updateCollection();
             }
             else responseMessage = "You cannot delete object with id=" + id + ", because you are not its creator!";
         }
-        else responseMessage = "Error occurred while trying to delete object with id=" + id + " from database";
-//        return "Объект по данному id успешно удален";
+        else responseMessage = "Error occurred while trying to delete object with id=" + id + " from database!";
         locker.unlock();
         return responseMessage;
     }
@@ -139,12 +135,16 @@ public class CollectionService implements Serializable {
                 providedStudyGroup.setId(id);
                 studyGroupCollection.set(index, providedStudyGroup);
                 responseMessage = "Object with id=" + id + " was successfully updated";
+                updateCollection();
             }
             else responseMessage = "You cannot modify object with id=" + id + ", because you are not its creator!";
         }
-        else responseMessage = "Error occurred while trying to modify element with id=" + id + " in database";
-//        return "Объект по заданному id был успешно обновлен";
+        else responseMessage = "Error occurred while trying to modify element with id=" + id + " in database!";
         locker.unlock();
         return responseMessage;
+    }
+
+    public void updateCollection() {
+        Updater.getInstance().updateCollection(getCollection());
     }
 }

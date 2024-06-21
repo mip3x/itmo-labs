@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.AnimationController">
+    <center>
+        <Canvas fx:id="canvas" width="800" height="600"/>
+    </center>
+    <bottom>
+        <HBox alignment="CENTER" spacing="10">
+            <Button fx:id="addButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="editButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteAllLowerButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteAnyByFOE" minWidth="150" style="-fx-background-radius: 10;"/>
+        </HBox>
+    </bottom>
+</BorderPane>

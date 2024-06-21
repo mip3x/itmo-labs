@@ -5,14 +5,11 @@ import exception.InvalidInputException;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * Study group - class of elements of collection
- */
 public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
-    private transient Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
+    private Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
     private Long studentsCount = null; //Значение поля должно быть больше 0, Поле может быть null
     private long shouldBeExpelled; //Значение поля должно быть больше 0
     private FormOfEducation formOfEducation; //Поле не может быть null
@@ -50,8 +47,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateName(String name) {
-//        if (name == null || name.isBlank()) throw new InvalidInputException("Поле 'Имя' не должно быть пустым!");
-        if (name == null || name.isBlank()) throw new InvalidInputException("Field 'Name' should not be empty!");
+        if (name == null || name.isBlank()) throw new InvalidInputException("error.sg.name");
     }
 
     public String getName() {
@@ -64,8 +60,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateCoordinates(Coordinates coordinates) {
-//        if (coordinates == null) throw new InvalidInputException("Поле 'Координаты' не должно быть пустым!");
-        if (coordinates == null) throw new InvalidInputException("Field 'Coordinates' should not be empty!");
+        if (coordinates == null) throw new InvalidInputException("error.sg.coordinates.empty");
     }
 
     public Coordinates getCoordinates() {
@@ -78,9 +73,8 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateStudentsCount(Long studentsCount) {
-        if (studentsCount == null) throw new InvalidInputException("Value of field 'Quantity of students' should not be empty!");
-//        if (studentsCount <= 0) throw new InvalidInputException("Значение поля 'Количество студентов' должно быть больше нуля!");
-        if (studentsCount <= 0) throw new InvalidInputException("Value of field 'Quantity of students' should be greater than 0!");
+        if (studentsCount == null) throw new InvalidInputException("error.sg.students_count.empty");
+        if (studentsCount <= 0) throw new InvalidInputException("error.sg.students_count.wrong_value");
     }
 
     public Long getStudentsCount() {
@@ -93,10 +87,8 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateShouldBeExpelled(Long shouldBeExpelled) {
-//        if (shouldBeExpelled == null) throw new InvalidInputException("Поле 'Количество студентов на отчисление' не должно быть пустым!");
-        if (shouldBeExpelled == null) throw new InvalidInputException("Field 'Should be expelled' should not be empty!");
-//        if (shouldBeExpelled <= 0) throw new InvalidInputException("Значение поля 'Количество студентов на отчисление' должно быть больше нуля!");
-        if (shouldBeExpelled <= 0) throw new InvalidInputException("Value of field 'Should be expelled' should be greater than 0!");
+        if (shouldBeExpelled == null) throw new InvalidInputException("error.sg.should_be_expelled.empty");
+        if (shouldBeExpelled <= 0) throw new InvalidInputException("error.sg.should_be_expelled.wrong_value");
     }
 
     public Long getShouldBeExpelled() {
@@ -109,8 +101,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateFormOfEducation(FormOfEducation formOfEducation) {
-//        if (formOfEducation == null) throw new InvalidInputException("Поле 'Форма обучения' не должно быть пустым!");
-        if (formOfEducation == null) throw new InvalidInputException("Field 'Form of education' should not be empty!");
+        if (formOfEducation == null) throw new InvalidInputException("error.sg.foe.empty");
     }
 
     public FormOfEducation getFormOfEducation() {
@@ -123,8 +114,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateSemester(Semester semester) {
-//        if (semester == null) throw new InvalidInputException("Поле 'Семестр' не должно быть пустым!");
-        if (semester == null) throw new InvalidInputException("Field 'Semester' should not be empty!");
+        if (semester == null) throw new InvalidInputException("error.sg.semester.empty");
     }
 
     public Semester getSemester() {
@@ -137,8 +127,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     }
 
     private void validateGroupAdmin(Person groupAdmin) {
-//        if (groupAdmin == null) throw new InvalidInputException("Поле 'Староста группы' не должно быть пустым!");
-        if (groupAdmin == null) throw new InvalidInputException("Field 'Group admin' should not be empty!");
+        if (groupAdmin == null) throw new InvalidInputException("error.sg.ga.empty");
     }
 
     public Person getGroupAdmin() {
