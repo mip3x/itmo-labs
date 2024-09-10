@@ -11,7 +11,7 @@ public class Main {
             var content = """
               <html>
                 <head><title>Java FastCGI Test App</title></head>
-                <body><h1>JAVA #3</h1></body>
+                <body><h1>JAVA #4</h1></body>
               </html>""";
             var httpResponse = """
               HTTP/1.1 228 OK
