@@ -1,4 +1,4 @@
-package org.example;
+package ru.mip3x;
 import com.fastcgi.FCGIInterface;
 
 import java.nio.charset.StandardCharsets;
