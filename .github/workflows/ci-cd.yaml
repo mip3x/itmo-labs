@@ -36,4 +36,5 @@ jobs:
     - name: Deploy to SSH server via rsync
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/actions
+        chmod 600 /tmp/actions
         rsync -avz --delete -e "ssh -i /tmp/actions -p ${{ secrets.SSH_PORT }}" webapp/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/studs/${{ secrets.SSH_USER }}/web/lab1/
