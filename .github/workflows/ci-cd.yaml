@@ -46,6 +46,7 @@ jobs:
 
     - name: Manage processes on server
       run: |
+        pwd
         ls -la ~
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
