@@ -45,27 +45,12 @@ jobs:
         remote_port: ${{ secrets.SSH_PORT }}
 
     - name: Manage processes on server
-      run: |
-        pwd
-        ls -la ~
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/actions
-        chmod 600 /tmp/actions
-        ssh -i /tmp/actions -p ${{ secrets.SSH_PORT }} -T ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
-          USER_HOME="/home/studs/${{ secrets.SSH_USER }}"
-          LOG_FILE="\$USER_HOME/web/lab1/httpd-root/logs/deploy.logs"
-
-          # Stop existing HTTPD processes
-          killall httpd >> \$LOG_FILE 2>&1 || echo "No HTTPD processes found" >> \$LOG_FILE
-
-          # Start HTTPD
-          httpd -f \$USER_HOME/web/lab1/httpd-root/conf/httpd.conf -k start >> \$LOG_FILE 2>&1
-
-          # Stop existing Java processes
-          killall java >> \$LOG_FILE 2>&1 || echo "No Java processes found" >> \$LOG_FILE
-
-          # Start Java application
-          java -DFCGI_PORT=41489 -jar \$USER_HOME/web/lab1/webapp/fcgi-bin/server.jar >> \$LOG_FILE 2>&1 &
-        EOF
-
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        user: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+            ls -al
+            cat test
