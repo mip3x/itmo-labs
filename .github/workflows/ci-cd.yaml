@@ -55,12 +55,16 @@ jobs:
             LOG_FILE="$HOME/web/lab1/httpd-root/logs/deploy.logs"
 
             echo "---RUNNING HTTPD & JAVA PROCESSES $(date)---" >> $LOG_FILE
-            echo "-Stop existing HTTPD processes-" >> $LOG_FILE
+
+            echo "--Stop existing HTTPD processes--" >> $LOG_FILE
             pkill -f "httpd -f $HOME/web/lab1/httpd-root/conf/httpd.conf -k start" >> $LOG_FILE 2>&1 || echo "No HTTPD processes found" >> $LOG_FILE
+
+            sleep 5
+
             echo "-Start HTTPD service-" >> $LOG_FILE
             httpd -f $HOME/web/lab1/httpd-root/conf/httpd.conf -k start >> $LOG_FILE 2>&1
 
-            echo "-Stop existing JAVA processes-" >> $LOG_FILE
+            echo "--Stop existing JAVA processes--" >> $LOG_FILE
             pkill -f "java -DFCGI_PORT=41489 -jar $HOME/web/lab1/webapp/fcgi-bin/server.jar" >> $LOG_FILE 2>&1 || echo "No Java processes found" >> $LOG_FILE
-            echo "-Start JAVA service-" >> $LOG_FILE
+            echo "--Start JAVA service--" >> $LOG_FILE
             java -XX:MaxHeapSize=1G -XX:MaxMetaspaceSize=128m -DFCGI_PORT=41489 -jar $HOME/web/lab1/webapp/fcgi-bin/server.jar >> $LOG_FILE 2>&1 &
