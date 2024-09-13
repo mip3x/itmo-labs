@@ -33,8 +33,13 @@ jobs:
         mkdir -p webapp
         cp -r second-course/web/lab1/frontend/* webapp/
 
-    - name: Deploy to SSH server via rsync
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/actions
-        chmod 600 /tmp/actions
-        rsync -avz --delete -e "ssh -i /tmp/actions -p ${{ secrets.SSH_PORT }}" webapp/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/studs/${{ secrets.SSH_USER }}/web/lab1/
+    - name: Rsync to the server
+      uses: burnett01/rsync-deployments@7.0.1
+      with:
+        switches: -avzr --delete
+        path: webapp/
+        remote_path: /home/studs/${{ secrets.SSH_USERNAME }}/web/lab1/
+        remote_host: ${{ secrets.SSH_HOST }}
+        remote_user: ${{ secrets.SSH_USERNAME }}
+        remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        remote_port: ${{ secrets.SSH_PORT }}
