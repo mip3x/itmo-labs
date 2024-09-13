@@ -1,0 +1,40 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+      
+    - name: Build 'server.jar'
+      working-directory: ./backend
+      run: ./gradlew build
+
+    - name: Copy 'server.jar' to webapp
+      run: |
+        mkdir -p webapp/fcgi-bin
+        cp backend/build/libs/*.jar webapp/fcgi-bin/server.jar
+
+    - name: Copy frontend to webapp
+      run: |
+        mkdir -p webapp
+        cp -r frontend/* webapp/
+
+    - name: Deploy to SSH server via rsync
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/actions
+        chmod 600 ~/.ssh/id_rsa
+        rsync -avz --delete -e "ssh -i ~/.ssh/actions -p ${{ secrets.SSH_PORT }}" webapp/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/users/${{ secrets.SSH_USER }}/web/lab1/
