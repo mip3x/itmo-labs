@@ -38,8 +38,8 @@ jobs:
       with:
         switches: -avzr --delete
         path: webapp/
-        remote_path: /home/studs/${{ secrets.SSH_USERNAME }}/web/lab1/
+        remote_path: /home/studs/${{ secrets.SSH_USER }}/web/lab1/
         remote_host: ${{ secrets.SSH_HOST }}
-        remote_user: ${{ secrets.SSH_USERNAME }}
+        remote_user: ${{ secrets.SSH_USER }}
         remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
         remote_port: ${{ secrets.SSH_PORT }}
