@@ -52,11 +52,10 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-            USER_HOME="/home/studs/${{ secrets.SSH_USER }}"
-            LOG_FILE="\$USER_HOME/web/lab1/httpd-root/logs/deploy.logs"
+            LOG_FILE="$HOME/web/lab1/httpd-root/logs/deploy.logs"
 
-            pkill -f "httpd -f \$USER_HOME/web/lab1/httpd-root/conf/httpd.conf -k start" >> \$LOG_FILE 2>&1 || echo "No HTTPD processes found" >> \$LOG_FILE # Stop existing HTTPD processes
-            httpd -f \$USER_HOME/web/lab1/httpd-root/conf/httpd.conf -k start >> \$LOG_FILE 2>&1 # Start HTTPD service
+            pkill -f "httpd -f $HOME/web/lab1/httpd-root/conf/httpd.conf -k start" >> $LOG_FILE 2>&1 || echo "No HTTPD processes found" >> $LOG_FILE # Stop existing HTTPD processes
+            httpd -f $HOME/web/lab1/httpd-root/conf/httpd.conf -k start >> $LOG_FILE 2>&1 # Start HTTPD service
 
-            pkill -f "java -DFCGI_PORT=41489 -jar \$USER_HOME/web/lab1/webapp/fcgi-bin/server.jar" >> \$LOG_FILE 2>&1 || echo "No Java processes found" >> \$LOG_FILE # Stop existing JAVA processes
-            java -DFCGI_PORT=41489 -jar \$USER_HOME/web/lab1/webapp/fcgi-bin/server.jar >> \$LOG_FILE 2>&1 &
+            pkill -f "java -DFCGI_PORT=41489 -jar $HOME/web/lab1/webapp/fcgi-bin/server.jar" >> $LOG_FILE 2>&1 || echo "No Java processes found" >> $LOG_FILE # Stop existing JAVA processes
+            java -DFCGI_PORT=41489 -jar $HOME/web/lab1/webapp/fcgi-bin/server.jar >> $LOG_FILE 2>&1 &
