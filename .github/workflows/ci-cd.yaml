@@ -46,7 +46,8 @@ jobs:
 
     - name: Manage processes on server
       run: |
-        mkdir ~/.ssh
+        ls -la ~
+        mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/actions
         chmod 600 /tmp/actions
