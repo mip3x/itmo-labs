@@ -44,11 +44,15 @@ jobs:
         remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
         remote_port: ${{ secrets.SSH_PORT }}
 
+    - name: Add SSH host key
+      run: |
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
     - name: Manage processes on server
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/actions
         chmod 600 /tmp/actions
-        ssh -i /tmp/actions -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+        ssh -i /tmp/actions -p ${{ secrets.SSH_PORT }} -T ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
           USER_HOME="/home/studs/${{ secrets.SSH_USER }}"
           LOG_FILE="\$USER_HOME/web/lab1/httpd-root/logs/deploy.logs"
 
