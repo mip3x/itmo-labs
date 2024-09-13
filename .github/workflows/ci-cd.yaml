@@ -34,7 +34,4 @@ jobs:
         cp -r second-course/web/lab1/frontend/* webapp/
 
     - name: Deploy to SSH server via rsync
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/actions
-        chmod 600 ~/.ssh/actions
-        rsync -avz --delete -e "ssh -i ~/.ssh/actions -p ${{ secrets.SSH_PORT }}" webapp/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/users/${{ secrets.SSH_USER }}/web/lab1/
+      run: rsync -avz --delete -e "ssh -i <(echo '${{ secrets.SSH_PRIVATE_KEY }}') -p ${{ secrets.SSH_PORT }}" webapp/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/studs/${{ secrets.SSH_USER }}/web/lab1/
