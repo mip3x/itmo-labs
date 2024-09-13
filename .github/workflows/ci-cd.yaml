@@ -20,21 +20,21 @@ jobs:
         java-version: '21'
       
     - name: Build 'server.jar'
-      working-directory: ./backend
+      working-directory: ./second-course/web/lab1/backend
       run: ./gradlew build
 
     - name: Copy 'server.jar' to webapp
       run: |
         mkdir -p webapp/fcgi-bin
-        cp backend/build/libs/*.jar webapp/fcgi-bin/server.jar
+        cp second-course/web/lab1/backend/build/libs/*.jar webapp/fcgi-bin/server.jar
 
     - name: Copy frontend to webapp
       run: |
         mkdir -p webapp
-        cp -r frontend/* webapp/
+        cp -r second-course/web/lab1/frontend/* webapp/
 
     - name: Deploy to SSH server via rsync
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/actions
-        chmod 600 ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/actions
         rsync -avz --delete -e "ssh -i ~/.ssh/actions -p ${{ secrets.SSH_PORT }}" webapp/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/users/${{ secrets.SSH_USER }}/web/lab1/
