@@ -1,48 +1,50 @@
 package ru.mip3x.transfer.request;
 
 import com.fastcgi.FCGIInterface;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.mip3x.dto.RequestData;
 import ru.mip3x.dto.Response;
-import ru.mip3x.dto.ValidatedData;
-import ru.mip3x.server.Server;
-import ru.mip3x.transfer.response.SendResponseService;
-import ru.mip3x.transfer.response.SendResponseServiceImpl;
 import ru.mip3x.validation.ValidationService;
 import ru.mip3x.validation.ValidationServiceImpl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Logger;
 
 public class RequestProcessServiceImpl implements RequestProcessService {
-    private final Logger logger;
+    private final Logger logger = LogManager.getLogger(this.getClass());
     private final ValidationService validationService;
-    private final SendResponseService sendResponseService;
 
     public RequestProcessServiceImpl() {
-        logger = Server.getLogger();
         validationService = new ValidationServiceImpl();
-        sendResponseService = new SendResponseServiceImpl();
     }
 
-    public void processRequest(long executionStart) throws IOException {
+    public Response processRequest() throws IOException {
         String requestMethod = FCGIInterface.request.params.getProperty("REQUEST_METHOD");
-        logger.info("REQUEST_METHOD: \n" + requestMethod);
+        logger.info("Request method: {}", requestMethod);
 
-        Response response;
-        if (requestMethod.equals("POST")) {
-            String requestBody = getRequestBody();
-            logger.info("REQUEST BODY:" + requestBody);
+        return switch (requestMethod) {
+            case "POST" -> {
+                String requestBody = getRequestBody();
+                logger.info("Request body:{}", requestBody);
 
-            ValidatedData validatedData = validationService.validateRequestBody(requestBody);
+                try {
+                    RequestData requestData = validationService.parseRequestBody(requestBody);
+                    validationService.validateRequestBody(requestData);
 
-            if (validatedData == null) response = new Response(400, "Bad Request");
-            else response = new Response(200, "OK", validatedData, validationService.checkHit(validatedData), executionStart);
-        }
-        else response = new Response(400, "Bad Request");
+                    boolean checkHitStatus = validationService.checkHit(requestData);
+                    logger.info("Result: {}", checkHitStatus);
 
-        logger.info("GOING TO SEND RESPONSE...");
-        sendResponseService.sendResponse(response);
+                    yield new Response(200, "OK", requestData, checkHitStatus);
+                }
+                catch (IllegalArgumentException exception) {
+                    logger.error("Data validating failed", exception);
+                    yield new Response(400, "Bad Request");
+                }
+            }
+            default -> new Response(400, "Bad Request");
+        };
     }
 
     private String getRequestBody() throws IOException {

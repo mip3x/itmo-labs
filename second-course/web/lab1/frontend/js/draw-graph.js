@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('graph');
     const context = canvas.getContext('2d');
-    let selectedRadius = 100; // value that is not used
+    let selectedRadius = 100;
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;

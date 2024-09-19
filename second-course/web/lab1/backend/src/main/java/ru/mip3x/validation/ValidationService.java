@@ -1,9 +1,11 @@
 package ru.mip3x.validation;
 
-import ru.mip3x.dto.ValidatedData;
+import ru.mip3x.dto.RequestData;
 
 public interface ValidationService {
-    ValidatedData validateRequestBody(String requestBody);
+    RequestData parseRequestBody(String requestBody);
 
-    boolean checkHit(ValidatedData request);
+    void validateRequestBody(RequestData requestData);
+
+    boolean checkHit(RequestData request);
 }

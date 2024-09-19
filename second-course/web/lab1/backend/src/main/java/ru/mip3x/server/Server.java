@@ -1,39 +1,41 @@
 package ru.mip3x.server;
 
 import com.fastcgi.FCGIInterface;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.mip3x.dto.Response;
 import ru.mip3x.transfer.request.RequestProcessService;
 import ru.mip3x.transfer.request.RequestProcessServiceImpl;
+import ru.mip3x.transfer.response.SendResponseService;
+import ru.mip3x.transfer.response.SendResponseServiceImpl;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 public class Server {
-    private static Logger logger;
+    private final Logger logger = LogManager.getLogger(this.getClass());
     private final FCGIInterface fcgiInterface;
     private final RequestProcessService requestProcessService;
+    private final SendResponseService sendResponseService;
 
     public Server() {
-        logger = Logger.getLogger(Server.class.getName());
-
         requestProcessService = new RequestProcessServiceImpl();
+        sendResponseService = new SendResponseServiceImpl();
         fcgiInterface = new FCGIInterface();
     }
 
-    public static Logger getLogger() {
-        return logger;
-    }
-
     public void run() {
-        logger.info("FCGI SERVER STARTED");
-        logger.info("WAITING FOR REQUEST...");
+        logger.info("FastCGI server started");
+        logger.info("Waiting for request...");
 
         while (fcgiInterface.FCGIaccept() >= 0) {
             long executionStart = System.nanoTime();
 
             try {
-                requestProcessService.processRequest(executionStart);
-            } catch (IOException e) {
-                logger.warning("REQUEST PROCESS FAILED");
+                Response response = requestProcessService.processRequest();
+                logger.info("Going to send response...");
+                sendResponseService.sendResponse(response, executionStart);
+            } catch (IOException exception) {
+                logger.error("Request process failed", exception);
             }
         }
     }
