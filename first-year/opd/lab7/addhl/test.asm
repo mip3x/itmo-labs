@@ -1,0 +1,74 @@
+ORG 0x470
+ARG1: WORD 0x0BFF
+ARG2: WORD 0x0000
+ARG3: WORD 0x0078
+
+AC1: WORD 0xFF00
+AC2: WORD 0x0000
+AC3: WORD 0x3C00
+
+CHECK1: WORD 0x0
+CHECK2: WORD 0x0
+CHECK3: WORD 0x0
+
+FINAL: WORD 0x0
+
+CORRECT_RES1: WORD 0xFFFF 
+CORRECT_RES2: WORD 0x0000
+CORRECT_RES3: WORD 0x3C78
+
+ORG 0x48B
+START:
+	CLA
+	CALL TEST1
+	CALL TEST2
+	CALL TEST3
+	LD #0x1
+	AND CHECK1
+	AND CHECK2
+	AND CHECK3
+	ST FINAL
+STOP: HLT
+
+TEST1:
+    LD AC1 
+	WORD 0x9470; ADDHL 470 - адрес ARG1
+	BMI negative_is_set
+	JUMP exit
+	negative_is_set: LD ARG1
+	CMP CORRECT_RES1
+	BEQ set_number1_is_correct
+	JUMP exit
+	set_number1_is_correct: LD CHECK1
+	INC
+	ST CHECK1
+	exit: RET
+
+TEST2:
+	LD AC2
+	WORD 0x9471; ADDHL 471 - адрес ARG2
+	BEQ zero_is_set
+	JUMP exit
+	zero_is_set: LD ARG2
+	CMP CORRECT_RES2
+	BEQ set_number2_is_correct
+	JUMP exit
+	set_number2_is_correct: LD CHECK2
+	INC
+	ST CHECK2
+	JUMP exit
+
+TEST3:
+	LD AC3
+	WORD 0x9472; ADDHL 472 - адрес ARG3
+	BVC overflow_is_set
+	JUMP exit
+	overflow_is_set: LD ARG3
+	CMP CORRECT_RES3
+	BEQ set_number3_is_correct
+	JUMP exit
+	set_number3_is_correct: LD CHECK3
+	INC
+	ST CHECK3
+	JUMP exit
+

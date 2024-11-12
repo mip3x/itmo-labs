@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.MainController">
+    <top>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button fx:id="tableButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="infoButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="animationsButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <ComboBox fx:id="languageSelector" style="-fx-background-radius: 10;"/>
+            <Button fx:id="exitButton" minWidth="150" style="-fx-background-radius: 10;"/>
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="tableView" onMouseClicked="#handleTableClick">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" />
+                <TableColumn fx:id="nameColumn" text="Name" />
+                <TableColumn fx:id="xColumn" text="X" />
+                <TableColumn fx:id="yColumn" text="Y" />
+                <TableColumn fx:id="creationDateColumn" text="Creation Date" />
+                <TableColumn fx:id="studentsCountColumn" text="Students Count" />
+                <TableColumn fx:id="shouldBeExpelledColumn" text="Should Be Expelled" />
+                <TableColumn fx:id="formOfEducationColumn" text="Form of Education" />
+                <TableColumn fx:id="semesterColumn" text="Semester" />
+                <TableColumn fx:id="groupAdminNameColumn" text="Group Admin Name" />
+                <TableColumn fx:id="groupAdminWeightColumn" text="Group Admin Weight" />
+                <TableColumn fx:id="groupAdminPassportIdColumn" text="Group Admin Passport Id" />
+                <TableColumn fx:id="groupAdminEyeColorColumn" text="Group Admin Eye Color" />
+                <TableColumn fx:id="locationNameColumn" text="Location name" />
+                <TableColumn fx:id="locationXColumn" text="Location X" />
+                <TableColumn fx:id="locationYColumn" text="Location Y" />
+                <TableColumn fx:id="locationZColumn" text="Location Z" />
+            </columns>
+        </TableView>
+    </center>
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <Button fx:id="addButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="editButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteAllLowerButton" minWidth="150" style="-fx-background-radius: 10;"/>
+            <Button fx:id="deleteAnyByFOE" minWidth="150" style="-fx-background-radius: 10;"/>
+        </HBox>
+    </bottom>
+</BorderPane>

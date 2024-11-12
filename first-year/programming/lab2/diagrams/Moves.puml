@@ -1,0 +1,102 @@
+@startuml
+package "moves" {
+    package "physical" {
+        Class Bulldoze {
+            +Bulldoze
+            #String describe()
+            #void applyOppEffects(Pokemon pokemon)
+            #void applyOppDamage((Pokemon pokemon, double damage)
+        }
+        Class RockSlide {
+            +RockSlide
+            #String describe()
+            #void applyOppEffects(Pokemon pokemon)
+            #void applyOppDamage((Pokemon pokemon, double damage)
+
+        }
+        Class SeedBomb {
+            +SeedBomb
+            #String describe()
+            #void applyOppDamage((Pokemon pokemon, double damage)
+        }
+        Class SteelWing {
+            +SteelWing
+            #String describe()
+            #void applySelfEffects((Pokemon pokemon)
+            #void applyOppDamage((Pokemon pokemon, double damage)
+        }
+    }
+    package "special" {
+        Class Glaciate {
+            +Glaciate
+            #String describe()
+            #void applyOppEffects(Pokemon pokemon)
+            #void applyOppDamage((Pokemon pokemon, double damage)
+        }
+        Class IceBeam {
+            +IceBeam
+            #String describe()
+            #void applyOppEffects(Pokemon pokemon)
+            #void applyOppDamage((Pokemon pokemon, double damage)
+        }
+    }
+    package "status" {
+        Class Agility {
+            +Agility
+            #String describe()
+            #void applySelfEffects((Pokemon pokemon)
+        }
+        Class Confide {
+            +Confide
+            #String describe()
+            #void applySelfEffects((Pokemon pokemon)
+        }
+        Class DoubleTeam {
+            +DoubleTeam
+            #String describe()
+            #void applySelfEffects((Pokemon pokemon)
+        }
+        Class Rest {
+            +Rest
+            #String describe()
+            #void applySelfEffects((Pokemon pokemon)
+        }
+        Class SwordsDance {
+            +SwordsDance
+            #String describe()
+            #void applySelfEffects((Pokemon pokemon)
+        }
+    }
+}
+
+class PhysicalMove
+
+PhysicalMove <-- Bulldoze
+PhysicalMove <-- RockSlide
+PhysicalMove <-- SeedBomb
+PhysicalMove <-- SteelWing
+
+class SpecialMove
+
+SpecialMove <-- Glaciate
+SpecialMove <-- IceBeam
+
+class StatusMove
+
+StatusMove <-- Agility
+StatusMove <-- Confide
+StatusMove <-- DoubleTeam
+StatusMove <-- Rest
+StatusMove <-- SwordsDance
+
+Abstract Move
+
+Move <-- StatusMove
+Move <-- DamageMove
+
+Abstract DamageMove
+
+DamageMove <-- PhysicalMove
+DamageMove <-- SpecialMove
+
+@enduml
