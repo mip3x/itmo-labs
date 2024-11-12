@@ -3,6 +3,19 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedR = null;
     let selectedY = null;
 
+    // reset checkboxes
+    document.querySelectorAll('#x-checkboxes input[type="checkbox"]').forEach(checkbox => { 
+            checkbox.checked = false;
+    });
+
+    // reset buttons for radius
+    document.querySelectorAll('#r-buttons button').forEach(button => {
+            button.removeAttribute('selected');
+    });
+
+    // reset y
+    document.getElementById('y').value = '';
+
     document.querySelectorAll('#x-checkboxes input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', function () {
             if (this.checked) {
@@ -74,6 +87,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${cells[5]}</td>`;
 
                 tbody.insertAdjacentElement('afterbegin', row);
+
+                drawPoint(parseFloat(selectedX), parseFloat(selectedY), parseFloat(selectedR));
 
                 let rows = tbody.querySelectorAll('tr');
                 if (rows.length > 10) {
