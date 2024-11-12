@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${cells[0]}</td>
                     <td>${cells[1]}</td>
                     <td>${cells[2]}</td>
-                    <td>${cells[3] === 'true' ? '<span style="color: green;">&#10004;</span>' : '<span style="color: red;">&#10008;</span>'}</td>
+                    <td>${cells[3]}</td>
                     <td>${cells[4]}</td>
                     <td>${cells[5]}</td>`;
 

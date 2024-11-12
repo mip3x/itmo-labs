@@ -54,13 +54,14 @@ public class AreaCheckServlet extends HttpServlet {
                     <td>%d</td>
                     <td>%.1f</td>
                     <td>%d</td>
-                    <td>%b</td>
+                    <td>%s</td>
                     <td>%s</td>
                     <td>%tS ms</td>
                     </tr>
                     """.formatted(
                             requestData.x(), requestData.y(), requestData.radius(),
-                            checkHitStatus, time, System.nanoTime() - executionStart);
+                            checkHitStatus ? "<span style=\"color: green;\">&#10004;</span>" : "<span style=\"color: red;\">&#10008;</span>"
+                            , time, System.nanoTime() - executionStart);
 
             results.addFirst(result);
             if (results.size() > 10) results.removeLast();
