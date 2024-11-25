@@ -1,13 +1,29 @@
 document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('graph');
     const context = canvas.getContext('2d');
-    let selectedRadius = 100;
+    // let selectedRadius = 100;
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
     const axisLength = canvas.width;
     const scaleConst = 130;
+
+    let selectedRadius = localStorage.getItem('selectedRadius') ? parseInt(localStorage.getItem('selectedRadius')) : 100;
+
+    // const results = savedResults
+    //     ? savedResults
+    //         .match(/<tr>.*?<\/tr>/g)
+    //         .map((row) => {
+    //             const cells = row.match(/<td>(.*?)<\/td>/g).map((cell) => cell.replace(/<\/?td>/g, ''));
+    //             return {
+    //                 x: parseFloat(cells[0]),
+    //                 y: parseFloat(cells[1]),
+    //                 radius: parseInt(cells[2]),
+    //                 hit: cells[3].includes('green'),
+    //             };
+    //         })
+    //     : [];
 
     function drawGraph(radius) {
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -41,16 +57,17 @@ document.addEventListener('DOMContentLoaded', function () {
         drawAxesSigns(radius);
     }
 
-    function drawPoint(x, y, radius) {
+    function drawPoint(x, y, radius, isHit) {
         const scale = scaleConst / radius;
         const pointX = centerX + x * scale;
         const pointY = centerY - y * scale;
 
-        context.fillStyle = '#FFA500';
+        context.fillStyle = isHit ? '#00FF00' : '#FF0000'; // Зелёный для попадания, красный для промаха
         context.beginPath();
         context.arc(pointX, pointY, 4, 0, Math.PI * 2);
         context.fill();
     }
+
     window.drawPoint = drawPoint;
 
     function drawAxesSigns(radius) {
@@ -135,15 +152,31 @@ document.addEventListener('DOMContentLoaded', function () {
         context.stroke();
     }
 
-    document.querySelectorAll('#r-buttons button').forEach(button => {
+    if (selectedRadius) {
+        drawGraph(selectedRadius);
+    }
+
+    document.querySelectorAll('#r-buttons button').forEach((button) => {
+        if (selectedRadius && parseInt(button.value) === selectedRadius) {
+            button.setAttribute('selected', 'true');
+            button.style.backgroundColor = '#fbfbfb';
+        }
+
         button.addEventListener('click', function () {
             selectedRadius = parseInt(this.value);
-            // drawAxesSigns(selectedRadius)
+            localStorage.setItem('selectedRadius', selectedRadius);
+
+            document.querySelectorAll('#r-buttons button').forEach((btn) => {
+                btn.removeAttribute('selected');
+                btn.style.backgroundColor = '';
+            });
+
+            this.setAttribute('selected', 'true');
+            this.style.backgroundColor = '#fbfbfb';
+
             drawGraph(selectedRadius);
         });
     });
-
-    drawGraph(selectedRadius);
 });
 
 document.addEventListener('DOMContentLoaded', function () {
