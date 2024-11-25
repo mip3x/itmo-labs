@@ -57,8 +57,8 @@
       </form>
     </div>
 
-    <script src="static/js/script.js"></script>
     <script src="static/js/draw-graph.js"></script>
+    <script src="static/js/script.js"></script>
 
     <button id="toggle-table-button" class="toggle-btn">Показать таблицу</button>
     <table id="result-table" style="display: none;">

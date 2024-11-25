@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         context.arc(pointX, pointY, 4, 0, Math.PI * 2);
         context.fill();
     }
+    window.drawPoint = drawPoint;
 
     function drawAxesSigns(radius) {
         let radiusPoints = [

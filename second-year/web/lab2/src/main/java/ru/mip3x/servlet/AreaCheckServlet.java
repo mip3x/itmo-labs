@@ -31,12 +31,12 @@ public class AreaCheckServlet extends HttpServlet {
         final String time = DATE_FORMAT.format(new Date());
         boolean checkHitStatus;
         Request requestData;
-        List<String> results;
+        List<String> results = (List<String>) session.getAttribute("results");
 
-        if (session.getAttribute("results") == null) {
+        if (results == null) {
             results = new ArrayList<>();
             session.setAttribute("results", results);
-        } else results = (List<String>) session.getAttribute("results");
+        }
 
         RequestDispatcher requestDispatcher = request.getRequestDispatcher("index.jsp");
         try {
@@ -66,7 +66,6 @@ public class AreaCheckServlet extends HttpServlet {
             results.addFirst(result);
             if (results.size() > 10) results.removeLast();
             response.setContentType("text/html");
-            response.getWriter().write(result);
 
             request.setAttribute("results", results);
             request.getRequestDispatcher("index.jsp").forward(request, response);
