@@ -10,20 +10,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const scaleConst = 130;
 
     let selectedRadius = localStorage.getItem('selectedRadius') ? parseInt(localStorage.getItem('selectedRadius')) : 100;
+    console.log("draw-graph selectedRadius: ", selectedRadius);
+    window.selectedRadius = selectedRadius;
 
-    // const results = savedResults
-    //     ? savedResults
-    //         .match(/<tr>.*?<\/tr>/g)
-    //         .map((row) => {
-    //             const cells = row.match(/<td>(.*?)<\/td>/g).map((cell) => cell.replace(/<\/?td>/g, ''));
-    //             return {
-    //                 x: parseFloat(cells[0]),
-    //                 y: parseFloat(cells[1]),
-    //                 radius: parseInt(cells[2]),
-    //                 hit: cells[3].includes('green'),
-    //             };
-    //         })
-    //     : [];
+    const MAX_POINTS = 10;
+    const results = [];
+    if (savedResults && savedResults.trim().length > 0) {
+        const rows = savedResults.split('</tr>');
+        rows.forEach((row) => {
+            if (row.trim().length > 0) {
+                const cells = row.match(/<td>(.*?)<\/td>/g);
+                if (cells && cells.length >= 4) {
+                    results.push({
+                        x: parseFloat(cells[0].replace(/<\/?td>/g, '')),
+                        y: parseFloat(cells[1].replace(/<\/?td>/g, '')),
+                        radius: parseInt(cells[2].replace(/<\/?td>/g, '')),
+                        hit: cells[3].includes('green'),
+                    });
+                }
+            }
+        });
+
+        while (results.length > MAX_POINTS) {
+            results.shift();
+        }
+
+        results.reverse();
+    }
 
     function drawGraph(radius) {
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -55,20 +68,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
         drawAxes();
         drawAxesSigns(radius);
+
+        console.log(results);
+        drawSavedPoints(radius);
     }
 
-    function drawPoint(x, y, radius, isHit) {
+    function drawPoint(x, y, radius) {
         const scale = scaleConst / radius;
+
         const pointX = centerX + x * scale;
         const pointY = centerY - y * scale;
 
-        context.fillStyle = isHit ? '#00FF00' : '#FF0000'; // Зелёный для попадания, красный для промаха
+        context.fillStyle = "#FFA500";
         context.beginPath();
         context.arc(pointX, pointY, 4, 0, Math.PI * 2);
         context.fill();
     }
 
-    window.drawPoint = drawPoint;
+    function drawSavedPoints(radius) {
+        results.forEach((result) => {
+            drawPoint(result.x, result.y, radius);
+        });
+    }
+
+    window.drawPoint = function(x, y, radius) {
+        results.push({ x, y, radius });
+
+        while (results.length > MAX_POINTS) {
+            results.shift();
+        }
+
+        drawGraph(radius);
+    };
 
     function drawAxesSigns(radius) {
         let radiusPoints = [
@@ -185,6 +216,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const toggleButton = document.getElementById('toggle-table-button');
 
     toggleButton.addEventListener('click', function () {
+        const currentDisplay = getComputedStyle(table).display;
+        console.log("currentDisplay: ", currentDisplay)
         if (table.style.display === 'none' || !table.style.display) {
             table.style.display = 'table';
             toggleButton.textContent = 'Скрыть таблицу';

@@ -67,8 +67,16 @@ public class AreaCheckServlet extends HttpServlet {
             if (results.size() > 10) results.removeLast();
             response.setContentType("text/html");
 
-            request.setAttribute("results", results);
-            request.getRequestDispatcher("index.jsp").forward(request, response);
+            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+                response.setContentType("text/html");
+                response.getWriter().write(result);
+            } else {
+                request.setAttribute("results", results);
+                request.getRequestDispatcher("index.jsp").forward(request, response);
+            }
+
+//            request.setAttribute("results", results);
+//            request.getRequestDispatcher("index.jsp").forward(request, response);
 
         } catch (IllegalArgumentException exception) {
             logger.info("Error occurred while validating: {}", exception.getMessage());

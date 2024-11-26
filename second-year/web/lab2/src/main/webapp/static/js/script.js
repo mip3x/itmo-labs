@@ -1,21 +1,23 @@
 document.addEventListener('DOMContentLoaded', function () {
     let selectedX = null;
-    let selectedR = null;
+    let selectedR = window.selectedRadius;
+    if (selectedR === 100) selectedR = null;
     let selectedY = null;
 
-    // reset checkboxes
-    document.querySelectorAll('#x-checkboxes input[type="checkbox"]').forEach(checkbox => { 
-            checkbox.checked = false;
+    // Сбрасываем выбор чекбоксов
+    document.querySelectorAll('#x-checkboxes input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
     });
 
-    // reset buttons for radius
+    // Сбрасываем кнопки для радиуса
     document.querySelectorAll('#r-buttons button').forEach(button => {
-            button.removeAttribute('selected');
+        button.removeAttribute('selected');
     });
 
-    // reset y
+    // Сбрасываем поле для Y
     document.getElementById('y').value = '';
 
+    // Обработка выбора X
     document.querySelectorAll('#x-checkboxes input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', function () {
             if (this.checked) {
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Обработка выбора R
     document.querySelectorAll('#r-buttons button').forEach(button => {
         button.addEventListener('click', function () {
             selectedR = this.value;
@@ -37,10 +40,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Обработка отправки формы
     document.getElementById('point-form').addEventListener('submit', function (event) {
         event.preventDefault();
 
         selectedY = document.getElementById('y').value;
+        console.log(selectedR);
 
         if (!selectedX || !selectedR) {
             document.getElementById('error-msg').textContent = "Выберите значение для X и R";
@@ -54,45 +59,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('error-msg').textContent = '';
 
-        const url = `controller?x=${encodeURIComponent(selectedX)}&y=${encodeURIComponent(selectedY)}&radius=${encodeURIComponent(selectedR)}`;
-        let clientStartTime = new Date().toLocaleTimeString();
+        const url = `checkData?x=${encodeURIComponent(selectedX)}&y=${encodeURIComponent(selectedY)}&radius=${encodeURIComponent(selectedR)}`;
         const table = document.getElementById('result-table');
-        const tbody = table ? table.querySelector('tbody') : null;
+        const tbody = table.querySelector('tbody');
         const toggleButton = document.getElementById('toggle-table-button');
 
-        if (!tbody) {
-            console.error('Элемент <tbody> не найден');
-            return;
-        }
-
+        // Отправляем AJAX-запрос
         fetch(url, {
             method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) throw new Error("Ошибка при отправке запроса");
+                return response.text();
+            })
             .then(html => {
+                // Делаем таблицу видимой
                 if (table.style.display === 'none' || !table.style.display) {
                     table.style.display = 'table';
                     toggleButton.textContent = 'Скрыть таблицу';
                 }
 
-                let row = document.createElement('tr');
-                let cells = html.match(/<td>(.*?)<\/td>/g).map(cell => cell.replace(/<\/?td>/g, ''));
+                // Добавляем новую строку в таблицу
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = html.trim();
+                tbody.insertBefore(newRow, tbody.firstChild);
 
-                row.innerHTML = `
-                    <td>${cells[0]}</td>
-                    <td>${cells[1]}</td>
-                    <td>${cells[2]}</td>
-                    <td>${cells[3]}</td>
-                    <td>${cells[4]}</td>
-                    <td>${cells[5]}</td>`;
+                // Извлекаем данные для отрисовки точки
+                const cells = newRow.querySelectorAll('td');
+                const result = {
+                    x: parseFloat(cells[0].textContent),
+                    y: parseFloat(cells[1].textContent),
+                    radius: parseInt(cells[2].textContent),
+                    hit: cells[3].innerHTML.includes('green')
+                };
 
-                tbody.insertAdjacentElement('afterbegin', row);
+                // Рисуем точку
+                // drawPoint(result.x, result.y, result.radius, parseInt(selectedR), result.hit);
+                drawPoint(result.x, result.y, result.radius);
 
-                drawPoint(parseFloat(selectedX), parseFloat(selectedY), parseFloat(selectedR));
-
-                let rows = tbody.querySelectorAll('tr');
-                if (rows.length > 10) {
-                    tbody.removeChild(rows[rows.length - 1]);
+                // Ограничиваем количество строк в таблице до 10
+                if (tbody.rows.length > 10) {
+                    tbody.deleteRow(tbody.rows.length - 1);
                 }
             })
             .catch(error => {
@@ -103,24 +113,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     toggleButton.textContent = 'Скрыть таблицу';
                 }
 
-                let errorRow = document.createElement('tr');
+                // Добавляем строку с ошибкой
+                const errorRow = document.createElement('tr');
                 errorRow.innerHTML = `
                     <td>${selectedX}</td>
                     <td>${selectedY}</td>
                     <td>${selectedR}</td>
                     <td style="color: orange;">?</td>
-                    <td>${clientStartTime}</td>
+                    <td>${new Date().toLocaleTimeString()}</td>
                     <td style="color: red;">Ошибка</td>`;
+                tbody.insertBefore(errorRow, tbody.firstChild);
 
-                errorRow.classList.add('new-row');
-                tbody.insertAdjacentElement('afterbegin', errorRow);
-
-                let rows = tbody.querySelectorAll('tr');
-                if (rows.length > 10) {
-                    tbody.removeChild(rows[rows.length - 1]);
+                if (tbody.rows.length > 10) {
+                    tbody.deleteRow(tbody.rows.length - 1);
                 }
             });
-
-        console.log('Отправлен запрос:', url);
     });
 });

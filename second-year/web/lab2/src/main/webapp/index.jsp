@@ -57,14 +57,14 @@
             </form>
     </div>
 
+    <script>
+        const savedResults = `<%= session.getAttribute("results") != null
+            ? String.join("", (List<String>) session.getAttribute("results"))
+            : "" %>`;
+    </script>
+
     <script src="static/js/draw-graph.js"></script>
     <script src="static/js/script.js"></script>
-
-    <script>
-        const savedResults = <%= session.getAttribute("results") != null
-            ? session.getAttribute("results").toString()
-            : "[]" %>;
-    </script>
 
     <button id="toggle-table-button" class="toggle-btn">Показать таблицу</button>
     <table id="result-table" style="display: none;">
