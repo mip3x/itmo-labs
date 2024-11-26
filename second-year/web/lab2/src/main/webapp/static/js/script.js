@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('error-msg').textContent = '';
 
-        const url = `checkData?x=${encodeURIComponent(selectedX)}&y=${encodeURIComponent(selectedY)}&radius=${encodeURIComponent(selectedR)}`;
+        const url = `controller?x=${encodeURIComponent(selectedX)}&y=${encodeURIComponent(selectedY)}&radius=${encodeURIComponent(selectedR)}`;
         const table = document.getElementById('result-table');
         const tbody = table.querySelector('tbody');
         const toggleButton = document.getElementById('toggle-table-button');
