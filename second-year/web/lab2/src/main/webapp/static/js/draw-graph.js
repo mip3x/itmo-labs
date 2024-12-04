@@ -91,6 +91,47 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    canvas.addEventListener('click', function (event) {
+        if (selectedRadius === 100) {
+            alert("Выберите радиус!");
+            return;
+        }
+
+        let canvasPos = canvas.getBoundingClientRect();
+        const clickX = event.clientX - canvasPos.left;
+        const clickY = event.clientY - canvasPos.top;
+
+        let x = Math.round( (clickX.toFixed(4) - 180) / (120/selectedRadius) );
+        let y = ((180 - clickY.toFixed(4)) / (120/selectedRadius)).toFixed(1);
+
+        results.push({ x, y, selectedRadius });
+
+        console.log("coordinates to save: ", x, y, selectedRadius);
+
+        if (x< -4 || x > 4 || y < -5 || y > 5) {
+            console.log("Координаты вне диапазона!");
+
+            const table = document.getElementById('result-table');
+            const tbody = table.querySelector('tbody');
+
+            const errorRow = document.createElement('tr');
+            errorRow.innerHTML = `
+            <td>${x}</td>
+            <td>${y}</td>
+            <td>${selectedRadius}</td>
+            <td style="color: orange;">?</td>
+            <td>${new Date().toLocaleTimeString()}</td>
+            <td style="color: red;">Ошибка: вне диапазона</td>`;
+            tbody.insertBefore(errorRow, tbody.firstChild);
+
+            if (tbody.rows.length > 10) tbody.deleteRow(tbody.rows.length - 1);
+
+            return;
+        }
+
+        window.location.href = `controller?x=${encodeURIComponent(x)}&y=${encodeURIComponent(y)}&radius=${encodeURIComponent(selectedRadius)}`;
+    });
+
     window.drawPoint = function(x, y, radius) {
         results.push({ x, y, radius });
 

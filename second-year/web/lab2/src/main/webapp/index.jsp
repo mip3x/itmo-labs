@@ -1,6 +1,11 @@
 <%@ page import="java.util.List" %>
 <%@ page import="ru.mip3x.dto.Response" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%
+    String fullName = System.getenv("USER_FULLNAME");
+    String group = System.getenv("USER_GROUP");
+    String variant = System.getenv("USER_VARIANT");
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +19,9 @@
 <div class="container">
     <header>
         <div class="credentials">
-            ФИО: Иванов Иван Иванович<br>
-            Группа: P3211<br>
-            Вариант: 21108
+            ФИО: <%= fullName != null ? fullName : "Не указано" %><br>
+            Группа: <%= group != null ? group : "Не указано" %><br>
+            Вариант: <%= variant != null ? variant : "Не указано" %>
         </div>
     </header>
 
@@ -27,6 +32,7 @@
             </div>
 
             <form id="point-form" action="checkData" method="get">
+                <input type="hidden" id="radius" name="radius" value="">
                 <h4>X</h4>
                 <div class="checkbox-group" id="x-checkboxes" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
                     <label><input type="checkbox" name="x" value="-4">-4</label>

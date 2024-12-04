@@ -21,18 +21,4 @@ public class Response {
 
     public int getX() { return x; }
     public double getY() { return y; }
-    public int getRadius() { return radius; }
-    public boolean isHit() { return hit; }
-    public String getTime() { return time; }
-    public long getExecutionTime() { return executionTime; }
-
-    public String toJson() {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "{}";
-        }
-    }
 }

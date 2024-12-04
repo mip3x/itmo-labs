@@ -27,6 +27,6 @@ public class ControllerServlet extends HttpServlet {
         else requestDispatcher = request.getRequestDispatcher("/index.jsp");
         requestDispatcher.forward(request, response);
 
-        logger.info("Forwarding data to {} dispatcher", requestDispatcher.getClass().getName());
+        logger.info("Forwarding data to {} dispatcher", requestDispatcher);
     }
 }
