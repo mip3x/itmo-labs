@@ -10,18 +10,34 @@
 </h:head>
 
 <h:body>
-    <header>
-        <h1>ФИО: <h:outputText value="#{environmentBean.fullName}" /></h1>
-        <h2>Номер группы: <h:outputText value="#{environmentBean.groupNumber}" /></h2>
-        <h2>Вариант: <h:outputText value="#{environmentBean.variant}" /></h2>
-        <h2>Время: <h:outputText id="time" value="#{timeBean.currentDateTime}"/></h2>
-        <p:poll interval="7" listener="#{timeBean.updateTime}" update="time" />
+    <div class="background">
 
-        <h:form>
-            <h:commandLink value="Перейти к проверке точки"
-                           action="app.xhtml"/>
-        </h:form>
-    </header>
+        <div class="title">
+            <h1>Веб №3</h1>
+        </div>
+
+        <div class="menu">
+            <div class="button disabled">ФИО: <h:outputText value="#{environmentBean.fullName}" /></div>
+            <div class="button disabled">Номер группы: <h:outputText value="#{environmentBean.groupNumber}" /></div>
+            <div class="button disabled">Вариант: <h:outputText value="#{environmentBean.variant}" /></div>
+            <div class="button disabled time-button">
+                Дата: <h:outputText id="time" value="#{timeBean.currentDateTime}" styleClass="time-label"/>
+            </div>
+            <p:poll interval="7" listener="#{timeBean.updateTime}" update="time" />
+
+            <h:form>
+                <h:commandButton value="Перейти к выбору точек"
+                                 action="nextPage.xhtml"
+                                 styleClass="button active" />
+            </h:form>
+        </div>
+
+    </div>
+
+    <footer class="footer">
+        <div class="footer-left">Web#3 1.4.88</div>
+        <div class="footer-right">Copyright VT&#169;. Do distribute</div>
+    </footer>
+
 </h:body>
-
 </html>

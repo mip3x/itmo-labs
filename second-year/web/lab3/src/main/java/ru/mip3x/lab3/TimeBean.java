@@ -21,6 +21,6 @@ public class TimeBean implements Serializable {
     }
 
     public void updateTime() {
-        this.currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+        this.currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
     }
 }
