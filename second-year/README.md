@@ -1,2 +1,2 @@
-# second-course
+# second-year
 ## Лабораторные работы второго курса
