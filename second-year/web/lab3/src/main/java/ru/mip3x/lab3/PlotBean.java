@@ -21,13 +21,13 @@ import java.io.File;
 public class PlotBean implements Serializable {
     @Setter
     @Getter
-    private double x;
+    private Double x = 0.0;
     @Setter
     @Getter
-    private double y;
+    private Double y = 0.0;
     @Setter
     @Getter
-    private double radius = 1.0;
+    private Double radius = null; // Радиус изначально null
     private boolean pointInArea;
     @Inject
     private ServletContext servletContext;
@@ -42,16 +42,16 @@ public class PlotBean implements Serializable {
             // Anti-aliasing for smoother graphics
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Background
+            // Background circle filling slightly more than the area
             int pixelSize = 10;
             int centerX = width / 2;
             int centerY = height / 2;
-            int radius = (int) (1.15 * Math.min(width, height) / 2); // Adjust to fit within the square
+            int backgroundRadiusPixels = (int) (0.95 * Math.min(width, height) / 2); // Фон чуть больше осей
 
             g2d.setColor(new Color(255, 255, 255));
-            for (int y = -radius; y <= radius; y += pixelSize) {
-                for (int x = -radius; x <= radius; x += pixelSize) {
-                    if (x * x + y * y <= radius * radius) {
+            for (int y = -backgroundRadiusPixels; y <= backgroundRadiusPixels; y += pixelSize) {
+                for (int x = -backgroundRadiusPixels; x <= backgroundRadiusPixels; x += pixelSize) {
+                    if (x * x + y * y <= backgroundRadiusPixels * backgroundRadiusPixels) {
                         g2d.fillRect(centerX + x, centerY + y, pixelSize, pixelSize);
                     }
                 }
@@ -79,39 +79,48 @@ public class PlotBean implements Serializable {
             g2d.fillPolygon(new int[]{width, width - 10, width - 10}, new int[]{height / 2, height / 2 - 5, height / 2 + 5}, 3); // Ox arrow
 
             // Labels
-            int rPixels = (int) (0.75 * Math.min(width, height) / 2);
-            g2d.drawString("R", width / 2 + 5, height / 2 - rPixels + 5);
-            g2d.drawString("-R", width / 2 + 5, height / 2 + rPixels - 5);
-            g2d.drawString("R", width / 2 + rPixels - 10, height / 2 + 15);
-            g2d.drawString("-R", width / 2 - rPixels - 20, height / 2 + 15);
-            g2d.drawString("R/2", width / 2 + 5, height / 2 - rPixels / 2 + 5);
-            g2d.drawString("-R/2", width / 2 + 5, height / 2 + rPixels / 2 - 5);
-            g2d.drawString("R/2", width / 2 + rPixels / 2 - 10, height / 2 + 15);
-            g2d.drawString("-R/2", width / 2 - rPixels / 2 - 25, height / 2 + 15);
+            int graphRadiusPixels = (int) (0.75 * Math.min(width, height) / 2); // Радиус графика
+            if (radius == null) {
+                g2d.drawString("R", width / 2 + 5, height / 2 - graphRadiusPixels + 5);
+                g2d.drawString("-R", width / 2 + 5, height / 2 + graphRadiusPixels - 5);
+                g2d.drawString("R", width / 2 + graphRadiusPixels - 10, height / 2 + 15);
+                g2d.drawString("-R", width / 2 - graphRadiusPixels - 20, height / 2 + 15);
 
-            // Axis labels
-            g2d.drawString("X", width - 20, height / 2 - 10);
-            g2d.drawString("Y", width / 2 + 10, 20);
+                g2d.drawString("R/2", width / 2 + 5, height / 2 - graphRadiusPixels / 2 + 5);
+                g2d.drawString("-R/2", width / 2 + 5, height / 2 + graphRadiusPixels / 2 - 5);
+                g2d.drawString("R/2", width / 2 + graphRadiusPixels / 2 - 10, height / 2 + 15);
+                g2d.drawString("-R/2", width / 2 - graphRadiusPixels / 2 - 25, height / 2 + 15);
+            } else {
+                g2d.drawString(String.format("%.1f", radius), width / 2 + 5, height / 2 - graphRadiusPixels + 5);
+                g2d.drawString(String.format("-%.1f", radius), width / 2 + 5, height / 2 + graphRadiusPixels - 5);
+                g2d.drawString(String.format("%.1f", radius), width / 2 + graphRadiusPixels - 10, height / 2 + 15);
+                g2d.drawString(String.format("-%.1f", radius), width / 2 - graphRadiusPixels - 20, height / 2 + 15);
 
-            // Shapes (filled region)
+                g2d.drawString(String.format("%.1f", radius / 2), width / 2 + 5, height / 2 - graphRadiusPixels / 2 + 5);
+                g2d.drawString(String.format("-%.1f", radius / 2), width / 2 + 5, height / 2 + graphRadiusPixels / 2 - 5);
+                g2d.drawString(String.format("%.1f", radius / 2), width / 2 + graphRadiusPixels / 2 - 10, height / 2 + 15);
+                g2d.drawString(String.format("-%.1f", radius / 2), width / 2 - graphRadiusPixels / 2 - 25, height / 2 + 15);
+            }
+
+            // Graph shapes (triangle, square, and quarter-circle)
             g2d.setColor(new Color(0, 0, 255, 150));
 
             // Rectangle
-            g2d.fillRect(width / 2, height / 2 - rPixels / 2, rPixels, rPixels / 2);
+            g2d.fillRect(centerX, centerY - graphRadiusPixels / 2, graphRadiusPixels, graphRadiusPixels / 2);
 
             // Triangle
             Polygon triangle = new Polygon();
-            triangle.addPoint(width / 2, height / 2);
-            triangle.addPoint(width / 2 - rPixels, height / 2);
-            triangle.addPoint(width / 2, height / 2 - rPixels / 2);
+            triangle.addPoint(centerX, centerY);
+            triangle.addPoint(centerX - graphRadiusPixels, centerY);
+            triangle.addPoint(centerX, centerY - graphRadiusPixels / 2);
             g2d.fillPolygon(triangle);
 
             // Quarter-circle
-            g2d.fillArc(width / 2 - rPixels / 2, height / 2 - rPixels / 2, rPixels, rPixels, 0, -90);
+            g2d.fillArc(centerX - graphRadiusPixels / 2, centerY - graphRadiusPixels / 2, graphRadiusPixels, graphRadiusPixels, 0, -90);
 
             // Example dot
-            int pointX = (int) (width / 2 + x * (rPixels / radius));
-            int pointY = (int) (height / 2 - y * (rPixels / radius));
+            int pointX = (int) (width / 2 + x * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
+            int pointY = (int) (height / 2 - y * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
             g2d.setColor(pointInArea ? Color.GREEN : Color.RED);
             g2d.fillOval(pointX - 5, pointY - 5, 10, 10);
 
@@ -130,19 +139,26 @@ public class PlotBean implements Serializable {
         int width = 500;
         int height = 500;
 
-        double rPixels = 0.75 * Math.min(width, height) / 2;
-        x = (clickX - width / 2) / (rPixels / radius);
-        y = (height / 2 - clickY) / (rPixels / radius);
+        double graphRadiusPixels = 0.75 * Math.min(width, height) / 2;
+        x = (clickX - width / 2) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
+        y = (height / 2 - clickY) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
         checkPoint();
     }
 
     public void checkPoint() {
+        if (radius == null) {
+            pointInArea = false;
+            return;
+        }
         pointInArea = (x >= 0 && y >= 0 && y <= radius - x)
                 || (x <= 0 && y >= 0 && x >= -radius / 2 && y <= radius)
                 || (x >= 0 && y <= 0 && x * x + y * y <= (radius / 2) * (radius / 2));
     }
 
     public void updateRadius() {
+        if (radius != null) {
+            radius = Math.round(radius * 10) / 10.0; // Ограничиваем до 1 знака после запятой
+        }
         checkPoint();
     }
 }
