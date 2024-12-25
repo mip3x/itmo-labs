@@ -43,8 +43,19 @@ public class PlotBean implements Serializable {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             // Background
-            g2d.setColor(new Color(255, 240, 220));
-            g2d.fillRect(0, 0, width, height);
+            int pixelSize = 10;
+            int centerX = width / 2;
+            int centerY = height / 2;
+            int radius = (int) (1.15 * Math.min(width, height) / 2); // Adjust to fit within the square
+
+            g2d.setColor(new Color(255, 255, 255));
+            for (int y = -radius; y <= radius; y += pixelSize) {
+                for (int x = -radius; x <= radius; x += pixelSize) {
+                    if (x * x + y * y <= radius * radius) {
+                        g2d.fillRect(centerX + x, centerY + y, pixelSize, pixelSize);
+                    }
+                }
+            }
 
             // Load custom font
             Font customFont;
