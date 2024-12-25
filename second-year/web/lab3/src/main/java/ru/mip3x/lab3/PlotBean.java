@@ -2,6 +2,8 @@ package ru.mip3x.lab3;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,8 +16,14 @@ import java.io.Serializable;
 @Named("plotBean")
 @ApplicationScoped
 public class PlotBean implements Serializable {
+    @Setter
+    @Getter
     private double x;
+    @Setter
+    @Getter
     private double y;
+    @Setter
+    @Getter
     private double radius = 1.0;
     private boolean pointInArea;
 
@@ -89,29 +97,5 @@ public class PlotBean implements Serializable {
 
     public void updateRadius() {
         checkPoint();
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getRadius() {
-        return radius;
-    }
-
-    public void setRadius(double radius) {
-        this.radius = radius;
     }
 }
