@@ -91,6 +91,12 @@ body, footer {
     height: 2rem;
     text-align: center;
     box-sizing: border-box;
+    transition: background-color 0.3s ease;
+}
+
+.change-x.active {
+    background-color: #222;
+    color: #ffff00;
 }
 
 .check-point-button, .back-button {

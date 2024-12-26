@@ -29,32 +29,41 @@
                     <h:outputLabel styleClass="label-x" value="Изменение X:" />
                     <div class="x-buttons">
                         <!-- Buttons for X selection -->
-                        <h:commandButton styleClass="change-x" value="-4">
+                        <h:commandButton id="xButton1" styleClass="change-x" value="-4">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-4)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="-3">
+                        <h:commandButton id="xButton2" styleClass="change-x" value="-3">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-3)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="-2">
+                        <h:commandButton id="xButton3" styleClass="change-x" value="-2">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-2)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="-1">
+                        <h:commandButton id="xButton4" styleClass="change-x" value="-1">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-1)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="0">
+                        <h:commandButton id="xButton5" styleClass="change-x" value="0">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(0)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="1">
+                        <h:commandButton id="xButton6" styleClass="change-x" value="1">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(1)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="2">
+                        <h:commandButton id="xButton7" styleClass="change-x" value="2">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(2)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="3">
+                        <h:commandButton id="xButton8" styleClass="change-x" value="3">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(3)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
-                        <h:commandButton styleClass="change-x" value="4">
+                        <h:commandButton id="xButton9" styleClass="change-x" value="4">
                             <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(4)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                     </div>
                 </div>
@@ -91,8 +100,16 @@
         </div>
     </h:form>
 
-    <!-- Script to redirect Enter key to the checkButton -->
+    <!-- Script to manage active buttons and handle Enter key -->
     <script>
+        function setActiveButton(clickedButton) {
+            const buttons = document.querySelectorAll('.change-x');
+            buttons.forEach(button => {
+                button.classList.remove('active'); // Убираем класс active со всех кнопок
+            });
+            clickedButton.classList.add('active'); // Добавляем класс active на нажатую кнопку
+        }
+
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
