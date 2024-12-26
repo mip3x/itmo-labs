@@ -52,6 +52,7 @@
                     <h:outputLabel styleClass="label-r" for="radius" value="Изменение R (1...4):" />
                     <h:inputText styleClass="input-r" id="radius" value="#{plotBean.radius}" size="5">
                         <f:validateDoubleRange minimum="1" maximum="4" />
+                        <f:ajax event="blur" render="plotImage" listener="#{plotBean.updateRadius}" />
                     </h:inputText>
                 </div>
 

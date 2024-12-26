@@ -27,7 +27,7 @@ public class PlotBean implements Serializable {
     private Double y = 0.0;
     @Setter
     @Getter
-    private Double radius = null; // Радиус изначально null
+    private Double radius = null;
     private boolean pointInArea;
     @Inject
     private ServletContext servletContext;
@@ -46,7 +46,7 @@ public class PlotBean implements Serializable {
             int pixelSize = 10;
             int centerX = width / 2;
             int centerY = height / 2;
-            int backgroundRadiusPixels = (int) (0.95 * Math.min(width, height) / 2); // Фон чуть больше осей
+            int backgroundRadiusPixels = (int) (1.10 * Math.min(width, height) / 2); // Фон чуть больше осей
 
             g2d.setColor(new Color(255, 255, 255));
             for (int y = -backgroundRadiusPixels; y <= backgroundRadiusPixels; y += pixelSize) {
@@ -79,7 +79,7 @@ public class PlotBean implements Serializable {
             g2d.fillPolygon(new int[]{width, width - 10, width - 10}, new int[]{height / 2, height / 2 - 5, height / 2 + 5}, 3); // Ox arrow
 
             // Labels
-            int graphRadiusPixels = (int) (0.75 * Math.min(width, height) / 2); // Радиус графика
+            int graphRadiusPixels = (int) (0.75 * Math.min(width, height) / 2);
             if (radius == null) {
                 g2d.drawString("R", width / 2 + 5, height / 2 - graphRadiusPixels + 5);
                 g2d.drawString("-R", width / 2 + 5, height / 2 + graphRadiusPixels - 5);
@@ -157,7 +157,7 @@ public class PlotBean implements Serializable {
 
     public void updateRadius() {
         if (radius != null) {
-            radius = Math.round(radius * 10) / 10.0; // Ограничиваем до 1 знака после запятой
+            radius = Math.round(radius * 10) / 10.0;
         }
         checkPoint();
     }
