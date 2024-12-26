@@ -14,7 +14,7 @@
             <!-- plot panel -->
             <div class="left-panel">
                 <p:graphicImage id="plotImage" value="#{plotBean.image}" cache="false" style="max-width: 100%; height: auto;">
-                    <p:ajax event="click" listener="#{plotBean.handleClick}" />
+                    <p:ajax event="click" listener="#{plotBean.handleClick}" render="plotImage" />
                 </p:graphicImage>
             </div>
 
@@ -58,7 +58,8 @@
 
                 <div class="form-field">
                     <!-- Check Point Button -->
-                    <h:commandButton styleClass="check-point-button active" value="Проверить точку" />
+                    <h:commandButton styleClass="check-point-button active" value="Проверить точку"
+                                     action="#{plotBean.checkPoint}" update="plotImage" />
                     <!-- Back to Welcome Page Button -->
                     <h:commandButton value="Назад на стартовую страницу" action="welcome.xhtml" styleClass="back-button active" />
                 </div>

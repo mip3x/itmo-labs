@@ -153,13 +153,16 @@ public class PlotBean implements Serializable {
     }
 
     public void checkPoint() {
-        if (radius == null) {
+        if (radius == null || x == null || y == null) {
             pointInArea = false;
             return;
         }
-        pointInArea = (x >= 0 && y >= 0 && y <= radius - x)
-                || (x <= 0 && y >= 0 && x >= -radius / 2 && y <= radius)
-                || (x >= 0 && y <= 0 && x * x + y * y <= (radius / 2) * (radius / 2));
+
+        boolean inRectangle = (x >= 0 && x <= radius && y >= 0 && y <= radius / 2);
+        boolean inTriangle = (x <= 0 && y >= 0 && y <= radius / 2 + x);
+        boolean inCircle = (x >= 0 && y <= 0 && (x * x + y * y <= (radius / 2) * (radius / 2)));
+
+        pointInArea = inRectangle || inTriangle || inCircle;
     }
 
     public void updateRadius() {
