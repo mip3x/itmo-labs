@@ -27,15 +27,34 @@
                 <div class="form-field">
                     <h:outputLabel styleClass="label-x" value="Изменение X:" />
                     <div class="x-buttons">
-                        <h:commandButton styleClass="change-x" value="-4" action="#{plotBean.setX(-4)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="-3" action="#{plotBean.setX(-3)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="-2" action="#{plotBean.setX(-2)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="-1" action="#{plotBean.setX(-1)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="0" action="#{plotBean.setX(0)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="1" action="#{plotBean.setX(1)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="2" action="#{plotBean.setX(2)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="3" action="#{plotBean.setX(3)}" update="plotImage" />
-                        <h:commandButton styleClass="change-x" value="4" action="#{plotBean.setX(4)}" update="plotImage" />
+                        <!-- Buttons for X selection -->
+                        <h:commandButton styleClass="change-x" value="-4">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-4)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="-3">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-3)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="-2">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-2)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="-1">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-1)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="0">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(0)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="1">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(1)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="2">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(2)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="3">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(3)}" />
+                        </h:commandButton>
+                        <h:commandButton styleClass="change-x" value="4">
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(4)}" />
+                        </h:commandButton>
                     </div>
                 </div>
 
@@ -44,6 +63,7 @@
                     <h:outputLabel styleClass="label-y" for="yCoord" value="Изменение Y (-3...3):" />
                     <h:inputText styleClass="input-y" id="yCoord" value="#{plotBean.y}" size="5">
                         <f:validateDoubleRange minimum="-3" maximum="3" />
+                        <f:ajax event="blur" render="plotImage" listener="#{plotBean.checkPoint}" />
                     </h:inputText>
                 </div>
 
@@ -56,11 +76,13 @@
                     </h:inputText>
                 </div>
 
+                <!-- Check Point Button -->
                 <div class="form-field">
-                    <!-- Check Point Button -->
-                    <h:commandButton styleClass="check-point-button active" value="Проверить точку"
-                                     action="#{plotBean.checkPoint}" update="plotImage" />
-                    <!-- Back to Welcome Page Button -->
+                    <h:commandButton styleClass="check-point-button active" value="Проверить точку" action="#{plotBean.checkPoint}" update="plotImage" />
+                </div>
+
+                <!-- Back to Welcome Page Button -->
+                <div class="form-field">
                     <h:commandButton value="Назад на стартовую страницу" action="welcome.xhtml" styleClass="back-button active" />
                 </div>
             </div>

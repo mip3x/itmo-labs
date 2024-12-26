@@ -21,7 +21,6 @@ import java.io.Serializable;
 @Named("plotBean")
 @ApplicationScoped
 public class PlotBean implements Serializable {
-    @Setter
     @Getter
     private Double x = 0.0;
     @Setter
@@ -33,6 +32,11 @@ public class PlotBean implements Serializable {
     private boolean pointInArea;
     @Inject
     private ServletContext servletContext;
+
+    public void setX(double x) {
+        this.x = x;
+        checkPoint();
+    }
 
     public StreamedContent getImage() {
         try {
