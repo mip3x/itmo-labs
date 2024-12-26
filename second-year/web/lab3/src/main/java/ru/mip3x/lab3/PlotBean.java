@@ -190,10 +190,11 @@ public class PlotBean implements Serializable {
         }
 
         boolean inRectangle = (displayX >= 0 && displayX <= radius && displayY >= 0 && displayY <= radius / 2);
-        boolean inTriangle = (displayX <= 0 && displayY >= 0 && displayY <= radius / 2 + displayX);
+        boolean inTriangle = (displayX <= 0 && displayY >= 0 && displayY <= radius / 2 + displayX / 2);
         boolean inCircle = (displayX >= 0 && displayY <= 0 && (displayX * displayX + displayY * displayY <= (radius / 2) * (radius / 2)));
 
         pointInArea = inRectangle || inTriangle || inCircle;
+        System.out.println("Check point: x=" + displayX + ", y=" + displayY + ", inRectangle=" + inRectangle + ", inTriangle=" + inTriangle + ", inCircle=" + inCircle + ", pointInArea=" + pointInArea);
     }
 
     public void updateRadius() {
