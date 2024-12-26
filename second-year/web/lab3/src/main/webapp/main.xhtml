@@ -9,7 +9,8 @@
     <link rel="stylesheet" type="text/css" href="static/css/main.css" />
 </h:head>
 <h:body>
-    <h:form>
+    <!-- Форма с динамическим содержимым -->
+    <h:form id="mainForm">
         <div class="container">
             <!-- plot panel -->
             <div class="left-panel">
@@ -78,7 +79,8 @@
 
                 <!-- Check Point Button -->
                 <div class="form-field">
-                    <h:commandButton styleClass="check-point-button active" value="Проверить точку" action="#{plotBean.checkPoint}" update="plotImage" />
+                    <h:commandButton id="checkButton" styleClass="check-point-button active" value="Проверить точку"
+                                     action="#{plotBean.checkPoint}" update="plotImage" />
                 </div>
 
                 <!-- Back to Welcome Page Button -->
@@ -88,5 +90,18 @@
             </div>
         </div>
     </h:form>
+
+    <!-- Script to redirect Enter key to the checkButton -->
+    <script>
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const checkButton = document.getElementById('mainForm:checkButton');
+                if (checkButton) {
+                    checkButton.click();
+                }
+            }
+        });
+    </script>
 </h:body>
 </html>
