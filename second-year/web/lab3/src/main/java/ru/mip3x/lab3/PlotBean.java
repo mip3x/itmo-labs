@@ -6,15 +6,17 @@ import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
 import lombok.Getter;
 import lombok.Setter;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.File;
 
 @Named("plotBean")
 @ApplicationScoped
@@ -32,7 +34,7 @@ public class PlotBean implements Serializable {
     @Inject
     private ServletContext servletContext;
 
-    public InputStream getImage() {
+    public StreamedContent getImage() {
         try {
             int width = 500;
             int height = 500;
@@ -46,7 +48,7 @@ public class PlotBean implements Serializable {
             int pixelSize = 10;
             int centerX = width / 2;
             int centerY = height / 2;
-            int backgroundRadiusPixels = (int) (1.10 * Math.min(width, height) / 2); // Фон чуть больше осей
+            int backgroundRadiusPixels = (int) (1.10 * Math.min(width, height) / 2);
 
             g2d.setColor(new Color(255, 255, 255));
             for (int y = -backgroundRadiusPixels; y <= backgroundRadiusPixels; y += pixelSize) {
@@ -128,7 +130,12 @@ public class PlotBean implements Serializable {
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage, "png", baos);
-            return new ByteArrayInputStream(baos.toByteArray());
+            InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+            return DefaultStreamedContent.builder()
+                    .contentType("image/png")
+                    .stream(() -> is)
+                    .build();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
