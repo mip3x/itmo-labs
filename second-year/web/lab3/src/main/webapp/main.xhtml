@@ -9,7 +9,6 @@
     <link rel="stylesheet" type="text/css" href="static/css/main.css" />
 </h:head>
 <h:body>
-    <!-- Форма с динамическим содержимым -->
     <h:form id="mainForm">
         <div class="container">
             <!-- plot panel -->
@@ -105,11 +104,26 @@
         function setActiveButton(clickedButton) {
             const buttons = document.querySelectorAll('.change-x');
             buttons.forEach(button => {
-                button.classList.remove('active'); // Убираем класс active со всех кнопок
+                button.classList.remove('active');
             });
-            clickedButton.classList.add('active'); // Добавляем класс active на нажатую кнопку
+            clickedButton.classList.add('active');
+
+            // saving active button id to localStorage
+            localStorage.setItem('activeXButton', clickedButton.id);
         }
 
+        // restore activeXButton from localStorage
+        document.addEventListener('DOMContentLoaded', function () {
+            const activeButtonId = localStorage.getItem('activeXButton');
+            if (activeButtonId) {
+                const activeButton = document.getElementById(activeButtonId);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                }
+            }
+        });
+
+        // handle form with checkButton
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
