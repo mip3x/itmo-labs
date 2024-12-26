@@ -23,18 +23,31 @@ import java.io.Serializable;
 public class PlotBean implements Serializable {
     @Getter
     private Double x = 0.0;
-    @Setter
     @Getter
     private Double y = 0.0;
-    @Setter
-    @Getter
+    @Getter @Setter
+    private Double clickX;
+    @Getter @Setter
+    private Double clickY;
+    @Getter @Setter
+    private Double displayX;
+    @Getter @Setter
+    private Double displayY;
+    @Setter @Getter
     private Double radius = null;
     private boolean pointInArea;
     @Inject
     private ServletContext servletContext;
 
-    public void setX(double x) {
+    public void setX(Double x) {
         this.x = x;
+        this.displayX = x;
+        checkPoint();
+    }
+
+    public void setY(Double y) {
+        this.y = y;
+        this.displayY = y;
         checkPoint();
     }
 
@@ -125,8 +138,18 @@ public class PlotBean implements Serializable {
             g2d.fillArc(centerX - graphRadiusPixels / 2, centerY - graphRadiusPixels / 2, graphRadiusPixels, graphRadiusPixels, 0, -90);
 
             // Example dot
-            int pointX = (int) (width / 2 + x * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
-            int pointY = (int) (height / 2 - y * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
+            int pointX;
+            int pointY;
+            if (displayX == null) {
+                pointX = (int) ((double) width / 2 + x * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
+            } else {
+                pointX = (int) ((double) width / 2 + displayX * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
+            }
+            if (displayY == null) {
+                pointY = (int) ((double) height / 2 - y * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
+            } else {
+                pointY = (int) ((double) height / 2 - displayY * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
+            }
             g2d.setColor(pointInArea ? Color.GREEN : Color.RED);
             g2d.fillOval(pointX - 5, pointY - 5, 10, 10);
 
@@ -146,25 +169,29 @@ public class PlotBean implements Serializable {
         }
     }
 
-    public void handleClick(int clickX, int clickY) {
+    public void handleClick() {
+        System.out.println("Start handleClick");
         int width = 500;
         int height = 500;
 
-        double graphRadiusPixels = 0.75 * Math.min(width, height) / 2;
-        x = (clickX - width / 2) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
-        y = (height / 2 - clickY) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
+        double graphRadiusPixels = 0.75 * width / 2;
+
+        displayX = (clickX - (double) width / 2) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
+        displayY = ((double) height / 2 - clickY) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
+
+        System.out.println("x=" + displayX + ", y=" + displayY);
         checkPoint();
     }
 
     public void checkPoint() {
-        if (radius == null || x == null || y == null) {
+        if (radius == null || displayX == null || displayY == null) {
             pointInArea = false;
             return;
         }
 
-        boolean inRectangle = (x >= 0 && x <= radius && y >= 0 && y <= radius / 2);
-        boolean inTriangle = (x <= 0 && y >= 0 && y <= radius / 2 + x);
-        boolean inCircle = (x >= 0 && y <= 0 && (x * x + y * y <= (radius / 2) * (radius / 2)));
+        boolean inRectangle = (displayX >= 0 && displayX <= radius && displayY >= 0 && displayY <= radius / 2);
+        boolean inTriangle = (displayX <= 0 && displayY >= 0 && displayY <= radius / 2 + displayX);
+        boolean inCircle = (displayX >= 0 && displayY <= 0 && (displayX * displayX + displayY * displayY <= (radius / 2) * (radius / 2)));
 
         pointInArea = inRectangle || inTriangle || inCircle;
     }

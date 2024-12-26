@@ -7,16 +7,33 @@
 <h:head>
     <title>Лабораторная работа №3</title>
     <link rel="stylesheet" type="text/css" href="static/css/main.css" />
+    <script>
+        function sendCoordinates(event) {
+            const clickX = event.offsetX;
+            const clickY = event.offsetY;
+
+            document.getElementById('mainForm:clickX').value = clickX;
+            document.getElementById('mainForm:clickY').value = clickY;
+
+            document.getElementById('mainForm:plotSubmitButton').click();
+            console.log("send coords. clickX: " + clickX + "clickY: " + clickY);
+        }
+    </script>
 </h:head>
 <h:body>
     <h:form id="mainForm">
         <div class="container">
             <!-- plot panel -->
             <div class="left-panel">
-                <p:graphicImage id="plotImage" value="#{plotBean.image}" cache="false" style="max-width: 100%; height: auto;">
-                    <p:ajax event="click" listener="#{plotBean.handleClick}" render="plotImage" />
-                </p:graphicImage>
+                <p:graphicImage id="plotImage" value="#{plotBean.image}" cache="false"
+                                style="max-width: 100%; height: auto;" onclick="sendCoordinates(event)" />
             </div>
+            <!-- Hidden inputs for click coordinates -->
+            <h:inputHidden id="clickX" value="#{plotBean.clickX}" />
+            <h:inputHidden id="clickY" value="#{plotBean.clickY}" />
+
+            <!-- Submit button for click handling -->
+            <h:commandButton id="plotSubmitButton" style="display:none;" action="#{plotBean.handleClick}" />
 
             <!-- panel gap -->
             <div class="panel-gap"></div>
@@ -72,7 +89,7 @@
                     <h:outputLabel styleClass="label-y" for="yCoord" value="Изменение Y (-3...3):" />
                     <h:inputText styleClass="input-y" id="yCoord" value="#{plotBean.y}" size="5">
                         <f:validateDoubleRange minimum="-3" maximum="3" />
-                        <f:ajax event="blur" render="plotImage" listener="#{plotBean.checkPoint}" />
+                        <f:ajax event="blur" execute="@this" listener="#{plotBean.setY}" render="plotImage" />
                     </h:inputText>
                 </div>
 
