@@ -93,7 +93,8 @@ body, footer {
     box-sizing: border-box;
 }
 
-.check-point-button {
+.check-point-button, .back-button {
+    margin: 0.5rem;
     width: 80%;
     padding: 0.625rem 0;
     font-size: 1rem;
@@ -109,12 +110,12 @@ body, footer {
     cursor: default;
 }
 
-.check-point-button.active {
+.check-point-button.active, .back-button.active {
     font-family: 'Monocraft', sans-serif;
     cursor: pointer;
 }
 
-.check-point-button:hover {
+.check-point-button:hover, .back-button:hover {
     background: url('../assets/selected_item_c.png') no-repeat center !important;
     background-size: cover !important;
     color: #ffffa0 !important;
