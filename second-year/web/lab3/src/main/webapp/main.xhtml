@@ -132,7 +132,7 @@
                 <!-- check point button -->
                 <div class="form-field">
                     <h:commandButton id="checkButton" styleClass="check-point-button active" value="Проверить точку"
-                                     action="#{plotBean.checkPoint}">
+                                     action="#{plotBean.processButtonClick}">
                         <f:ajax execute="@form" render="mainForm:plotImage mainForm:resultsTable" />
                     </h:commandButton>
                 </div>

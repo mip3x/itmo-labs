@@ -203,6 +203,28 @@ public class PlotBean implements Serializable {
         System.out.println("x=" + displayX + ", y=" + displayY);
     }
 
+    public void processButtonClick() {
+        if (radius == null || x == null || y == null) {
+            System.out.println("Invalid parameters for point check.");
+            pointInArea = false;
+            return;
+        }
+
+        LocalDateTime startTime = LocalDateTime.now();
+
+        displayX = x;
+        displayY = y;
+
+        checkPoint();
+
+        LocalDateTime endTime = LocalDateTime.now();
+        long executionTime = ChronoUnit.MILLIS.between(startTime, endTime);
+
+        results.add(new ResultEntry(displayX, displayY, radius, pointInArea, startTime, executionTime));
+
+        System.out.println("Check point from form: x=" + displayX + ", y=" + displayY + ", pointInArea=" + pointInArea);
+    }
+
     public void checkPoint() {
         if (radius == null || displayX == null || displayY == null) {
             pointInArea = false;
