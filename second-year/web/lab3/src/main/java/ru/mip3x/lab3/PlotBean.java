@@ -224,24 +224,20 @@ public class PlotBean implements Serializable {
             return;
         }
 
-        boolean inRectangle = (displayX >= 0 && displayX <= radius && displayY >= 0 && displayY <= radius / 2);
-        boolean inTriangle = (displayX <= 0 && displayY >= 0 && displayY <= radius / 2 + displayX / 2);
-        boolean inCircle = (displayX >= 0 && displayY <= 0 && (displayX * displayX + displayY * displayY <= (radius / 2) * (radius / 2)));
-
-        pointInArea = inRectangle || inTriangle || inCircle;
-        System.out.println("Check point: x=" + displayX + ", y=" + displayY + ", inRectangle=" + inRectangle + ", inTriangle=" + inTriangle + ", inCircle=" + inCircle + ", pointInArea=" + pointInArea);
+        pointInArea = isPointInArea(displayX, displayY, radius);
+        System.out.println("Check point: x=" + displayX + ", y=" + displayY + ", inRectangle=" + ", pointInArea=" + pointInArea);
     }
 
     public void checkPoint(ResultEntry entry) {
-        double x = entry.getX();
-        double y = entry.getY();
-        double r = entry.getR();
+        entry.setResult(isPointInArea(entry.getX(), entry.getY(), entry.getR()));
+    }
 
+    public boolean isPointInArea(double x, double y, double r) {
         boolean inRectangle = (x >= 0 && x <= r && y >= 0 && y <= r / 2);
         boolean inTriangle = (x <= 0 && y >= 0 && y <= r / 2 + x / 2);
         boolean inCircle = (x >= 0 && y <= 0 && (x * x + y * y <= (r / 2) * (r / 2)));
 
-        entry.setResult(inRectangle || inTriangle || inCircle);
+        return inRectangle || inTriangle || inCircle;
     }
 
     public void updateRadius() {
