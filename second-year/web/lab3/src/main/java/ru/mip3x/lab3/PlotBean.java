@@ -1,6 +1,6 @@
 package ru.mip3x.lab3;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
@@ -17,9 +17,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Named("plotBean")
-@ApplicationScoped
+@SessionScoped
 public class PlotBean implements Serializable {
     @Getter
     private Double x = 0.0;
@@ -36,6 +40,10 @@ public class PlotBean implements Serializable {
     @Setter @Getter
     private Double radius = null;
     private boolean pointInArea;
+
+    @Getter
+    private List<ResultEntry> results = new ArrayList<>();
+
     @Inject
     private ServletContext servletContext;
 
@@ -170,17 +178,29 @@ public class PlotBean implements Serializable {
     }
 
     public void handleClick() {
+        if (radius == null) {
+            System.out.println("Radius is null, skipping result update.");
+            return;
+        }
+
         System.out.println("Start handleClick");
         int width = 500;
         int height = 500;
 
         double graphRadiusPixels = 0.75 * width / 2;
+        LocalDateTime startTime = LocalDateTime.now();
 
         displayX = (clickX - (double) width / 2) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
         displayY = ((double) height / 2 - clickY) / (graphRadiusPixels / (radius == null ? 1.0 : radius));
 
-        System.out.println("x=" + displayX + ", y=" + displayY);
         checkPoint();
+
+        LocalDateTime endTime = LocalDateTime.now();
+        long executionTime = ChronoUnit.MILLIS.between(startTime, endTime);
+
+        results.add(new ResultEntry(displayX, displayY, radius, pointInArea, startTime, executionTime));
+
+        System.out.println("x=" + displayX + ", y=" + displayY);
     }
 
     public void checkPoint() {
@@ -202,5 +222,25 @@ public class PlotBean implements Serializable {
             radius = Math.round(radius * 10) / 10.0;
         }
         checkPoint();
+    }
+
+    @Getter
+    @Setter
+    public static class ResultEntry {
+        private Double x;
+        private Double y;
+        private Double r;
+        private boolean result;
+        private LocalDateTime sendTime;
+        private long executionTime;
+
+        public ResultEntry(Double x, Double y, Double r, boolean result, LocalDateTime sendTime, long executionTime) {
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            this.result = result;
+            this.sendTime = sendTime;
+            this.executionTime = executionTime;
+        }
     }
 }

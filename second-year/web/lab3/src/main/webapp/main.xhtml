@@ -42,7 +42,7 @@
             }
         });
 
-        // handlign Enter press for point checking
+        // handling Enter press for point checking
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -68,7 +68,7 @@
             <h:inputHidden id="clickY" value="#{plotBean.clickY}" />
             <!-- hidden button for sending -->
             <h:commandButton id="plotSubmitButton" action="#{plotBean.handleClick}" style="display:none;">
-                <f:ajax execute="@form" render="mainForm:plotImage" />
+                <f:ajax execute="@form" render="mainForm:plotImage mainForm:resultsTable" />
             </h:commandButton>
 
             <!-- panel gap -->
@@ -81,41 +81,32 @@
                     <h:outputLabel styleClass="label-x" value="Изменение X:" />
                     <div class="x-buttons">
                         <!-- Buttons for X selection -->
-                        <h:commandButton id="xButton1" styleClass="change-x" value="-4">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-4)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton1" styleClass="change-x" value="-4" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-4)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton2" styleClass="change-x" value="-3">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-3)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton2" styleClass="change-x" value="-3" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-3)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton3" styleClass="change-x" value="-2">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-2)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton3" styleClass="change-x" value="-2" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-2)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton4" styleClass="change-x" value="-1">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-1)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton4" styleClass="change-x" value="-1" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-1)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton5" styleClass="change-x" value="0">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(0)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton5" styleClass="change-x" value="0" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(0)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton6" styleClass="change-x" value="1">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(1)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton6" styleClass="change-x" value="1" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(1)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton7" styleClass="change-x" value="2">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(2)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton7" styleClass="change-x" value="2" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(2)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton8" styleClass="change-x" value="3">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(3)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton8" styleClass="change-x" value="3" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(3)}" />
                         </h:commandButton>
-                        <h:commandButton id="xButton9" styleClass="change-x" value="4">
-                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(4)}" />
-                            <f:attribute name="onclick" value="setActiveButton(this)" />
+                        <h:commandButton id="xButton9" styleClass="change-x" value="4" onclick="setActiveButton(this)">
+                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(4)}" />
                         </h:commandButton>
                     </div>
                 </div>
@@ -142,7 +133,7 @@
                 <div class="form-field">
                     <h:commandButton id="checkButton" styleClass="check-point-button active" value="Проверить точку"
                                      action="#{plotBean.checkPoint}">
-                        <f:ajax execute="@form" render="mainForm:plotImage" />
+                        <f:ajax execute="@form" render="mainForm:plotImage mainForm:resultsTable" />
                     </h:commandButton>
                 </div>
 
@@ -152,6 +143,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Results Table -->
+        <h:panelGroup id="resultsTable">
+            <h2>Результаты</h2>
+            <p:dataTable value="#{plotBean.results}" var="result" styleClass="results-table">
+                <p:column headerText="X">
+                    <h:outputText value="#{result.x}" />
+                </p:column>
+                <p:column headerText="Y">
+                    <h:outputText value="#{result.y}" />
+                </p:column>
+                <p:column headerText="R">
+                    <h:outputText value="#{result.r}" />
+                </p:column>
+                <p:column headerText="Результат">
+                    <h:outputText value="#{result.result ? '✔' : '❌'}" style="color: #{result.result ? 'green' : 'red'};" />
+                </p:column>
+                <p:column headerText="Время отправки">
+                    <h:outputText value="#{result.sendTime}" />
+                </p:column>
+                <p:column headerText="Время выполнения">
+                    <h:outputText value="#{result.executionTime}" />
+                </p:column>
+            </p:dataTable>
+        </h:panelGroup>
     </h:form>
 </h:body>
 </html>
