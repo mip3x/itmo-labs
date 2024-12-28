@@ -198,7 +198,7 @@ public class PlotBean implements Serializable {
         LocalDateTime endTime = LocalDateTime.now();
         long executionTime = ChronoUnit.MILLIS.between(startTime, endTime);
 
-        results.add(new ResultEntry(displayX, displayY, radius, pointInArea, startTime, executionTime));
+        addResult(displayX, displayY, radius, pointInArea, startTime, executionTime);
 
         System.out.println("x=" + displayX + ", y=" + displayY);
     }
@@ -220,7 +220,7 @@ public class PlotBean implements Serializable {
         LocalDateTime endTime = LocalDateTime.now();
         long executionTime = ChronoUnit.MILLIS.between(startTime, endTime);
 
-        results.add(new ResultEntry(displayX, displayY, radius, pointInArea, startTime, executionTime));
+        addResult(displayX, displayY, radius, pointInArea, startTime, executionTime);
 
         System.out.println("Check point from form: x=" + displayX + ", y=" + displayY + ", pointInArea=" + pointInArea);
     }
@@ -244,6 +244,11 @@ public class PlotBean implements Serializable {
             radius = Math.round(radius * 10) / 10.0;
         }
         checkPoint();
+    }
+
+    private void addResult(Double x, Double y, Double radius, boolean result, LocalDateTime sendTime, long executionTime) {
+        ResultEntry newEntry = new ResultEntry(x, y, radius, result, sendTime, executionTime);
+        results.add(0, newEntry);
     }
 
     @Getter
