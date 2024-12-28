@@ -15,19 +15,22 @@ targetCompatibility = '17'
 tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'
 }
-// postgresql
-dependencies {
-  implementation("org.postgresql:postgresql:42.7.4")
-  implementation("org.hibernate.orm:hibernate-core:6.6.1.Final")
-}
 
-// jakarta
 dependencies {
+  // PostgreSQL JDBC driver
+  implementation("org.postgresql:postgresql:42.7.4")
+
+  // Hibernate for Jakarta Persistence
+  implementation("org.hibernate.orm:hibernate-core:6.6.1.Final")
+
+  // Jakarta EE APIs
   compileOnly('jakarta.platform:jakarta.jakartaee-web-api:11.0.0-M3')
 
+  // Lombok (annotations)
   compileOnly('org.projectlombok:lombok:1.18.30')
   annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
+  // PrimeFaces and PrimeFaces Extensions
   implementation("org.primefaces:primefaces:14.0.0:jakarta")
   implementation("org.primefaces.extensions:primefaces-extensions:14.0.0:jakarta")
 }

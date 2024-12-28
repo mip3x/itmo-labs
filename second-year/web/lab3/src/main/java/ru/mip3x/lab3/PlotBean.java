@@ -4,10 +4,12 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import jakarta.persistence.EntityManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
+import ru.mip3x.lab3.utils.DatabaseUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -48,6 +50,10 @@ public class PlotBean implements Serializable {
     @Inject
     private ServletContext servletContext;
 
+    public PlotBean() {
+        loadResultsFromDatabase();
+    }
+
     public void setX(Double x) {
         this.x = x;
         this.displayX = x;
@@ -67,10 +73,8 @@ public class PlotBean implements Serializable {
             BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2d = bufferedImage.createGraphics();
 
-            // Anti-aliasing for smoother graphics
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Background circle filling slightly more than the area
             int pixelSize = 10;
             int centerX = width / 2;
             int centerY = height / 2;
@@ -85,7 +89,6 @@ public class PlotBean implements Serializable {
                 }
             }
 
-            // Load custom font
             Font customFont;
             try {
                 String fontPath = servletContext.getRealPath("/static/assets/assets/Monocraft.otf");
@@ -130,10 +133,8 @@ public class PlotBean implements Serializable {
                 g2d.drawString(String.format("-%.1f", radius / 2), width / 2 - graphRadiusPixels / 2 - 25, height / 2 + 15);
             }
 
-            // Graph shapes (triangle, square, and quarter-circle)
             g2d.setColor(new Color(0, 0, 255, 150));
 
-            // Rectangle
             g2d.fillRect(centerX, centerY - graphRadiusPixels / 2, graphRadiusPixels, graphRadiusPixels / 2);
 
             // Triangle
@@ -143,10 +144,10 @@ public class PlotBean implements Serializable {
             triangle.addPoint(centerX, centerY - graphRadiusPixels / 2);
             g2d.fillPolygon(triangle);
 
-            // Quarter-circle
+            // 1/4 circle
             g2d.fillArc(centerX - graphRadiusPixels / 2, centerY - graphRadiusPixels / 2, graphRadiusPixels, graphRadiusPixels, 0, -90);
 
-            // Draw all points from the results list
+            // points from results list
             for (ResultEntry entry : results) {
                 int pointX = (int) ((double) width / 2 + entry.getX() * (graphRadiusPixels / (entry.getR() == null ? 1.0 : entry.getR())));
                 int pointY = (int) ((double) height / 2 - entry.getY() * (graphRadiusPixels / (entry.getR() == null ? 1.0 : entry.getR())));
@@ -255,31 +256,28 @@ public class PlotBean implements Serializable {
         ResultEntry newEntry = new ResultEntry(x, y, radius, result, sendTime, executionTime);
         results.add(0, newEntry);
         limitResults();
+
+        saveResultToDatabase(newEntry);
     }
 
     private void limitResults() {
         if (results.size() > MAX_RESULTS) {
-            results = results.subList(0, MAX_RESULTS); // Оставляем только последние 15 записей
+            results = results.subList(0, MAX_RESULTS);
+        }
+    }
+    public void loadResultsFromDatabase() {
+        try (EntityManager em = DatabaseUtil.getEntityManager()) {
+            results = em.createQuery("SELECT r FROM ResultEntry r ORDER BY r.sendTime DESC", ResultEntry.class)
+                    .setMaxResults(MAX_RESULTS)
+                    .getResultList();
         }
     }
 
-    @Getter
-    @Setter
-    public static class ResultEntry {
-        private Double x;
-        private Double y;
-        private Double r;
-        private boolean result;
-        private LocalDateTime sendTime;
-        private long executionTime;
-
-        public ResultEntry(Double x, Double y, Double r, boolean result, LocalDateTime sendTime, long executionTime) {
-            this.x = x;
-            this.y = y;
-            this.r = r;
-            this.result = result;
-            this.sendTime = sendTime;
-            this.executionTime = executionTime;
+    private void saveResultToDatabase(ResultEntry resultEntry) {
+        try (EntityManager em = DatabaseUtil.getEntityManager()) {
+            em.getTransaction().begin();
+            em.persist(resultEntry);
+            em.getTransaction().commit();
         }
     }
 }

@@ -12,17 +12,14 @@
             const clickX = event.offsetX;
             const clickY = event.offsetY;
 
-            // set hidden values
             document.getElementById('mainForm:clickX').value = clickX;
             document.getElementById('mainForm:clickY').value = clickY;
 
-            // trigger hidden button
             document.getElementById('mainForm:plotSubmitButton').click();
 
             console.log(`Sent coords. clickX: ${clickX}, clickY: ${clickY}`);
         }
 
-        // restore active X button after page reload
         function setActiveButton(clickedButton) {
             const buttons = document.querySelectorAll('.change-x');
             buttons.forEach(button => {
@@ -42,7 +39,6 @@
             }
         });
 
-        // handling Enter press for point checking
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -63,24 +59,20 @@
                                 style="max-width: 100%; height: auto;"
                                 onclick="sendCoordinates(event)" />
             </div>
-            <!-- hidden values for coordinates -->
+
             <h:inputHidden id="clickX" value="#{plotBean.clickX}" />
             <h:inputHidden id="clickY" value="#{plotBean.clickY}" />
-            <!-- hidden button for sending -->
+
             <h:commandButton id="plotSubmitButton" action="#{plotBean.handleClick}" style="display:none;">
                 <f:ajax execute="@form" render="mainForm:plotImage mainForm:resultsTable" />
             </h:commandButton>
 
-            <!-- panel gap -->
             <div class="panel-gap"></div>
 
-            <!-- right panel with input -->
             <div class="right-panel">
-                <!-- X input -->
                 <div class="form-field">
                     <h:outputLabel styleClass="label-x" value="Изменение X:" />
                     <div class="x-buttons">
-                        <!-- Buttons for X selection -->
                         <h:commandButton id="xButton1" styleClass="change-x" value="-4" onclick="setActiveButton(this)">
                             <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-4)}" />
                         </h:commandButton>
