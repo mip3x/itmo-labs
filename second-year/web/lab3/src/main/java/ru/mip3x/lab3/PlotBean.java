@@ -40,6 +40,7 @@ public class PlotBean implements Serializable {
     @Setter @Getter
     private Double radius = null;
     private boolean pointInArea;
+    private static final int MAX_RESULTS = 15;
 
     @Getter
     private List<ResultEntry> results = new ArrayList<>();
@@ -145,21 +146,13 @@ public class PlotBean implements Serializable {
             // Quarter-circle
             g2d.fillArc(centerX - graphRadiusPixels / 2, centerY - graphRadiusPixels / 2, graphRadiusPixels, graphRadiusPixels, 0, -90);
 
-            // Example dot
-            int pointX;
-            int pointY;
-            if (displayX == null) {
-                pointX = (int) ((double) width / 2 + x * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
-            } else {
-                pointX = (int) ((double) width / 2 + displayX * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
+            // Draw all points from the results list
+            for (ResultEntry entry : results) {
+                int pointX = (int) ((double) width / 2 + entry.getX() * (graphRadiusPixels / (entry.getR() == null ? 1.0 : entry.getR())));
+                int pointY = (int) ((double) height / 2 - entry.getY() * (graphRadiusPixels / (entry.getR() == null ? 1.0 : entry.getR())));
+                g2d.setColor(entry.isResult() ? Color.GREEN : Color.RED);
+                g2d.fillOval(pointX - 5, pointY - 5, 10, 10);
             }
-            if (displayY == null) {
-                pointY = (int) ((double) height / 2 - y * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
-            } else {
-                pointY = (int) ((double) height / 2 - displayY * (graphRadiusPixels / (radius == null ? 1.0 : radius)));
-            }
-            g2d.setColor(pointInArea ? Color.GREEN : Color.RED);
-            g2d.fillOval(pointX - 5, pointY - 5, 10, 10);
 
             g2d.dispose();
 
@@ -239,16 +232,39 @@ public class PlotBean implements Serializable {
         System.out.println("Check point: x=" + displayX + ", y=" + displayY + ", inRectangle=" + inRectangle + ", inTriangle=" + inTriangle + ", inCircle=" + inCircle + ", pointInArea=" + pointInArea);
     }
 
+    public void checkPoint(ResultEntry entry) {
+        double x = entry.getX();
+        double y = entry.getY();
+        double r = entry.getR();
+
+        boolean inRectangle = (x >= 0 && x <= r && y >= 0 && y <= r / 2);
+        boolean inTriangle = (x <= 0 && y >= 0 && y <= r / 2 + x / 2);
+        boolean inCircle = (x >= 0 && y <= 0 && (x * x + y * y <= (r / 2) * (r / 2)));
+
+        entry.setResult(inRectangle || inTriangle || inCircle);
+    }
+
     public void updateRadius() {
         if (radius != null) {
             radius = Math.round(radius * 10) / 10.0;
+
+            for (ResultEntry entry : results) {
+                entry.setR(radius);
+                checkPoint(entry);
+            }
         }
-        checkPoint();
     }
 
     private void addResult(Double x, Double y, Double radius, boolean result, LocalDateTime sendTime, long executionTime) {
         ResultEntry newEntry = new ResultEntry(x, y, radius, result, sendTime, executionTime);
         results.add(0, newEntry);
+        limitResults();
+    }
+
+    private void limitResults() {
+        if (results.size() > MAX_RESULTS) {
+            results = results.subList(0, MAX_RESULTS); // Оставляем только последние 15 записей
+        }
     }
 
     @Getter
