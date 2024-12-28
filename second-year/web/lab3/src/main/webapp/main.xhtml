@@ -89,7 +89,7 @@
                     <h:outputLabel styleClass="label-y" for="yCoord" value="Изменение Y (-3...3):" />
                     <h:inputText styleClass="input-y" id="yCoord" value="#{plotBean.y}" size="5">
                         <f:validateDoubleRange minimum="-3" maximum="3" />
-                        <f:ajax event="blur" execute="@this" listener="#{plotBean.setY}" render="plotImage" />
+                        <f:ajax event="blur" execute="@this" render="plotImage" />
                     </h:inputText>
                 </div>
 
