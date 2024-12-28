@@ -80,33 +80,42 @@
                 <div class="form-field">
                     <h:outputLabel styleClass="label-x" value="Изменение X:" />
                     <div class="x-buttons">
-                        <!-- Button for X selection -->
+                        <!-- Buttons for X selection -->
                         <h:commandButton id="xButton1" styleClass="change-x" value="-4">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-4)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-4)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton2" styleClass="change-x" value="-3">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-3)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-3)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton3" styleClass="change-x" value="-2">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-2)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-2)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton4" styleClass="change-x" value="-1">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(-1)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(-1)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton5" styleClass="change-x" value="0">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(0)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(0)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton6" styleClass="change-x" value="1">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(1)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(1)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton7" styleClass="change-x" value="2">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(2)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(2)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton8" styleClass="change-x" value="3">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(3)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(3)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                         <h:commandButton id="xButton9" styleClass="change-x" value="4">
-                            <f:ajax execute="@this" render="mainForm:plotImage" listener="#{plotBean.setX(4)}" />
+                            <f:ajax execute="@this" render="plotImage" listener="#{plotBean.setX(4)}" />
+                            <f:attribute name="onclick" value="setActiveButton(this)" />
                         </h:commandButton>
                     </div>
                 </div>
