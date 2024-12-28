@@ -15,7 +15,8 @@ body, footer {
     color: #ffffff;
     margin: 0;
     padding: 0;
-    height: 100vh;
+    height: auto;
+    overflow-y: scroll;
     display: flex;
     align-items: center;
     justify-content: center;
