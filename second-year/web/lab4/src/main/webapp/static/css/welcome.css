@@ -1,0 +1,112 @@
+@font-face {
+    font-family: 'Monocraft';
+    src: url('../assets/assets/Monocraft.otf') format('opentype');
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, footer {
+    font-family: 'Monocraft', sans-serif;
+    background: url('../assets/background.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #ffffff;
+}
+
+.background {
+    text-align: center;
+    width: 100%;
+    position: relative;
+}
+
+.title h1 {
+    font-size: 4rem;
+    color: #ffffff;
+    text-shadow: 4px 4px 0px #000000;
+    margin: 30px auto 50px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.button {
+    width: 600px;
+    padding: 20px 0;
+    font-size: 1.8rem;
+    color: #ffffff;
+    text-align: center;
+    background: url('../assets/item_c.png') no-repeat center;
+    background-size: cover;
+    border: 2px solid #383838;
+    text-shadow: 2px 2px 4px #000;
+    text-decoration: none;
+    box-shadow: 4px 4px 0px #222;
+    transition: all 0.2s ease-in-out;
+    cursor: default;
+}
+
+.button.disabled {
+    opacity: 1;
+}
+
+.button.active {
+    font-family: 'Monocraft', sans-serif;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: url('../assets/selected_item_c.png') no-repeat center;
+    background-size: cover;
+    color: #ffffa0;
+    box-shadow: 2px 2px 0px #222;
+    transform: translate(2px, 2px);
+}
+
+.time-label {
+    display: inline-block;
+    animation: fadeIn 4s infinite alternate;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0.7;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.footer-left,
+.footer-right {
+    flex: 1;
+}
+
+.footer-left {
+    text-align: left;
+}
+
+.footer-right {
+    text-align: right;
+}
+
