@@ -1,4 +1,4 @@
-package ru.mip3x.lab3;
+package ru.mip3x.lab4;
 
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
-import ru.mip3x.lab3.utils.DatabaseUtil;
+import ru.mip3x.lab4.utils.DatabaseUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

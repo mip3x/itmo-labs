@@ -1,4 +1,4 @@
-package ru.mip3x.lab3.utils;
+package ru.mip3x.lab4.utils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;

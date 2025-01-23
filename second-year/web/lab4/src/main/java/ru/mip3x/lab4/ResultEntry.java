@@ -1,4 +1,4 @@
-package ru.mip3x.lab3;
+package ru.mip3x.lab4;
 
 import jakarta.persistence.*;
 import lombok.Getter;
