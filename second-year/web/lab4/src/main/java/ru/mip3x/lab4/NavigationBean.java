@@ -8,8 +8,8 @@ import java.io.Serializable;
 @Named
 @Stateful
 public class NavigationBean implements Serializable {
-    public String goToWelcome() {
-        return "welcome";
+    public String goToIndex() {
+        return "index";
     }
 
     public String goToMain() {
