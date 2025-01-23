@@ -1,13 +1,13 @@
 package ru.mip3x.lab4;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
 import jakarta.inject.Named;
 
-import java.io.Serializable;
-
 @Named
-@ApplicationScoped
-public class EnvironmentBean implements Serializable {
+@Singleton
+@Startup
+public class EnvironmentBean {
     private String fullName;
     private String groupNumber;
     private String variant;

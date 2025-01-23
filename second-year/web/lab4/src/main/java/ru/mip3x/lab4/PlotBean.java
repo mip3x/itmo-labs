@@ -24,7 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Named("plotBean")
+@Named
 @SessionScoped
 public class PlotBean implements Serializable {
     @Getter

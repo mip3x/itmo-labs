@@ -1,12 +1,12 @@
 package ru.mip3x.lab4;
 
-import jakarta.enterprise.context.SessionScoped;
+import jakarta.ejb.Stateful;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
 
 @Named
-@SessionScoped
+@Stateful
 public class NavigationBean implements Serializable {
     public String goToWelcome() {
         return "welcome";

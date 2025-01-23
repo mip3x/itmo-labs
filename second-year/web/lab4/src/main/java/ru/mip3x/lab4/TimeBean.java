@@ -1,14 +1,16 @@
 package ru.mip3x.lab4;
 
-import jakarta.enterprise.context.SessionScoped;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Startup
+@Singleton
 @Named
-@SessionScoped
 public class TimeBean implements Serializable {
     private String currentDateTime;
 
