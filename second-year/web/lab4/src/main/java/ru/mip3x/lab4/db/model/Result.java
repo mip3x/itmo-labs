@@ -1,4 +1,4 @@
-package ru.mip3x.lab4.db;
+package ru.mip3x.lab4.db.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "results")
 @Getter
 @Setter
-public class ResultEntry {
+public class Result {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,14 +32,19 @@ public class ResultEntry {
     @Column(name = "execution_time", nullable = false)
     private long executionTime;
 
-    public ResultEntry() {}
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    public ResultEntry(Double x, Double y, Double r, boolean result, LocalDateTime sendTime, long executionTime) {
+    public Result() {}
+
+    public Result(Double x, Double y, Double r, boolean result, LocalDateTime sendTime, long executionTime, User user) {
         this.x = x;
         this.y = y;
         this.r = r;
         this.result = result;
         this.sendTime = sendTime;
         this.executionTime = executionTime;
+        this.user = user;
     }
 }

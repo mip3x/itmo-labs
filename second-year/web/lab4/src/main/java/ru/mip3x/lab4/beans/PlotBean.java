@@ -9,7 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
-import ru.mip3x.lab4.db.ResultEntry;
+import ru.mip3x.lab4.db.model.Result;
+import ru.mip3x.lab4.db.model.User;
 import ru.mip3x.lab4.utils.DatabaseUtil;
 
 import javax.imageio.ImageIO;
@@ -46,7 +47,7 @@ public class PlotBean implements Serializable {
     private static final int MAX_RESULTS = 15;
 
     @Getter
-    private List<ResultEntry> results = new ArrayList<>();
+    private List<Result> results = new ArrayList<>();
 
     @Inject
     private ServletContext servletContext;
@@ -149,7 +150,7 @@ public class PlotBean implements Serializable {
             g2d.fillArc(centerX - graphRadiusPixels / 2, centerY - graphRadiusPixels / 2, graphRadiusPixels, graphRadiusPixels, 0, -90);
 
             // points from results list
-            for (ResultEntry entry : results) {
+            for (Result entry : results) {
                 int pointX = (int) ((double) width / 2 + entry.getX() * (graphRadiusPixels / (entry.getR() == null ? 1.0 : entry.getR())));
                 int pointY = (int) ((double) height / 2 - entry.getY() * (graphRadiusPixels / (entry.getR() == null ? 1.0 : entry.getR())));
                 g2d.setColor(entry.isResult() ? Color.GREEN : Color.RED);
@@ -230,7 +231,7 @@ public class PlotBean implements Serializable {
         System.out.println("Check point: x=" + displayX + ", y=" + displayY + ", inRectangle=" + ", pointInArea=" + pointInArea);
     }
 
-    public void checkPoint(ResultEntry entry) {
+    public void checkPoint(Result entry) {
         entry.setResult(isPointInArea(entry.getX(), entry.getY(), entry.getR()));
     }
 
@@ -246,7 +247,7 @@ public class PlotBean implements Serializable {
         if (radius != null) {
             radius = Math.round(radius * 10) / 10.0;
 
-            for (ResultEntry entry : results) {
+            for (Result entry : results) {
                 entry.setR(radius);
                 checkPoint(entry);
             }
@@ -254,7 +255,8 @@ public class PlotBean implements Serializable {
     }
 
     private void addResult(Double x, Double y, Double radius, boolean result, LocalDateTime sendTime, long executionTime) {
-        ResultEntry newEntry = new ResultEntry(x, y, radius, result, sendTime, executionTime);
+        // TODO: FIX user
+        Result newEntry = new Result(x, y, radius, result, sendTime, executionTime, new User());
         results.add(0, newEntry);
         limitResults();
 
@@ -268,13 +270,13 @@ public class PlotBean implements Serializable {
     }
     public void loadResultsFromDatabase() {
         try (EntityManager em = DatabaseUtil.getEntityManager()) {
-            results = em.createQuery("SELECT r FROM ResultEntry r ORDER BY r.sendTime DESC", ResultEntry.class)
+            results = em.createQuery("SELECT r FROM Result r ORDER BY r.sendTime DESC", Result.class)
                     .setMaxResults(MAX_RESULTS)
                     .getResultList();
         }
     }
 
-    private void saveResultToDatabase(ResultEntry resultEntry) {
+    private void saveResultToDatabase(Result resultEntry) {
         try (EntityManager em = DatabaseUtil.getEntityManager()) {
             em.getTransaction().begin();
             em.persist(resultEntry);

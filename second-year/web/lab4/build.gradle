@@ -33,4 +33,6 @@ dependencies {
   // PrimeFaces and PrimeFaces Extensions
   implementation("org.primefaces:primefaces:14.0.0:jakarta")
   implementation("org.primefaces.extensions:primefaces-extensions:14.0.0:jakarta")
+
+  implementation("org.mindrot:jbcrypt:0.4")
 }
