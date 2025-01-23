@@ -1,4 +1,4 @@
-package ru.mip3x.lab4;
+package ru.mip3x.lab4.beans;
 
 import jakarta.ejb.Stateful;
 import jakarta.inject.Named;
