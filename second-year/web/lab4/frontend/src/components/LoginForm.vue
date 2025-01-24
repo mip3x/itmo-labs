@@ -5,6 +5,7 @@
       <input v-model="password" type="password" class="input-field" placeholder="Пароль" required />
       <button type="submit" class="button active">Войти</button>
       <button type="button" @click="register" class="button active">Регистрация</button>
+      <button v-if="isAuthenticated" @click="logout" class="button active">Выйти из аккаунта</button>
     </form>
 
     <div v-if="notification.visible" :class="['toast', notification.type]">
@@ -15,12 +16,12 @@
 
 <script>
 import axios from "axios";
+
 export default {
   data() {
     return {
       username: '',
       password: '',
-      errorMessage: '',
       notification: {
         visible: false,
         message: '',
@@ -28,13 +29,18 @@ export default {
       },
     };
   },
+  computed: {
+    isAuthenticated() {
+      return !!localStorage.getItem('authToken');
+    },
+  },
   methods: {
     showNotification(message, type) {
       this.notification.message = message;
       this.notification.type = type;
       this.notification.visible = true;
 
-      // 3 sec timeout for notification
+      // 3 secs timeout for notification
       setTimeout(() => {
         this.notification.visible = false;
       }, 3000);
@@ -45,12 +51,16 @@ export default {
           username: this.username,
           password: this.password,
         });
+        const sessionId = response.data.sessionId;
+
+        localStorage.setItem('authToken', sessionId);
         this.showNotification(response.data.message, 'success');
-        this.$router.push('/main');
+
+        const redirect = this.$route.query.redirect || '/main';
+        this.$router.push(redirect);
       } catch (error) {
-        this.errorMessage =
-            error.response?.data?.message || 'Ошибка входа. Проверьте данные.';
-        this.showNotification(this.errorMessage, 'error');
+        const errorMessage = error.response?.data?.message || 'Ошибка входа. Проверьте данные.';
+        this.showNotification(errorMessage, 'error');
       }
     },
     async register() {
@@ -59,13 +69,43 @@ export default {
           username: this.username,
           password: this.password,
         });
+        const sessionId = response.data.sessionId;
+
+        localStorage.setItem('authToken', sessionId);
         this.showNotification(response.data.message, 'success');
+
         this.$router.push('/main');
       } catch (error) {
-        this.errorMessage =
-            error.response?.data?.message ||
-            'Ошибка регистрации. Пользователь уже существует.';
-        this.showNotification(this.errorMessage, 'error');
+        const errorMessage =
+            error.response?.data?.message || 'Ошибка регистрации. Пользователь уже существует.';
+        this.showNotification(errorMessage, 'error');
+      }
+    },
+    async logout() {
+      const sessionId = localStorage.getItem('authToken');
+      if (!sessionId) {
+        this.showNotification('Вы не авторизованы!', 'error');
+        return;
+      }
+
+      try {
+        console.log({
+          Authorization: sessionId,
+        });
+
+        await axios.post('/api/auth/logout', null, {
+          headers: {
+            Authorization: sessionId,
+            'Content-Type': 'application/json',
+          },
+        });
+        localStorage.removeItem('authToken');
+        this.showNotification('Вы успешно вышли из системы.', 'success');
+        this.$router.push('/');
+      } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || 'Ошибка при выходе из аккаунта.';
+        this.showNotification(errorMessage, 'error');
       }
     },
   },
