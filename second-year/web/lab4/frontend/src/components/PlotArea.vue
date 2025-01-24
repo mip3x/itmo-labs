@@ -147,6 +147,12 @@ export default {
         ctx.fillText(this.radius / 2, centerX + fixedR / 2, centerY + 20);
         ctx.fillText(-(this.radius / 2), centerX + 30, centerY + fixedR / 2 + 5);
         ctx.fillText(this.radius / 2, centerX + 30, centerY - fixedR / 2);
+
+        this.points.forEach((point) => {
+          const hit = this.isPointInArea(point.x, point.y, this.radius);
+          const color = hit ? "green" : "red";
+          this.drawPoint(point.x, point.y, scaleFactor, color);
+        });
       } else {
         ctx.fillText("-R", centerX - fixedR, centerY + 20);
         ctx.fillText("R", centerX + fixedR, centerY + 20);
@@ -158,12 +164,6 @@ export default {
         ctx.fillText("-R/2", centerX + 30, centerY + fixedR / 2 + 5);
         ctx.fillText("R/2", centerX + 30, centerY - fixedR / 2);
       }
-
-      this.points.forEach((point) => {
-        const hit = this.isPointInArea(point.x, point.y, this.radius);
-        const color = hit ? "green" : "red";
-        this.drawPoint(point.x, point.y, scaleFactor, color);
-      });
     },
 
     isPointInArea(x, y, r) {
