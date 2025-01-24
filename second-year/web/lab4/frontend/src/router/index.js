@@ -14,6 +14,10 @@ const routes = [
         component: MainView,
         meta: { requiresAuth: true },
     },
+    {
+        path: '/:pathMatch(.*)*',
+        redirect: '/main',
+    },
 ];
 
 const router = createRouter({
@@ -24,6 +28,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
     const token = localStorage.getItem('authToken');
+
+    if (to.path === '/' && token) {
+        return next({
+            path: '/main',
+        });
+    }
 
     if (requiresAuth && !token) {
         return next({
