@@ -160,8 +160,18 @@ export default {
       }
 
       this.points.forEach((point) => {
-        this.drawPoint(point.x, point.y, scaleFactor, point.color || "red");
+        const hit = this.isPointInArea(point.x, point.y, this.radius);
+        const color = hit ? "green" : "red";
+        this.drawPoint(point.x, point.y, scaleFactor, color);
       });
+    },
+
+    isPointInArea(x, y, r) {
+      return (
+          (x >= 0 && y >= 0 && x <= r && y <= r / 2) ||
+          (x >= 0 && y <= 0 && x ** 2 + y ** 2 <= (r) ** 2) ||
+          (x <= 0 && y >= 0 && y <= r / 2 + x / 2)
+      );
     },
 
     drawPoint(x, y, scaleFactor, color) {
