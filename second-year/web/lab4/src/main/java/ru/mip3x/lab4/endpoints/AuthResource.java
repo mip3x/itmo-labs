@@ -60,6 +60,7 @@ public class AuthResource {
 
     @GET
     @Path("/session")
+    @Consumes("*/*")
     public Response getSession(@HeaderParam("Authorization") String sessionId) {
         String username = authService.getUsernameFromSession(sessionId);
         if (username == null) {

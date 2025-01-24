@@ -1,6 +1,9 @@
 <template>
   <div class="main-view">
-    <button class="logout-button" @click="logout">Выйти</button>
+    <div class="header">
+      <span v-if="username" class="username">{{ username }}</span>
+      <button class="logout-button" @click="logout">Выйти</button>
+    </div>
     <div class="container">
       <PlotArea :radius="radius" :points="points" @add-point="addPoint" />
       <div class="panel-gap"></div>
@@ -22,9 +25,14 @@ export default {
 
   data() {
     return {
+      username: null,
       radius: 100,
       points: [],
     };
+  },
+
+  mounted() {
+    this.fetchUsername();
   },
 
   methods: {
@@ -39,6 +47,35 @@ export default {
 
     updateRadius(newRadius) {
       this.radius = newRadius;
+    },
+
+    async fetchUsername() {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        this.username = "Гость";
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/auth/session", {
+          method: "GET",
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          this.username = "Гость";
+          return;
+        }
+
+        const data = await response.json();
+        this.username = data.username;
+      } catch (error) {
+        console.error("Ошибка при загрузке имени пользователя: ", error);
+        this.username = "Гость";
+      }
     },
   },
 
@@ -56,14 +93,28 @@ export default {
 <style>
 @import '../styles/main.css';
 
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.8rem;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.username {
+  margin-right: 0.8rem;
+  font-size: 1rem;
+  color: white;
+}
+
 .logout-button {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  padding: 10px 15px;
+  padding: 0.8rem 1rem;
   font-size: 1rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 0.4rem;
   background-color: #444;
   color: white;
   cursor: pointer;
