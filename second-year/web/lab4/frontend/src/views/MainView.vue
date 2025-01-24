@@ -9,9 +9,9 @@
       <div class="panel-gap"></div>
       <div>
         <PointForm @add-point="addPoint" @update-radius="updateRadius" />
-        <ResultsTable :points="points" />
       </div>
     </div>
+    <ResultsTable :points="points" />
   </div>
 </template>
 
