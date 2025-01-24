@@ -43,7 +43,7 @@ export default {
       const centerY = canvas.height / 2;
 
       const fixedR = 100; // Фиксированный размер областей
-      const scaleFactor = this.radius * 100 / fixedR; // Масштаб для точек
+      const scaleFactor = fixedR / this.radius; // Масштаб для точек и рисков
 
       // Очистка канваса
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -101,7 +101,7 @@ export default {
       ctx.closePath();
       ctx.fill();
 
-      // Риски для R и R/2 (значения обновляются)
+      // Риски для R и R/2
       ctx.lineWidth = 1;
 
       // X-axis risks
@@ -159,30 +159,23 @@ export default {
         ctx.fillText("R/2", centerX + 30, centerY - fixedR / 2);
       }
 
-      // Рисование всех точек с обновленным масштабом
       this.points.forEach((point) => {
         this.drawPoint(point.x, point.y, scaleFactor);
       });
     },
 
-    drawPoint(x, y) {
+    drawPoint(x, y, scaleFactor) {
       const canvas = this.$refs.canvas;
       const ctx = canvas.getContext("2d");
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
 
-      // Масштабирование координат точки
-      console.log("radius is" + this.radius)
-      let pointX = centerX + x * (100 / this.radius) * 100; // Используем масштаб
-      let pointY = centerY - y * (100 / this.radius) * 100;
-      if (this.radius !== 100) {
-        pointX = centerX + x * (1 / this.radius) * 100; // Используем масштаб
-        pointY = centerY - y * (1 / this.radius) * 100;
-      }
+      const pointX = centerX + x * scaleFactor;
+      const pointY = centerY - y * scaleFactor;
 
       ctx.beginPath();
       ctx.arc(pointX, pointY, 5, 0, 2 * Math.PI);
-      ctx.fillStyle = "red"; // Цвет точки
+      ctx.fillStyle = "red";
       ctx.fill();
     },
 
@@ -195,17 +188,11 @@ export default {
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
 
-      let setR = this.radius;
-      if (setR !== 100) {
-        setR = this.radius * 100;
-      }
-      const R = setR;
+      const fixedR = 100;
 
-      const x = ((clickX - centerX) / R).toFixed(2);
-      const y = ((centerY - clickY) / R).toFixed(2);
+      const x = ((clickX - centerX) / (fixedR / this.radius)).toFixed(2);
+      const y = ((centerY - clickY) / (fixedR / this.radius)).toFixed(2);
 
-      // Добавление точки
-      // this.drawPoint(x, y, false);
       this.$emit("add-point", { x: parseFloat(x), y: parseFloat(y), hit: true });
     },
   },
