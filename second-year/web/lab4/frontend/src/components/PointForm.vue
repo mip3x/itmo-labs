@@ -73,9 +73,15 @@ export default {
 
     checkPoint() {
       if (this.selectedX === null || this.yCoord === '' || this.selectedR === null) {
-        alert('Заполните все поля.');
+        alert('Заполните все поля!');
         return;
       }
+
+      if (isNaN(this.yCoord) || this.yCoord < -5 || this.yCoord > 5) {
+        alert("Некорректное значение Y. Введите число в диапазоне от -5 до 5!");
+        return;
+      }
+
       this.$emit('add-point', {
         x: this.selectedX,
         y: parseFloat(this.yCoord),

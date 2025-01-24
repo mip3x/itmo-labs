@@ -36,10 +36,12 @@ export default {
     addPoint(point) {
       this.points.push(point);
     },
+
     updateRadius(newRadius) {
       this.radius = newRadius;
     },
   },
+
   beforeRouteEnter(to, from, next) {
     document.body.classList.add('main-view-body');
     next();
