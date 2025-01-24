@@ -7,6 +7,11 @@
     font-size: 1rem; /* 16px */
 }
 
+.results-table {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
 body.main-view-body,
 .main-view footer {
     font-family: 'Monocraft', sans-serif;
