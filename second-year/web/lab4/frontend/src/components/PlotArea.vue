@@ -160,11 +160,11 @@ export default {
       }
 
       this.points.forEach((point) => {
-        this.drawPoint(point.x, point.y, scaleFactor);
+        this.drawPoint(point.x, point.y, scaleFactor, point.color || "red");
       });
     },
 
-    drawPoint(x, y, scaleFactor) {
+    drawPoint(x, y, scaleFactor, color) {
       const canvas = this.$refs.canvas;
       const ctx = canvas.getContext("2d");
       const centerX = canvas.width / 2;
@@ -175,7 +175,7 @@ export default {
 
       ctx.beginPath();
       ctx.arc(pointX, pointY, 5, 0, 2 * Math.PI);
-      ctx.fillStyle = "red";
+      ctx.fillStyle = color;
       ctx.fill();
     },
 

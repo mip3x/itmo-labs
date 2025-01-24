@@ -41,8 +41,36 @@ export default {
       this.$router.push('/');
     },
 
-    addPoint(point) {
-      this.points.push(point);
+    async addPoint(point) {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('/api/plot/check', {
+          method: 'POST',
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            x: point.x,
+            y: point.y,
+            radius: this.radius,
+          }),
+        });
+
+        if (!response.ok) {
+          this.points.push({ ...point, hit: false, color: 'orange' });
+          console.error('Ошибка сервера при проверке точки');
+          return;
+        }
+
+        const data = await response.json();
+        const hit = data.result;
+
+        this.points.push({ ...point, hit, color: hit ? 'green' : 'red' });
+      } catch (error) {
+        console.error('Ошибка сети при проверке точки:', error);
+        this.points.push({ ...point, hit: false, color: 'orange' });
+      }
     },
 
     updateRadius(newRadius) {
@@ -50,15 +78,15 @@ export default {
     },
 
     async fetchUsername() {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem('authToken');
       if (!token) {
-        this.username = "Гость";
+        this.username = 'Гость';
         return;
       }
 
       try {
-        const response = await fetch("/api/auth/session", {
-          method: "GET",
+        const response = await fetch('/api/auth/session', {
+          method: 'GET',
           headers: {
             Authorization: token,
             'Content-Type': 'application/json',
@@ -66,15 +94,15 @@ export default {
         });
 
         if (!response.ok) {
-          this.username = "Гость";
+          this.username = 'Гость';
           return;
         }
 
         const data = await response.json();
         this.username = data.username;
       } catch (error) {
-        console.error("Ошибка при загрузке имени пользователя: ", error);
-        this.username = "Гость";
+        console.error('Ошибка при загрузке имени пользователя: ', error);
+        this.username = 'Гость';
       }
     },
   },
