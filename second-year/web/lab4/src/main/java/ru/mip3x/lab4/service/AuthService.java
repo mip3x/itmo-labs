@@ -1,5 +1,6 @@
 package ru.mip3x.lab4.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.mindrot.jbcrypt.BCrypt;
 import ru.mip3x.lab4.db.model.User;
 import ru.mip3x.lab4.db.repository.UserRepository;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@ApplicationScoped
 public class AuthService {
     private final UserRepository userRepository = new UserRepository();
     private final Map<String, String> sessions = new HashMap<>();
@@ -41,6 +43,7 @@ public class AuthService {
 
     public String getUsernameFromSession(String sessionId) {
         System.out.println(sessions);
+        System.out.println(sessions.get(sessionId));
         return sessions.get(sessionId);
     }
 

@@ -14,9 +14,9 @@
       <tr v-for="point in points" :key="point.id">
         <td>{{ point.x }}</td>
         <td>{{ point.y }}</td>
-        <td>{{ point.r }}</td>
-        <td :style="{ color: point.hit ? 'green' : 'red' }">
-          {{ point.hit ? '✔' : '❌' }}
+        <td>{{ point.radius }}</td>
+        <td :style="{ color: point.color }">
+          {{ point.result ? '✔' : '❌' }}
         </td>
       </tr>
       </tbody>

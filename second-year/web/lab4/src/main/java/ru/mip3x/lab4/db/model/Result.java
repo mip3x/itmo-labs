@@ -1,8 +1,11 @@
 package ru.mip3x.lab4.db.model;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.primefaces.shaded.json.JSONPropertyIgnore;
+
 import java.time.LocalDateTime;
 
 @Entity

@@ -1,5 +1,7 @@
 package ru.mip3x.lab4.endpoints;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -10,9 +12,10 @@ import ru.mip3x.lab4.service.AuthService;
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Singleton
+@ApplicationScoped
 public class AuthResource {
-    private final AuthService authService = new AuthService();
+    @Inject
+    private AuthService authService;
 
     @POST
     @Path("/register")
@@ -60,7 +63,7 @@ public class AuthResource {
 
     @GET
     @Path("/session")
-    @Consumes("*/*")
+
     public Response getSession(@HeaderParam("Authorization") String sessionId) {
         String username = authService.getUsernameFromSession(sessionId);
         if (username == null) {

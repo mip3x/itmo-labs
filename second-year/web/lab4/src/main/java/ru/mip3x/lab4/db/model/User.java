@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -12,6 +14,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Result> results;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;

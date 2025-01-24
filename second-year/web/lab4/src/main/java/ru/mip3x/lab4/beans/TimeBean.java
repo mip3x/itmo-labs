@@ -2,6 +2,7 @@ package ru.mip3x.lab4.beans;
 
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Startup
-@Singleton
+@ApplicationScoped
 @Named
 public class TimeBean implements Serializable {
     private String currentDateTime;

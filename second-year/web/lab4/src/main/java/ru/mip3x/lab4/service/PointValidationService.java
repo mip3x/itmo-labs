@@ -1,8 +1,9 @@
 package ru.mip3x.lab4.service;
 
 import jakarta.ejb.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 
-@Singleton
+@ApplicationScoped
 public class PointValidationService {
     public boolean isPointInArea(double x, double y, double r) {
         boolean inRectangle = (x >= 0 && x <= r && y >= 0 && y <= r / 2);

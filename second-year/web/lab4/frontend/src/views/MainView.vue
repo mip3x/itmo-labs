@@ -33,6 +33,7 @@ export default {
 
   mounted() {
     this.fetchUsername();
+    this.fetchPoints();
   },
 
   methods: {
@@ -41,14 +42,52 @@ export default {
       this.$router.push('/');
     },
 
-    async addPoint(point) {
+    async fetchPoints() {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        alert("Вы не авторизованы!");
+        return;
+      }
+
       try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch('/api/plot/check', {
-          method: 'POST',
+        const response = await fetch("/api/plot/points", {
+          method: "GET",
           headers: {
             Authorization: token,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          this.points = data.map((point) => ({
+            x: point.x,
+            y: point.y,
+            radius: point.r,
+            result: point.result,
+            color: point.result ? "green" : "red",
+          }));
+        } else {
+          console.error("Ошибка загрузки точек:", await response.text());
+        }
+      } catch (error) {
+        console.error("Ошибка подключения к серверу:", error);
+      }
+    },
+
+    async addPoint(point) {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        alert("Вы не авторизованы!");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/plot/check", {
+          method: "POST",
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             x: point.x,
@@ -57,19 +96,33 @@ export default {
           }),
         });
 
-        if (!response.ok) {
-          this.points.push({ ...point, hit: false, color: 'orange' });
-          console.error('Ошибка сервера при проверке точки');
-          return;
-        }
-
         const data = await response.json();
-        const hit = data.result;
 
-        this.points.push({ ...point, hit, color: hit ? 'green' : 'red' });
+        if (response.ok) {
+          this.points.push({
+            x: point.x,
+            y: point.y,
+            radius: this.radius,
+            result: data.result,
+            color: data.result ? "green" : "red",
+          });
+        } else {
+          console.error("Ошибка проверки точки:", data.message);
+          this.points.push({
+            x: point.x,
+            y: point.y,
+            radius: this.radius,
+            color: "orange",
+          });
+        }
       } catch (error) {
-        console.error('Ошибка сети при проверке точки:', error);
-        this.points.push({ ...point, hit: false, color: 'orange' });
+        console.error("Ошибка подключения к серверу:", error);
+        this.points.push({
+          x: point.x,
+          y: point.y,
+          radius: this.radius,
+          color: "orange",
+        });
       }
     },
 
