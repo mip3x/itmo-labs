@@ -1,7 +1,7 @@
 <template>
-  <form @submit.prevent="login">
-    <input v-model="username" placeholder="Логин" required />
-    <input v-model="password" type="password" placeholder="Пароль" required />
+  <form @submit.prevent="login" class="login-form">
+    <input v-model="username" class="input-field" placeholder="Логин" required />
+    <input v-model="password" type="password" class="input-field" placeholder="Пароль" required />
     <button type="submit" class="button active">Войти</button>
   </form>
 </template>
