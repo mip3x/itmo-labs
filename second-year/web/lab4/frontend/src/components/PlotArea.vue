@@ -180,6 +180,11 @@ export default {
     },
 
     handleClick(event) {
+      if (this.radius === 100) {
+        alert("Выберите радиус перед добавлением точки!");
+        return;
+      }
+
       const canvas = this.$refs.canvas;
       const rect = canvas.getBoundingClientRect();
       const clickX = event.clientX - rect.left;
