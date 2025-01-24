@@ -11,11 +11,13 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="result in results" :key="result.id">
-        <td>{{ result.x }}</td>
-        <td>{{ result.y }}</td>
-        <td>{{ result.r }}</td>
-        <td>{{ result.result ? '✔' : '❌' }}</td>
+      <tr v-for="point in points" :key="point.id">
+        <td>{{ point.x }}</td>
+        <td>{{ point.y }}</td>
+        <td>{{ point.r }}</td>
+        <td :style="{ color: point.hit ? 'green' : 'red' }">
+          {{ point.hit ? '✔' : '❌' }}
+        </td>
       </tr>
       </tbody>
     </table>
@@ -24,13 +26,8 @@
 
 <script>
 export default {
-  data() {
-    return {
-      results: [
-        { id: 1, x: 1, y: 2, r: 3, result: true },
-        { id: 2, x: -1, y: -2, r: 4, result: false },
-      ],
-    };
+  props: {
+    points: Array,
   },
 };
 </script>
