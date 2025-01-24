@@ -59,7 +59,7 @@ export default {
         const redirect = this.$route.query.redirect || '/main';
         this.$router.push(redirect);
       } catch (error) {
-        const errorMessage = error.response?.data?.message || 'Ошибка входа. Проверьте данные.';
+        const errorMessage = 'Ошибка входа. Проверьте данные.';
         this.showNotification(errorMessage, 'error');
       }
     },
@@ -76,8 +76,7 @@ export default {
 
         this.$router.push('/main');
       } catch (error) {
-        const errorMessage =
-            error.response?.data?.message || 'Ошибка регистрации. Пользователь уже существует.';
+        const errorMessage = 'Ошибка регистрации. Пользователь уже существует.';
         this.showNotification(errorMessage, 'error');
       }
     },
@@ -103,8 +102,7 @@ export default {
         this.showNotification('Вы успешно вышли из системы.', 'success');
         this.$router.push('/');
       } catch (error) {
-        const errorMessage =
-            error.response?.data?.message || 'Ошибка при выходе из аккаунта.';
+        const errorMessage = 'Ошибка при выходе из аккаунта.';
         this.showNotification(errorMessage, 'error');
       }
     },
