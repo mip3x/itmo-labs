@@ -25,6 +25,7 @@ footer {
 }
 
 .input-field {
+    font-family: 'Monocraft', sans-serif;
     width: 37.5rem; /* 600px */
     padding: 1.25rem 0; /* 20px */
     font-size: 1.8rem;
