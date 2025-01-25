@@ -1,6 +1,5 @@
 package ru.mip3x.lab4.beans;
 
-import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;

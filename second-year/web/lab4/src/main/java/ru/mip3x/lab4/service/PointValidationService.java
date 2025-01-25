@@ -1,6 +1,5 @@
 package ru.mip3x.lab4.service;
 
-import jakarta.ejb.Singleton;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

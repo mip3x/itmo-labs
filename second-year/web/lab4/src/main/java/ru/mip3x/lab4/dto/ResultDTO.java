@@ -1,4 +1,5 @@
 package ru.mip3x.lab4.dto;
+
 import lombok.Getter;
 import ru.mip3x.lab4.db.model.Result;
 
