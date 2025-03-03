@@ -3,6 +3,7 @@
 
 #define ST_NAME_ENV "ST_NAME"
 #define DEFAULT_ST_NAME "Иванов Иван Иванович"
+#define VARIANT 10
 
 void print_intro_prompt();
 
