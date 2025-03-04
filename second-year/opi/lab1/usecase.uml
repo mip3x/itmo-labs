@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+
+actor "Неавторизованный\nпользователь" as NU
+actor "Авторизованный\nпользователь" as AU
+
+rectangle "Система Ozon Travel" {
+  (Поиск билетов и услуг) as Search
+  (Покупка авиабилета) as Purchase
+  (Выбор места в салоне) as SeatSelection
+  (Просмотр бонусной программы "Мили") as Bonus
+  (Бронирование билета) as Booking
+  (Ввод данных пассажира) as PassengerData
+}
+
+NU --> Search
+NU --> Bonus
+
+AU --> Search
+AU --> Purchase
+
+Purchase --> Booking : <<include>>
+Purchase --> SeatSelection : <<include>>
+Booking --> PassengerData : <<include>>
+
+@enduml
