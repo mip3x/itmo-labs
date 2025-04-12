@@ -25,6 +25,7 @@ const_1:         .word  1
 const_FF:        .word  0xFF
 buf_mask:        .word  0x5F5F5F00
 const_newline:   .word  0x0A
+overflow_sign:   .word  0xCCCCCCCC
 
 
     .text
@@ -93,7 +94,7 @@ read_line:
     store        index
 
 while_read_line:
-    beqz         output_excl_mark
+    beqz         overflow
 
     load_ind     input_addr
 
@@ -113,6 +114,15 @@ while_read_line:
     store        index
 
     jmp          while_read_line
+
+overflow:
+    load_imm     buf
+    store        buf_ptr
+
+    load         overflow_sign
+    store_ind    output_addr
+
+    jmp          end
 
 output_excl_mark:
     load         excl_mark
@@ -157,3 +167,4 @@ calc_pascal_str_length:
 
 end:
     halt
+
