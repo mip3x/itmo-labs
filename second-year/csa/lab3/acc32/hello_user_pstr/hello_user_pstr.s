@@ -1,7 +1,8 @@
     .data
 
-buf:             .byte  '________________________________'
-buf_size:        .word  0x20
+pascal_str_len:  .byte  0
+buf:             .byte  '_______________________________'
+buf_size:        .word  0x1F
 
 input_addr:      .word  0x80
 output_addr:     .word  0x84
@@ -55,7 +56,6 @@ while_q_msg:
 
 hello_msg_output:
     load_imm     buf
-    add          const_1        ; skip pascal length
     store        buf_ptr
 
     load_imm     hello_str
@@ -88,7 +88,6 @@ while_hello_msg:
 
 read_line:
     load         buf_size
-    sub          const_1      ; pascal length in the beginning
     sub          hello_size
     sub          excl_mark_size
     store        index
@@ -127,7 +126,6 @@ output_excl_mark:
 
 output_buf:
     load_imm     buf
-    add          const_1
     store        buf_ptr
 
     load         const_0
@@ -153,6 +151,9 @@ while_output_buf:
     jmp          while_output_buf
 
 calc_pascal_str_length:
+    load        pascal_str_len
+    add         index
+    store       pascal_str_len
 
 end:
     halt
