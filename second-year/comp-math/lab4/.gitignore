@@ -6,3 +6,5 @@
 /report.xml
 /server
 /solution/build
+/venv
+/__pycache__
