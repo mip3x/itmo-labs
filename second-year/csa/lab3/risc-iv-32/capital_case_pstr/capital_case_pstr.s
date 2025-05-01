@@ -11,7 +11,7 @@ overflow_sign:   .word  0xCCCCCCCC
 buf_mask:        .word  0x5F5F5F00
 
     .text
-    .org 0x85
+    .org 0x88
 
 _start:
     lui     sp, 0x1                         ; initialize stack pointer with 0x1000

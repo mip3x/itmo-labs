@@ -7,7 +7,7 @@ output_value:   .word 0
 byte_mask:      .word 0xFF
 
     .text
-    .org    0x85
+    .org    0x88
 _start:
     lui     sp, 0x1
     jal     ra, main

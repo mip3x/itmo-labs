@@ -29,7 +29,7 @@ overflow_sign:   .word  0xCCCCCCCC
 
 
     .text
-    .org 0x85
+    .org 0x88
 
 _start:
     load_imm     q_str
