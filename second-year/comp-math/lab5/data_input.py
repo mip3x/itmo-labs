@@ -47,6 +47,38 @@ def get_data():
 
         return xs, ys, None
 
+    if mode == 2:
+        import os
+
+        while True:
+            filename = input("Введите имя файла (например, data.txt): ").strip()
+            if not os.path.isfile(filename):
+                print("Ошибка: файл не найден! Попробуйте снова")
+                continue
+
+            try:
+                xs, ys = [], []
+                with open(filename, 'r') as f:
+                    for i, line in enumerate(f, start=1):
+                        line = line.strip().replace(',', ' ')
+                        parts = line.split()
+                        if len(parts) < 2:
+                            raise ValueError(f"Недостаточно значений в строке {i}: '{line}'")
+                        x, y = map(float, parts[:2])
+                        if x in xs:
+                            raise ValueError(f"Повторяющееся значение x в строке {i}: x = {x}")
+                        xs.append(x)
+                        ys.append(y)
+                if len(xs) < 2:
+                    raise ValueError("В файле должно быть как минимум две точки.")
+                break
+            except Exception as e:
+                print(f"Ошибка при чтении файла: {e}")
+                continue
+
+        return xs, ys, None
+
+
     if mode == 3:
         funcs = {1: math.sin, 2: math.cos, 3: math.exp}
         print(" 1) sin(x)\n 2) cos(x)\n 3) exp(x)")
