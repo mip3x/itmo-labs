@@ -70,7 +70,7 @@ def get_data():
                         xs.append(x)
                         ys.append(y)
                 if len(xs) < 2:
-                    raise ValueError("В файле должно быть как минимум две точки.")
+                    raise ValueError("В файле должно быть как минимум две точки!")
                 break
             except Exception as e:
                 print(f"Ошибка при чтении файла: {e}")
@@ -80,8 +80,14 @@ def get_data():
 
 
     if mode == 3:
-        funcs = {1: math.sin, 2: math.cos, 3: math.exp}
-        print(" 1) sin(x)\n 2) cos(x)\n 3) exp(x)")
+        funcs = {
+            1: math.sin,
+            2: math.cos,
+            3: math.exp,
+            4: lambda x: x**2,
+            5: lambda x: x**3
+        }
+        print(" 1) sin(x)\n 2) cos(x)\n 3) exp(x)\n 4) x^2\n 5) x^3")
 
         while True:
             try:
@@ -93,8 +99,8 @@ def get_data():
                 print(f"Ошибка: введите целое число от 1 до {len(funcs)}!")
 
         f = funcs[c]
-        a = float(input("Начало отрезка a: "))
-        b = float(input("Начало отрезка b: "))
+        a = float(input("Начало отрезка (точка a): "))
+        b = float(input("Конец отрезка (точка b): "))
 
         n = get_points_number()
         xs = [a + i * (b - a)/(n - 1) for i in range(n)]
