@@ -16,10 +16,10 @@ prepare_war:
 	@rm -rf $(STAGING)
 	@mkdir -p $(STAGING)/WEB-INF/classes $(STAGING)/WEB-INF/lib
 
-	@cp -r $(CLASS_FILES_DIR)/*      $(STAGING)/WEB-INF/classes/
-	@cp -r src/main/resources/*      $(STAGING)/WEB-INF/classes/
+	@cp -r $(CLASS_FILES_DIR)/* $(STAGING)/WEB-INF/classes/
+	@cp -r src/main/resources/* $(STAGING)/WEB-INF/classes/
 
-	@cp $(LIB_DIR)/*.jar             $(STAGING)/WEB-INF/lib/
+	@cp $(LIB_DIR)/*.jar $(STAGING)/WEB-INF/lib/
 
 package_war:
 	@mkdir -p $(ARTIFACTS_DIR)
