@@ -4,6 +4,7 @@ from problem import CauchyProblem
 from euler_method import solve_euler
 from runge_kutta_method import solve_runge_kutta
 from milne_method import solve_milne
+from plot_solution import plot_solution
 
 def input_int(prompt, valid_func=lambda x: True, error_msg='Неверный ввод'):
     while True:
@@ -75,6 +76,7 @@ def run_methods(problem: CauchyProblem):
     ]
     f = problem.f
     eps = problem.eps
+    exact = problem.exact
 
     for name, solver in methods:
         print('\n' + '='*40)
@@ -106,6 +108,9 @@ def run_methods(problem: CauchyProblem):
                 print('Погрешность превышает допустимый допуск (max_err > ε)')
                 
         print('='*40)
+
+        plot_solution(xs, ys, exact, name)
+        input("\nГрафики открыты — нажмите Enter, чтобы перейти к следующему методу...")
 
 
 def main():
