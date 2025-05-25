@@ -1,6 +1,9 @@
+import math
+
 from problem import CauchyProblem
 from euler_method import solve_euler
 from runge_kutta_method import solve_runge_kutta
+from milne_method import solve_milne
 
 def input_int(prompt, valid_func=lambda x: True, error_msg='Неверный ввод'):
     while True:
@@ -28,77 +31,111 @@ def input_float(prompt, valid_func=lambda x: True, error_msg='Неверный �
 
 def get_problems():
     return {
-        1: ("y' = x + y", lambda x, y: x + y),
-        2: ("y' = y - x**2 + 1", lambda x, y: y - x**2 + 1),
-        3: ("y' = x * y", lambda x, y: x * y),
-        4: ("y' = y + (1 + x) * y ** 2", lambda x, y: y + (1 + x) * y ** 2),
+        1: (
+            "y' = x + y",
+            lambda x, y: x + y,
+            lambda x0, y0: (lambda x: -(x + 1) + (y0 + x0 + 1) * math.exp(x - x0)),
+        ),
+        2: (
+            "y' = y - x**2 + 1",
+            lambda x, y: y - x ** 2 + 1,
+            lambda x0, y0: (lambda x: (x + 1)**2 + (y0 - (x0 + 1)**2)*math.exp(x - x0)),
+        ),
+        3: (
+            "y' = x * y",
+            lambda x, y: x * y,
+            lambda x0, y0: (lambda x: y0 * math.exp((x**2 - x0**2)/2)),
+        ),
+        4: (
+            "y' = y + (1 + x) * y ** 2",
+            lambda x, y: y + (1 + x) * y ** 2,
+            None
+        ),
     }
 
 
 def select_ode():
     problems = get_problems()
 
-    print('Выберите ОДУ для решения:')
-    for key, (desc, _) in problems.items():
-        print(f'  {key}: {desc}')
-    choice = input_int(
-        'Номер уравнения: ',
-        valid_func=lambda x: x in problems,
-        error_msg='Выберите корректный номер из списка!'
-    )
+    print("Выберите ОДУ:")
+    for k, (desc, _, _) in problems.items():
+        print(f"  {k}: {desc}")
 
-    _, f = problems[choice]
-    return f
+    choice = int(input("Номер: "))
+    desc, f, exact_factory = problems[choice]
+
+    return f, exact_factory
 
 
-def select_method():
-    print('\nВыберите метод решения:')
-    print('  1: Метод Эйлера')
-    print('  2: Метод Рунге–Кутта 4-го порядка')
-    return input_int(
-        'Номер метода: ',
-        valid_func=lambda x: x in (1, 2),
-        error_msg='Выберите 1 или 2.'
-    )
+def run_methods(problem: CauchyProblem):
+    methods = [
+        ('Милна', solve_milne),
+        ('Эйлера', solve_euler),
+        ('Рунге–Кутта 4го порядка', solve_runge_kutta),
+    ]
+    f = problem.f
+    eps = problem.eps
+
+    for name, solver in methods:
+        print('\n' + '='*40)
+        print(f'РЕЗУЛЬТАТЫ метода {name} (ε = {eps})')
+        print('-'*40)
+        xs, ys = solver(problem)
+        print('i\tx\t\ty\t\tf(x,y)')
+        for i, (x, y) in enumerate(zip(xs, ys)):
+            if i < len(xs) - 1:
+                fx = f(x, y)
+                print(f'{i}\t{x:.6f}\t{y:.6f}\t{fx:.6f}')
+            else:
+                print(f'{i}\t{x:.6f}\t{y:.6f}')
+
+        if name == 'Милна' and problem.exact is not None:
+            max_err = 0.0
+            for x, y in zip(xs, ys):
+                err = abs(problem.exact(x) - y)
+                if err > max_err:
+                    max_err = err
+
+            print('-'*40)
+            print(f'Фактическая ошибка max|y_exact−y_approx| = {max_err:.6f}')
+            print(f'Допуск ε = {problem.eps:.6f}')
+
+            if max_err <= problem.eps:
+                print('Погрешность в пределах допустимого (max_err ≤ ε)')
+            else:
+                print('Погрешность превышает допустимый допуск (max_err > ε)')
+                
+        print('='*40)
 
 
 def main():
-    f = select_ode()
+    f, exact_factory = select_ode()
 
     x0 = input_float('Введите начальное значение x0: ')
     y0 = input_float('Введите начальное значение y0: ')
     x_end = input_float(
         'Введите конечное значение x: ',
         valid_func=lambda x: x > x0,
-        error_msg='Конечное x должно быть больше начального x0.'
+        error_msg='Конечное x должно быть больше начального x0!'
     )
     h = input_float(
         'Введите шаг h: ',
-        valid_func=lambda x: x > 0 and x <= (x_end - x0),
-        error_msg='Шаг должен быть положительным и не превышать интервал [x0, x].'
+        valid_func=lambda h: h > 0 and h <= (x_end - x0),
+        error_msg='Шаг должен быть положительным и не превышать интервал [x0, x]!'
+    )
+    eps = input_float(
+        'Введите точность ε: ',
+        valid_func=lambda e: e > 0,
+        error_msg='Точность должна быть положительным числом!'
     )
 
-    problem = CauchyProblem(f, x0, y0, x_end, h)
-    method = select_method()
-
-    if method == 1:
-        xs, ys = solve_euler(problem)
-        method_name = 'Эйлера'
+    if exact_factory:
+        exact = exact_factory(x0, y0)
     else:
-        xs, ys = solve_runge_kutta(problem)
-        method_name = 'Рунге–Кутта 4-го порядка'
+        exact = None
 
-    n = len(xs)
-    print('\nРезультаты метода {method_name}:')
-    print('i\tx\t\ty\t\tf(x,y)')
-    for i in range(n):
-        x = xs[i]
-        y = ys[i]
-        if i < n - 1:
-            fx = f(x, y)
-            print(f'{i}\t{x:.6f}\t{y:.6f}\t{fx:.6f}')
-        else:
-            print(f'{i}\t{x:.6f}\t{y:.6f}')
+    problem = CauchyProblem(f, x0, y0, x_end, h, eps, exact)
+    run_methods(problem)
 
 
 if __name__ == '__main__':
