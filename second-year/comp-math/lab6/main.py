@@ -1,5 +1,6 @@
 from problem import CauchyProblem
 from euler_method import solve_euler
+from runge_kutta_method import solve_runge_kutta
 
 def input_int(prompt, valid_func=lambda x: True, error_msg='Неверный ввод'):
     while True:
@@ -46,8 +47,19 @@ def select_ode():
         error_msg='Выберите корректный номер из списка!'
     )
 
-    desc, f = problems[choice]
+    _, f = problems[choice]
     return f
+
+
+def select_method():
+    print('\nВыберите метод решения:')
+    print('  1: Метод Эйлера')
+    print('  2: Метод Рунге–Кутта 4-го порядка')
+    return input_int(
+        'Номер метода: ',
+        valid_func=lambda x: x in (1, 2),
+        error_msg='Выберите 1 или 2.'
+    )
 
 
 def main():
@@ -67,10 +79,17 @@ def main():
     )
 
     problem = CauchyProblem(f, x0, y0, x_end, h)
-    xs, ys = solve_euler(problem)
-    n = len(xs)
+    method = select_method()
 
-    print('\nРезультаты метода Эйлера:')
+    if method == 1:
+        xs, ys = solve_euler(problem)
+        method_name = 'Эйлера'
+    else:
+        xs, ys = solve_runge_kutta(problem)
+        method_name = 'Рунге–Кутта 4-го порядка'
+
+    n = len(xs)
+    print('\nРезультаты метода {method_name}:')
     print('i\tx\t\ty\t\tf(x,y)')
     for i in range(n):
         x = xs[i]
