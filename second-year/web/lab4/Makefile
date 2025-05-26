@@ -6,7 +6,7 @@ STAGING := $(BUILD_DIR)/_staging
 
 all: build
 
-build: compile prepare_war doc package_war
+build: xml compile prepare_war doc package_war
 	@echo "[O3JMB] Successful build..."
 	@$(MAKE) music
 
@@ -68,7 +68,20 @@ javadoc:
 	@mkdir -p $(JAVADOC_DIR)
 	javadoc -d $(JAVADOC_DIR) -cp "$(CLASSPATH)" $(JAVA_SRCS)
 
+xml:
+	@echo "[O3JMB] Validating XML files..."
+	@find . -type f -name '*.xml' | while read file; do \
+		echo "  -> $$file"; \
+		xmllint --noout "$$file" || exit 1; \
+	done
+	@echo "[O3JMB] All XML files are valid."
+
+scp: build
+	@echo "[O3JMB] Copying WAR to remote server via SCP config [$(SERVER_NAME)]..."
+	scp $(ARTIFACTS_DIR)/$(WAR_NAME) $(SERVER_NAME):$(SCP_PATH)
+
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml
+

@@ -23,6 +23,9 @@ MUSIC_FILE ?= music/build_completed.mp3
 
 JAVADOC_DIR := $(BUILD_DIR)/docs/javadoc
 
+SERVER_NAME := helios
+SCP_PATH := ~/artifacts/
+
 POSTGRESQL_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar
 HIBERNATE_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/hibernate/orm/hibernate-core/6.6.1.Final/hibernate-core-6.6.1.Final.jar
 JAKARTA_WEB_API_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/platform/jakarta.jakartaee-web-api/11.0.0-M3/jakarta.jakartaee-web-api-11.0.0-M3.jar
