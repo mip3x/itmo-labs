@@ -6,10 +6,12 @@ STAGING := $(BUILD_DIR)/_staging
 
 all: build
 
-build: compile prepare_war package_war
+build: compile doc prepare_war package_war
+	@echo "[O3JMB] Successful build..."
 	@$(MAKE) music
 
 compile: dependencies
+	@echo "[O3JMB] Getting dependencies..."
 	@mkdir -p $(CLASS_FILES_DIR)
 	$(JAVAC) $(JAVACFLAGS) -cp "$(CLASSPATH)" -d $(CLASS_FILES_DIR) $(JAVA_SRCS)
 
@@ -28,7 +30,7 @@ package_war:
 
 dependencies:
 	@mkdir -p $(LIB_DIR)
-	@echo "Downloading dependencies into $(LIB_DIR)..."
+	@echo "[O3JMB] Downloading dependencies into $(LIB_DIR)..."
 	wget -nc -P $(LIB_DIR) $(POSTGRESQL_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(HIBERNATE_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(JAKARTA_WEB_API_DOWNLOAD_PATH)
@@ -41,12 +43,20 @@ dependencies:
 	wget -nc -P $(LIB_DIR) $(EJBI_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(EJB_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(INJECT_DOWNLOAD_PATH)
-	@echo "All dependencies are downloaded"
+	@echo "[O3JMB] All dependencies are downloaded"
 
 music:
+	@echo "[O3JMB] Playing $(MUSIC_FILE)..."
 	$(MUSIC_PLAYER) -nodisp -autoexit -loglevel quiet $(MUSIC_FILE)
+
+doc: javadoc
+
+javadoc:
+	@echo "[O3JMB] Generating Javadoc..."
+	@mkdir -p $(JAVADOC_DIR)
+	javadoc -d $(JAVADOC_DIR) -cp "$(CLASSPATH)" $(JAVA_SRCS)
 
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean music
+.PHONY: all compile prepare_war package_war build dependencies clean music javadoc

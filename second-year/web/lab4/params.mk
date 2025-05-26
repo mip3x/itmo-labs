@@ -21,6 +21,8 @@ WAR_NAME := lab4-$(VERSION).war
 MUSIC_PLAYER ?= ffplay
 MUSIC_FILE ?= music/build_completed.mp3
 
+JAVADOC_DIR := $(BUILD_DIR)/docs/javadoc
+
 POSTGRESQL_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar
 HIBERNATE_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/hibernate/orm/hibernate-core/6.6.1.Final/hibernate-core-6.6.1.Final.jar
 JAKARTA_WEB_API_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/platform/jakarta.jakartaee-web-api/11.0.0-M3/jakarta.jakartaee-web-api-11.0.0-M3.jar
