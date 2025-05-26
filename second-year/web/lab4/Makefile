@@ -6,7 +6,7 @@ STAGING := $(BUILD_DIR)/_staging
 
 all: build
 
-build: compile doc prepare_war package_war
+build: compile prepare_war doc package_war
 	@echo "[O3JMB] Successful build..."
 	@$(MAKE) music
 
@@ -50,6 +50,18 @@ music:
 	$(MUSIC_PLAYER) -nodisp -autoexit -loglevel quiet $(MUSIC_FILE)
 
 doc: javadoc
+	@echo "[O3JMB] Calculating checksums..."
+	@find $(SRC_DIR) -type f -name '*.java' -exec md5sum {} \; > $(BUILD_DIR)/MD5SUMS.txt
+	@find $(CLASS_FILES_DIR) -type f -name '*.class' -exec sha1sum {} \; > $(BUILD_DIR)/SHA1SUMS.txt
+
+	@echo "Manifest-Version: 1.0" > $(BUILD_DIR)/MANIFEST.MF
+	@echo "Created-By: $(USER)" >> $(BUILD_DIR)/MANIFEST.MF
+	@cat $(BUILD_DIR)/MD5SUMS.txt >> $(BUILD_DIR)/MANIFEST.MF
+	@cat $(BUILD_DIR)/SHA1SUMS.txt >> $(BUILD_DIR)/MANIFEST.MF
+
+	@echo "[O3JMB] Copying Javadoc into WAR staging..."
+	@mkdir -p $(STAGING)/docs
+	@cp -r $(JAVADOC_DIR)/* $(STAGING)/docs/
 
 javadoc:
 	@echo "[O3JMB] Generating Javadoc..."
@@ -59,4 +71,4 @@ javadoc:
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean music javadoc
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc
