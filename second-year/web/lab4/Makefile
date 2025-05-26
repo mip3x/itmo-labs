@@ -7,6 +7,7 @@ STAGING := $(BUILD_DIR)/_staging
 all: build
 
 build: compile prepare_war package_war
+	@$(MAKE) music
 
 compile: dependencies
 	@mkdir -p $(CLASS_FILES_DIR)
@@ -42,7 +43,10 @@ dependencies:
 	wget -nc -P $(LIB_DIR) $(INJECT_DOWNLOAD_PATH)
 	@echo "All dependencies are downloaded"
 
+music:
+	$(MUSIC_PLAYER) -nodisp -autoexit -loglevel quiet $(MUSIC_FILE)
+
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean
+.PHONY: all compile prepare_war package_war build dependencies clean music
