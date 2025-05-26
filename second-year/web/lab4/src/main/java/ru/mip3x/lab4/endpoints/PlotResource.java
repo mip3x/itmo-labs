@@ -16,6 +16,8 @@ import ru.mip3x.lab4.db.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Locale;
 
 /**
  * REST endpoint for validating and retrieving user-submitted points
@@ -34,6 +36,8 @@ public class PlotResource {
     private final UserRepository userRepository = new UserRepository();
     private final ResultRepository resultRepository = new ResultRepository();
 
+    private final ResourceBundle messages = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
+
     /**
      * Checks whether a point is inside a predefined area
      *
@@ -48,13 +52,13 @@ public class PlotResource {
         String username = authService.getUsernameFromSession(sessionId);
         if (username == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("{\"message\":\"Invalid session or not logged in\"}")
+                    .entity("{\"message\":\"" + messages.getString("session.invalid") + "\"}")
                     .build();
         }
 
         if (pointDTO.getX() == null || pointDTO.getY() == null || pointDTO.getRadius() == null || pointDTO.getRadius() <= 0) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"message\":\"Invalid input: x, y, and radius must be provided and radius must be positive\"}")
+                    .entity("{\"message\":\"" + messages.getString("point.invalid") + "\"}")
                     .build();
         }
 
@@ -63,7 +67,7 @@ public class PlotResource {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("{\"message\":\"User not found\"}")
+                    .entity("{\"message\":\"" + messages.getString("user.notfound") + "\"}")
                     .build();
         }
 
@@ -95,14 +99,14 @@ public class PlotResource {
         String username = authService.getUsernameFromSession(sessionId);
         if (username == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("{\"message\":\"Invalid session or not logged in\"}")
+                    .entity("{\"message\":\"" + messages.getString("session.invalid") + "\"}")
                     .build();
         }
 
         User user = userRepository.findByUsername(username);
         if (user == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("{\"message\":\"User not found\"}")
+                    .entity("{\"message\":\"" + messages.getString("user.notfound") + "\"}")
                     .build();
         }
 

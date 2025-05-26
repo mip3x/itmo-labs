@@ -6,7 +6,7 @@ STAGING := $(BUILD_DIR)/_staging
 
 all: build
 
-build: xml compile prepare_war doc package_war
+build: xml compile prepare_war package_war
 	@echo "[O3JMB] Successful build..."
 	@$(MAKE) music
 
@@ -49,7 +49,7 @@ music:
 	@echo "[O3JMB] Playing $(MUSIC_FILE)..."
 	$(MUSIC_PLAYER) -nodisp -autoexit -loglevel quiet $(MUSIC_FILE)
 
-doc: javadoc
+doc: build javadoc
 	@echo "[O3JMB] Calculating checksums..."
 	@find $(SRC_DIR) -type f -name '*.java' -exec md5sum {} \; > $(BUILD_DIR)/MD5SUMS.txt
 	@find $(CLASS_FILES_DIR) -type f -name '*.class' -exec sha1sum {} \; > $(BUILD_DIR)/SHA1SUMS.txt
@@ -80,8 +80,17 @@ scp: build
 	@echo "[O3JMB] Copying WAR to remote server via SCP config [$(SERVER_NAME)]..."
 	scp $(ARTIFACTS_DIR)/$(WAR_NAME) $(SERVER_NAME):$(SCP_PATH)
 
+native2ascii:
+	@echo "[O3JMB] native2ascii…"
+	@mkdir -p $(LOCALE_OUT_DIR)
+	@for f in $(LOCALE_SRC_DIR)/*.properties; do \
+	  [ -f "$$f" ] || continue; \
+	  echo "  -> $$f"; \
+	  $(NATIVE2ASCII) -encoding UTF-8 "$$f" "$(LOCALE_OUT_DIR)/$$(basename $$f)"; \
+	done
+
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii
 
