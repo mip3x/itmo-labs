@@ -50,7 +50,14 @@ def get_problems():
         4: (
             "y' = y + (1 + x) * y ** 2",
             lambda x, y: y + (1 + x) * y ** 2,
-            None
+            lambda x0, y0: (lambda x: (-1 / x))
+        ),
+        5: (
+            "y' = x ** 2 - 2 * y",
+            lambda x, y: x ** 2 - 2 * y,
+            lambda x0, y0: (lambda x: (x ** 2/2 - x/2 + 1/4) +
+                (y0 - (x0 ** 2/2 - x0/2 + 1/4)) * math.exp(2*(x0 - x))
+            )
         ),
     }
 
@@ -74,7 +81,8 @@ def run_methods(problem: CauchyProblem):
         ('Эйлера', solve_euler),
         ('Рунге–Кутта 4го порядка', solve_runge_kutta),
     ]
-    f = problem.f
+    x0 = problem.x0
+    h = problem.h
     eps = problem.eps
     exact = problem.exact
 
@@ -83,31 +91,45 @@ def run_methods(problem: CauchyProblem):
         print(f'РЕЗУЛЬТАТЫ метода {name} (ε = {eps})')
         print('-'*40)
         xs, ys = solver(problem)
-        print('i\tx\t\ty\t\tf(x,y)')
-        for i, (x, y) in enumerate(zip(xs, ys)):
-            if i < len(xs) - 1:
-                fx = f(x, y)
-                print(f'{i}\t{x:.6f}\t{y:.6f}\t{fx:.6f}')
-            else:
-                print(f'{i}\t{x:.6f}\t{y:.6f}')
+        
+        if exact is not None:
+            print('i\tx\t\ty\t\ty_точн\t\t|y_точн - y|')
+        else:
+            print('i\tx\ty')
 
-        if name == 'Милна' and problem.exact is not None:
+        x_prev = x0
+        for i, (x, y) in enumerate(zip(xs, ys)):
+            y = ys[i]
+
+            if abs(x_prev - x) < 1e-8:
+                if exact is not None:
+                    y_ex = exact(x)
+                    difference = abs(y_ex - y)
+                    print(f'{i}\t{x:.6f}\t{y:.6f}\t{y_ex:.6f}\t{difference:.12f}')
+                else:
+                    print(f'{i}\t{x:.6f}\t{y:.6f}')
+
+                x_prev += h
+
+        if name == 'Милна' and exact is not None:
             max_err = 0.0
             for x, y in zip(xs, ys):
-                err = abs(problem.exact(x) - y)
+                err = abs(exact(x) - y)
                 if err > max_err:
                     max_err = err
 
             print('-'*40)
-            print(f'Фактическая ошибка max|y_exact−y_approx| = {max_err:.6f}')
-            print(f'Допуск ε = {problem.eps:.6f}')
+            print(f'Фактическая ошибка max|y_exact−y_approx| = {max_err:.12f}')
+            print(f'Допуск ε = {problem.eps:.12f}')
+            print(f'Последний шаг h = {problem.last_h:.12f}')
 
             if max_err <= problem.eps:
-                print('Погрешность в пределах допустимого (max_err ≤ ε)')
+                print('Погрешность в пределах допустимого (max_err <= ε)')
             else:
                 print('Погрешность превышает допустимый допуск (max_err > ε)')
                 
         print('='*40)
+
 
         plot_solution(xs, ys, exact, name)
         input("\nГрафики открыты — нажмите Enter, чтобы перейти к следующему методу...")

@@ -8,3 +8,4 @@ class CauchyProblem:
         self.eps = eps
         self.exact = exact
         self.n_steps = int((x_end - x0) / h)
+        self.last_h = h

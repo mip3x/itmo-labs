@@ -72,9 +72,10 @@ def solve_runge_kutta(problem: CauchyProblem):
         print(f"  R = |y_end^(h/2) - y_end^h|/(2^{p}-1) = {R:.20f}")
 
         if R <= eps:
-            print("Точность достигнута:")
+            print(f"Точность достигнута. Последний шаг: {h:.20f}.\nУзловые точки:")
+            problem.last_h = h
             return xs_h, ys_h
 
         cur_step_splitting += 1
-        print(f"Точность НЕ достигнута (R > ε={eps}), уменьшаем шаг: {h} --> {h/2}\n")
+        print(f"Точность НЕ достигнута (R > ε={eps}), уменьшаем шаг: {h:.20f} --> {h/2:.20f}\n")
         h /= 2

@@ -7,6 +7,7 @@ def solve_milne(problem: CauchyProblem):
     f = problem.f 
     x0 = problem.x0
     n_steps = problem.n_steps
+    eps = problem.eps
 
     xs_init, ys_init = solve_runge_kutta(problem)
     xs = xs_init[:4]
@@ -25,7 +26,18 @@ def solve_milne(problem: CauchyProblem):
 
         y_corr = ys[i - 2] + (h / 3) * (f_im2 + 4 * f_im1 + f_pred)
 
+        max_iters = 5
+        for _ in range(max_iters):
+            if abs(y_corr - y_pred) <= eps:
+                break
+
+            f_corr = f(xi, y_corr)
+            y_new = ys[i - 2] + (h / 3) * (f_im2 + 4 * f_im1 + f_corr)
+
+            y_corr = y_new
+
         xs.append(xi)
         ys.append(y_corr)
 
+    problem.last_h = h
     return xs, ys
