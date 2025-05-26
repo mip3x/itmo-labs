@@ -17,6 +17,9 @@ import ru.mip3x.lab4.db.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * REST endpoint for validating and retrieving user-submitted points
+ */
 @Path("/plot")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -31,6 +34,13 @@ public class PlotResource {
     private final UserRepository userRepository = new UserRepository();
     private final ResultRepository resultRepository = new ResultRepository();
 
+    /**
+     * Checks whether a point is inside a predefined area
+     *
+     * @param sessionId the session ID from the Authorization header
+     * @param pointDTO  the coordinates and radius of the point
+     * @return JSON with boolean result or an error response
+     */
     @POST
     @Path("/check")
     @Consumes("*/*")
@@ -72,6 +82,12 @@ public class PlotResource {
         return Response.ok("{\"result\": " + result + "}").build();
     }
 
+    /**
+     * Returns all previously submitted points for the authenticated user
+     *
+     * @param sessionId the session ID from the Authorization header
+     * @return list of submitted points or an error response
+     */
     @GET
     @Path("/points")
     @Consumes("*/*")

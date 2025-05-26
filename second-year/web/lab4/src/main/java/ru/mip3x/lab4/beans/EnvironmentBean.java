@@ -4,6 +4,10 @@ import jakarta.ejb.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 
+/**
+ * A bean that retrieves environment-related information
+ * Used for displaying developer metadata such as full name, group, and variant
+ */
 @Named
 @ApplicationScoped
 @Startup
@@ -12,6 +16,9 @@ public class EnvironmentBean {
     private String groupNumber;
     private String variant;
 
+    /**
+     * Initializes the bean with environment variables or default fallback values
+     */
     public EnvironmentBean() {
         this.fullName = System.getenv("USER_FULL_NAME");
         this.groupNumber = System.getenv("USER_GROUP");
