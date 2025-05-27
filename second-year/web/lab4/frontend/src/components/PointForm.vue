@@ -2,11 +2,12 @@
   <div class="right-panel">
     <div class="form-field">
       <label for="x-coord" class="label-x">Выберите X:</label>
-      <div class="x-buttons">
+      <div id="x-buttons" class="x-buttons">
         <button
             v-for="x in xValues"
             :key="x"
             class="change-x"
+            :data-test="'x-btn-' + x"
             :class="{ active: x === selectedX }"
             @click="setX(x)"
         >
@@ -18,7 +19,7 @@
     <div class="form-field">
       <label for="y-coord" class="label-y">Введите Y:</label>
       <input
-          id="y-coord"
+          id="plot-y"
           v-model.number="yCoord"
           class="input-y"
           type="number"
@@ -31,11 +32,12 @@
 
     <div class="form-field">
       <label for="radius" class="label-r">Выберите R:</label>
-      <div class="x-buttons">
+      <div id="r-buttons" class="x-buttons">
         <button
             v-for="r in rValues"
             :key="r"
             class="change-x"
+            :data-test="'r-btn-' + r"
             :class="{ active: r === selectedR }"
             @click="setR(r)"
         >
@@ -44,7 +46,7 @@
       </div>
     </div>
 
-    <button class="check-point-button active" @click="checkPoint">
+    <button id="plot-submit" class="check-point-button active" @click="checkPoint">
       Проверить точку
     </button>
   </div>

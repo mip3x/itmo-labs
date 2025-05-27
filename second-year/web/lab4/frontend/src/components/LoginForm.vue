@@ -1,11 +1,11 @@
 <template>
   <div>
-    <form @submit.prevent="login" class="login-form">
-      <input v-model="username" class="input-field" placeholder="Логин" required />
-      <input v-model="password" type="password" class="input-field" placeholder="Пароль" required />
-      <button type="submit" class="button active">Войти</button>
-      <button type="button" @click="register" class="button active">Регистрация</button>
-      <button v-if="isAuthenticated" @click="logout" class="button active">Выйти из аккаунта</button>
+    <form id="login-form" @submit.prevent="login" class="login-form">
+      <input id="login-username" v-model="username" class="input-field" placeholder="Логин" required />
+      <input id="login-password" v-model="password" type="password" class="input-field" placeholder="Пароль" required />
+      <button id="login-submit" type="submit" class="button active">Войти</button>
+      <button id="register-submit" type="button" @click="register" class="button active">Регистрация</button>
+      <button id="logout-submit" v-if="isAuthenticated" @click="logout" class="button active">Выйти из аккаунта</button>
     </form>
 
     <div v-if="notification.visible" :class="['toast', notification.type]">
