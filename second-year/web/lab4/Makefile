@@ -2,12 +2,12 @@ include params.mk
 
 JAVA_SRCS := $(shell find $(SRC_DIR) -type f -name '*.java')
 TEST_SRCS := $(shell find $(TEST_SRC_DIR) -type f -name '*.java')
+SELENIUM_TEST_SRCS := $(shell find $(SELENIUM_SRC_DIR) -name '*.java')
 CLASS_FILES := $(patsubst $(SRC_DIR)/%.java,$(CLASS_FILES_DIR)/%.class,$(JAVA_SRCS))
-STAGING := $(BUILD_DIR)/_staging
 
 all: build
 
-build: xml compile prepare_war package_war
+build: xml compile native2ascii prepare_war package_war
 	@echo "[O3JMB] Successful build..."
 	@$(MAKE) music
 
@@ -25,6 +25,8 @@ prepare_war:
 
 	@cp -r $(CLASS_FILES_DIR)/* $(STAGING)/WEB-INF/classes/
 	@cp -r src/main/resources/* $(STAGING)/WEB-INF/classes/
+	@cp -r $(RESOURCES_DIR)/* $(STAGING)/WEB-INF/classes/
+	@cp -r $(LOCALE_OUT_DIR)/* $(STAGING)/WEB-INF/classes/i18n/
 
 	@cp $(LIB_DIR)/*.jar $(STAGING)/WEB-INF/lib/
 
@@ -48,6 +50,8 @@ dependencies:
 	wget -nc -P $(LIB_DIR) $(EJB_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(INJECT_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(JUNIT_CONSOLE_STANDALONE_PATH)
+	wget -nc -P $(LIB_DIR) $(SELENIUM_JAR_DOWNLOAD_PATH)
+	wget -nc -P $(LIB_DIR) $(SELENIUM_CHROME_DRIVER_DOWNLOAD_PATH)
 	@echo "[O3JMB] All dependencies are downloaded"
 
 music:
@@ -198,12 +202,45 @@ test: build test-compile
 	@echo "[O3JMB] Running unit tests..."
 	@java -jar $(LIB_DIR)/$(JUNIT_CS) \
 	  --class-path $(CLASS_FILES_DIR):$(TEST_CLASS_DIR):$(LIB_DIR)/* \
-	  --scan-class-path
+	  --scan-class-path \
+	  --reports-dir=$(REPORT_DIR) \
+	  --fail-if-no-tests \
+
+report: test
+	@echo "[O3JMB] Adding JUnit report to git and committing..."
+	@git add -f $(REPORT_DIR)/*.xml
+	@git commit -m "O3JMB: add JUnit XML report" || echo "[O3JMB] Nothing to commit"
 
 test-compile:
 	@echo "[O3JMB] Compiling test sources..."
 	@mkdir -p $(TEST_CLASS_DIR)
 	$(JAVAC) $(JAVACFLAGS) -cp "$(CLASS_FILES_DIR):$(LIB_DIR)/*" -d $(TEST_CLASS_DIR) $(TEST_SRCS)
-	 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env history team test
 
+functional-test-selenium: build
+	@echo "[O3JMB] Compiling Selenium tests..."
+	@mkdir -p $(SELENIUM_CLASSES)
+	$(JAVAC) $(JAVACFLAGS) -cp "$(CLASSPATH):$(SELENIUM_CLASSES)" -d $(SELENIUM_CLASSES) $(SELENIUM_TEST_SRCS)
+
+	@echo "[O3JMB] Running Selenium tests…"
+	$(JAVA) -cp "$(SELENIUM_CP)" \
+	  org.junit.platform.console.ConsoleLauncher \
+	    --scan-class-path \
+	    --reports-dir=build/selenium-test-results \
+	    --disable-ansi-colors
+
+	@echo "[O3JMB] Selenium tests finished"
+
+deploy: build
+	@echo "[O3JMB] Cleaning previous ROOT.war…"
+	@rm -rf $(WILDFLY_HOME)/standalone/deployments/ROOT.war* 
+	@echo "[O3JMB] Copying new WAR…"
+	@cp $(ARTIFACTS_DIR)/$(WAR_NAME) $(WILDFLY_HOME)/standalone/deployments/ROOT.war
+	@touch $(WILDFLY_HOME)/standalone/deployments/ROOT.war.dodeploy
+	@echo "[O3JMB] Starting WildFly…"
+	@nohup $(WILDFLY_HOME)/bin/standalone.sh > wildfly.log 2>&1 &
+
+frontend:
+	@echo "[O3JMB] Starting front-end dev server…"
+	@cd $(FRONTEND_DIR) && npm run serve
+	 
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env history team test report test-compile functional-test-selenium deploy frontend

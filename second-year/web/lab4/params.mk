@@ -1,3 +1,6 @@
+WILDFLY_HOME := ../wildfly
+FRONTEND_DIR := frontend
+
 JAVAC := javac
 JAVA := java
 JAR := jar
@@ -7,6 +10,7 @@ JAVACFLAGS := -encoding UTF-8 -source 17 -target 17
 SRC_DIR := src/main/java
 RESOURCES_DIR := src/main/resources
 BUILD_DIR := build
+STAGING := $(BUILD_DIR)/_staging
 CLASS_FILES_DIR := build/classes
 ARTIFACTS_DIR := build/artifacts
 LIB_DIR := lib
@@ -49,6 +53,12 @@ JUNIT_CS := junit-platform-console-standalone-$(JUNIT_CS_VERSION).jar
 TEST_SRC_DIR := src/test/java
 TEST_CLASS_DIR := $(BUILD_DIR)/test-classes
 
+REPORT_DIR := $(BUILD_DIR)/test-results
+
+SELENIUM_SRC_DIR := selenium-tests/src/test/java
+SELENIUM_CLASSES := $(BUILD_DIR)/selenium-classes
+SELENIUM_CP := $(CLASS_FILES_DIR):$(LIB_DIR)/*:$(SELENIUM_CLASSES)
+
 POSTGRESQL_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar
 HIBERNATE_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/hibernate/orm/hibernate-core/6.6.1.Final/hibernate-core-6.6.1.Final.jar
 JAKARTA_WEB_API_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/platform/jakarta.jakartaee-web-api/11.0.0-M3/jakarta.jakartaee-web-api-11.0.0-M3.jar
@@ -62,6 +72,7 @@ EJBI_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/enterprise/jakarta.
 EJB_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/ejb/jakarta.ejb-api/4.0.1/jakarta.ejb-api-4.0.1.jar
 INJECT_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar
 JUNIT_CONSOLE_STANDALONE_PATH := https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/$(JUNIT_CS_VERSION)/$(JUNIT_CS)
+SELENIUM_JAR_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/seleniumhq/selenium/selenium-java/4.8.0/selenium-java-4.8.0.jar
+SELENIUM_CHROME_DRIVER_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/seleniumhq/selenium/selenium-chrome-driver/4.8.0/selenium-chrome-driver-4.8.0.jar
 
 CLASSPATH := $(LIB_DIR)/*
-
