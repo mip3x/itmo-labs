@@ -35,7 +35,7 @@ ALT_SRC_DIR := build/alt_src
 ALT_ARTIFACTS_DIR := build/alt_artifacts
 ALT_WAR_NAME := alt-$(WAR_NAME)
 
-REPLACE_FILE := replace.properties
+REPLACE_FILE := alt.properties
 
 POSTGRESQL_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar
 HIBERNATE_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/hibernate/orm/hibernate-core/6.6.1.Final/hibernate-core-6.6.1.Final.jar
