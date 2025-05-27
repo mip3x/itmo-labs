@@ -132,8 +132,40 @@ env: build
 	  exit 1; \
 	fi
 
+history:
+	@echo "[O3JMB] Searching for last successful compilation..."
+	@branch=$$(git symbolic-ref --short -q HEAD || git rev-parse --short HEAD); \
+	last_success=""; \
+	for rev in $$(git rev-list --first-parent $$branch); do \
+	  echo "-> Testing $$rev…"; \
+	  git checkout --quiet $$rev; \
+	  if make compile >/dev/null 2>&1; then \
+	    last_success=$$rev; \
+	    echo "[O3JMB] Success at $$last_success"; \
+	    break; \
+	  fi; \
+	done; \
+	if [ -z "$$last_success" ]; then \
+	  echo "[O3JMB] No revision compiled successfully"; \
+	  git checkout --quiet $$branch; \
+	  exit 1; \
+	fi; \
+	\
+	git checkout --quiet $$branch; \
+	candidates=$$(git rev-list --first-parent --reverse $$last_success..$$branch); \
+	echo "[O3JMB] Candidate commits after $$last_success:"; \
+	echo "$$candidates"; \
+	next_rev=$$(echo "$$candidates" | head -n1); \
+	if [ -z "$$next_rev" ]; then \
+	  echo "[O3JMB] Last success is the very first commit — nothing to diff"; \
+	else \
+	  echo "[O3JMB] Generating diff between $$last_success and $$next_rev..."; \
+	  git diff $$last_success $$next_rev > $(DIFF_FILE); \
+	  echo "[O3JMB] Wrote $(DIFF_FILE)"; \
+	fi
+
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env history
 
