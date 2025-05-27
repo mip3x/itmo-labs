@@ -89,8 +89,39 @@ native2ascii:
 	  $(NATIVE2ASCII) -encoding UTF-8 "$$f" "$(LOCALE_OUT_DIR)/$$(basename $$f)"; \
 	done
 
+alt:
+	@echo "[O3JMB] Creating alternative version..."
+
+	@rm -rf $(ALT_SRC_DIR)
+	@mkdir -p $(ALT_SRC_DIR)
+	@cp -r $(SRC_DIR)/* $(ALT_SRC_DIR)/
+
+	@if [ -f $(REPLACE_FILE) ]; then \
+	  echo "[O3JMB] Applying replacements from $(REPLACE_FILE)…"; \
+	  while IFS='=' read -r pat rep; do \
+	    find $(ALT_SRC_DIR) -type f -name '*.java' -exec sed -i "s/$$pat/$$rep/g" {} +; \
+	  done < $(REPLACE_FILE); \
+	else \
+	  echo "[O3JMB] No $(REPLACE_FILE) — skipping"; \
+	fi
+
+	@echo "[O3JMB] Renaming .java files if class names changed..."
+	@find $(ALT_SRC_DIR) -type f -name '*.java' | while read file; do \
+	  new_name=$$(grep -E 'public (class|interface|enum) ' "$$file" | sed -E 's/.* (class|interface|enum) ([A-Za-z0-9_]+).*/\2.java/'); \
+	  dir=$$(dirname "$$file"); \
+	  old_name=$$(basename "$$file"); \
+	  [ "$$new_name" != "$$old_name" ] && mv "$$file" "$$dir/$$new_name"; \
+	done
+
+	@echo "[O3JMB] Building alternative WAR…"
+	$(MAKE) build \
+	  SRC_DIR=$(ALT_SRC_DIR) \
+	  ARTIFACTS_DIR=$(ALT_ARTIFACTS_DIR) \
+	  WAR_NAME=$(ALT_WAR_NAME)
+	@echo "[O3JMB] Alternative WAR is at $(ALT_ARTIFACTS_DIR)/$(ALT_WAR_NAME)"
+
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt
 
