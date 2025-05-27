@@ -1,6 +1,7 @@
 include params.mk
 
 JAVA_SRCS := $(shell find $(SRC_DIR) -type f -name '*.java')
+TEST_SRCS := $(shell find $(TEST_SRC_DIR) -type f -name '*.java')
 CLASS_FILES := $(patsubst $(SRC_DIR)/%.java,$(CLASS_FILES_DIR)/%.class,$(JAVA_SRCS))
 STAGING := $(BUILD_DIR)/_staging
 
@@ -46,6 +47,7 @@ dependencies:
 	wget -nc -P $(LIB_DIR) $(EJBI_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(EJB_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(INJECT_DOWNLOAD_PATH)
+	wget -nc -P $(LIB_DIR) $(JUNIT_CONSOLE_STANDALONE_PATH)
 	@echo "[O3JMB] All dependencies are downloaded"
 
 music:
@@ -192,5 +194,16 @@ team:
 	zip -j $(ARTIFACTS_DIR)/$(ZIP_NAME) $$outdir/*.war >/dev/null; \
 	echo "[O3JMB] Created $(ARTIFACTS_DIR)/team.zip with $$succeeded artifacts"
 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env history team
+test: build test-compile
+	@echo "[O3JMB] Running unit tests..."
+	@java -jar $(LIB_DIR)/$(JUNIT_CS) \
+	  --class-path $(CLASS_FILES_DIR):$(TEST_CLASS_DIR):$(LIB_DIR)/* \
+	  --scan-class-path
+
+test-compile:
+	@echo "[O3JMB] Compiling test sources..."
+	@mkdir -p $(TEST_CLASS_DIR)
+	$(JAVAC) $(JAVACFLAGS) -cp "$(CLASS_FILES_DIR):$(LIB_DIR)/*" -d $(TEST_CLASS_DIR) $(TEST_SRCS)
+	 
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env history team test
 

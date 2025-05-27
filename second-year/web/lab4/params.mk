@@ -43,6 +43,12 @@ ZIP_NAME := team.zip
 
 TEAM_ARTIFACTS_DIR := $(BUILD_DIR)/team-artifacts
 
+JUNIT_CS_VERSION := 1.12.2
+JUNIT_CS := junit-platform-console-standalone-$(JUNIT_CS_VERSION).jar
+
+TEST_SRC_DIR := src/test/java
+TEST_CLASS_DIR := $(BUILD_DIR)/test-classes
+
 POSTGRESQL_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar
 HIBERNATE_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/hibernate/orm/hibernate-core/6.6.1.Final/hibernate-core-6.6.1.Final.jar
 JAKARTA_WEB_API_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/platform/jakarta.jakartaee-web-api/11.0.0-M3/jakarta.jakartaee-web-api-11.0.0-M3.jar
@@ -55,6 +61,7 @@ PERSISTENCE_API_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/persiste
 EJBI_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/enterprise/jakarta.enterprise.cdi-api/4.0.1/jakarta.enterprise.cdi-api-4.0.1.jar
 EJB_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/ejb/jakarta.ejb-api/4.0.1/jakarta.ejb-api-4.0.1.jar
 INJECT_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar
+JUNIT_CONSOLE_STANDALONE_PATH := https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/$(JUNIT_CS_VERSION)/$(JUNIT_CS)
 
 CLASSPATH := $(LIB_DIR)/*
 
