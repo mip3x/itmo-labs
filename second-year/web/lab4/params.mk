@@ -72,7 +72,7 @@ EJBI_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/enterprise/jakarta.
 EJB_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/ejb/jakarta.ejb-api/4.0.1/jakarta.ejb-api-4.0.1.jar
 INJECT_DOWNLOAD_PATH := https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar
 JUNIT_CONSOLE_STANDALONE_PATH := https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/$(JUNIT_CS_VERSION)/$(JUNIT_CS)
-SELENIUM_JAR_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/seleniumhq/selenium/selenium-java/4.8.0/selenium-java-4.8.0.jar
+SELENIUM_SERVER_JAR_DOWNLOAD_PATH := https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.8.0/selenium-server-4.8.0.jar
 SELENIUM_CHROME_DRIVER_DOWNLOAD_PATH := https://repo1.maven.org/maven2/org/seleniumhq/selenium/selenium-chrome-driver/4.8.0/selenium-chrome-driver-4.8.0.jar
 
 CLASSPATH := $(LIB_DIR)/*

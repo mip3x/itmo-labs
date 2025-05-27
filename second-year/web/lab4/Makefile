@@ -50,7 +50,7 @@ dependencies:
 	wget -nc -P $(LIB_DIR) $(EJB_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(INJECT_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(JUNIT_CONSOLE_STANDALONE_PATH)
-	wget -nc -P $(LIB_DIR) $(SELENIUM_JAR_DOWNLOAD_PATH)
+	wget -nc -P $(LIB_DIR) $(SELENIUM_SERVER_JAR_DOWNLOAD_PATH)
 	wget -nc -P $(LIB_DIR) $(SELENIUM_CHROME_DRIVER_DOWNLOAD_PATH)
 	@echo "[O3JMB] All dependencies are downloaded"
 
@@ -220,7 +220,6 @@ functional-test-selenium: build
 	@echo "[O3JMB] Compiling Selenium tests..."
 	@mkdir -p $(SELENIUM_CLASSES)
 	$(JAVAC) $(JAVACFLAGS) -cp "$(CLASSPATH):$(SELENIUM_CLASSES)" -d $(SELENIUM_CLASSES) $(SELENIUM_TEST_SRCS)
-
 	@echo "[O3JMB] Running Selenium tests…"
 	$(JAVA) -cp "$(SELENIUM_CP)" \
 	  org.junit.platform.console.ConsoleLauncher \
