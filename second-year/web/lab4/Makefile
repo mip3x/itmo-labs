@@ -134,9 +134,9 @@ env: build
 
 history:
 	@echo "[O3JMB] Searching for last successful compilation..."
-	@branch=$$(git symbolic-ref --short -q HEAD || git rev-parse --short HEAD); \
+	@orig=$$(git symbolic-ref --short -q HEAD || git rev-parse --short HEAD); \
 	last_success=""; \
-	for rev in $$(git rev-list --first-parent $$branch); do \
+	for rev in $$(git rev-list --first-parent $$orig); do \
 	  echo "-> Testing $$rev…"; \
 	  git checkout --quiet $$rev; \
 	  if make compile >/dev/null 2>&1; then \
@@ -147,12 +147,12 @@ history:
 	done; \
 	if [ -z "$$last_success" ]; then \
 	  echo "[O3JMB] No revision compiled successfully"; \
-	  git checkout --quiet $$branch; \
+	  git checkout --quiet $$orig; \
 	  exit 1; \
 	fi; \
 	\
-	git checkout --quiet $$branch; \
-	candidates=$$(git rev-list --first-parent --reverse $$last_success..$$branch); \
+	git checkout --quiet $$orig; \
+	candidates=$$(git rev-list --first-parent --reverse $$last_success..$$orig); \
 	echo "[O3JMB] Candidate commits after $$last_success:"; \
 	echo "$$candidates"; \
 	next_rev=$$(echo "$$candidates" | head -n1); \
