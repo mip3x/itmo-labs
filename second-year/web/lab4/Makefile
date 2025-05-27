@@ -120,8 +120,20 @@ alt:
 	  WAR_NAME=$(ALT_WAR_NAME)
 	@echo "[O3JMB] Alternative WAR is at $(ALT_ARTIFACTS_DIR)/$(ALT_WAR_NAME)"
 
+env: build
+	@echo "[O3JMB] Running in custom environment from env.properties..."
+	@if [ -f env.properties ]; then \
+	  . ./env.properties; \
+	  echo "[O3JMB] Using JAVA_HOME=$$JAVA_HOME"; \
+	  echo "[O3JMB] Using JAVA_ARGS=$$JAVA_ARGS"; \
+	  "$$JAVA_HOME/bin/java" $$JAVA_ARGS -cp "$(CLASS_FILES_DIR):$(LIB_DIR)/*" $$MAIN_CLASS; \
+	else \
+	  echo "[O3JMB] env.properties not found"; \
+	  exit 1; \
+	fi
+
 clean:
 	rm -rf $(BUILD_DIR) $(LIB_DIR)
 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env
 
