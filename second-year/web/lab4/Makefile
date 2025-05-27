@@ -15,6 +15,9 @@ compile: dependencies
 	@mkdir -p $(CLASS_FILES_DIR)
 	$(JAVAC) $(JAVACFLAGS) -cp "$(CLASSPATH)" -d $(CLASS_FILES_DIR) $(JAVA_SRCS)
 
+clean:
+	rm -rf $(BUILD_DIR) $(LIB_DIR)
+
 prepare_war:
 	@rm -rf $(STAGING)
 	@mkdir -p $(STAGING)/WEB-INF/classes $(STAGING)/WEB-INF/lib
@@ -164,8 +167,30 @@ history:
 	  echo "[O3JMB] Wrote $(DIFF_FILE)"; \
 	fi
 
-clean:
-	rm -rf $(BUILD_DIR) $(LIB_DIR)
+team:
+	@echo "[O3JMB] Packaging previous 3 revisions into team.zip..."
+	@orig=$$(git symbolic-ref --short -q HEAD || echo HEAD); \
+	revs=$$(git rev-list --first-parent $$orig | sed '1d' | head -n3); \
+	outdir=$(TEAM_ARTIFACTS_DIR); \
+	rm -rf $$outdir; mkdir -p $$outdir; \
+	succeeded=0; \
+	for rev in $$revs; do \
+	  echo "-> [$${rev}] building..."; \
+	  git checkout --quiet $$rev; \
+	  if $(MAKE) build >/dev/null 2>&1; then \
+	    cp $(ARTIFACTS_DIR)/$(WAR_NAME) $$outdir/$(WAR_NAME)-$$rev; \
+	    succeeded=$$((succeeded+1)); \
+	  else \
+	    echo "[O3JMB] Warning: build failed for $$rev, skipping" >&2; \
+	  fi; \
+	done; \
+	git checkout --quiet $$orig; \
+	if [ $$succeeded -eq 0 ]; then \
+	  echo "[O3JMB] Error: none of the revisions built successfully"; \
+	  exit 1; \
+	fi; \
+	zip -j $(ARTIFACTS_DIR)/$(ZIP_NAME) $$outdir/*.war >/dev/null; \
+	echo "[O3JMB] Created $(ARTIFACTS_DIR)/team.zip with $$succeeded artifacts"
 
-.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env history
+.PHONY: all compile prepare_war package_war build dependencies clean music doc javadoc xml native2ascii alt env history team
 
