@@ -9,6 +9,6 @@ import jakarta.ws.rs.core.Application;
  * This class sets the base URI path ("/api") for all REST resources
  * using the {@link ApplicationPath} annotation
  */
-@ApplicationPath("/api")
+@ApplicationPath("/api"
 public class RestApplication extends Application {
 }
