@@ -1,0 +1,24 @@
+name: assert is_prime(n) == 1
+limit: 510000
+memory_size: 0x1fff
+input_streams:
+  0x80: [2147483647]
+  0x84: []
+reports:
+  - name: Step-by-step log
+    slice: all
+    view: |
+      Sp: {Sp:hex}
+      T0:{T0} T1:{T1} T2:{T2}
+      A0:{A0} A1:{A1} 
+      {pc}:	{instruction}	{pc:label}
+  - name: Check results
+    slice: last
+    filter:
+      - state
+    view: |
+      numio[0x80]: {io:0x80:dec}
+      numio[0x84]: {io:0x84:dec}
+    assert: |
+      numio[0x80]: [] >>> []
+      numio[0x84]: [] >>> [1]
