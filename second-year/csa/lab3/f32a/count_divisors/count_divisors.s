@@ -40,12 +40,12 @@ x_is_positive:
 
 count_divisors_prep:
     count_divisors
-    r>
+    r>                  \ T <- divisors_counter
     ;
 
 count_divisors:
-    lit 0 >r            \ r:0
-    lit divisor b!      \ b <- divisor
+    lit 0 >r            \ R <- divisors_counter
+    lit divisor b!      \ b <- &divisor
     main_loop ;
 
 main_loop:
@@ -55,35 +55,31 @@ main_loop:
     lit 31 >r
 
 division_step:
-    +/
+    +/                  \ dividend - A; divisor - [B]; quotient - T; remainder - S
     next division_step
-    drop
-    if del              \ if remainder == 0 => divisor / divisible -> +1
+    drop                \ drop quotient
+    if div              \ if remainder == 0 => divisor / divisible -> +1
 
-not_del:
+not_div:
     continue ;
 
-del:
+div:
     r> lit 1 + >r
-    continue ;
 
 continue:
     @p divisor
-    inv lit 1 +
+    inv lit 1 +        \ ds:[-divisor]
     @p divisible
     +
-    if end
-    @p divisor
-    lit 1 +
-    !p divisor
+    if end             \ if (divisible == divisor) ==> end
+    @p divisor lit 1 + 
+    !p divisor         \ divisor++
     main_loop ;
 
 end:
-    r>
-    r>
+    r> r>              \ rs:[counter,return_addr]
     over
-    >r
-    >r
+    >r >r              \ rs:[return_addr,counter]
     ;
 
 write_output:
@@ -92,6 +88,7 @@ write_output:
     \ |            |  /---- [B] -> T
     \ v            v  v
     @p output_addr b! !b
-
+   
 exit:
+    r>                 \ drop return addr (clear return stack)
     halt
