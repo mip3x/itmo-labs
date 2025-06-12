@@ -70,4 +70,5 @@ write_output:
     ;
 
 end:
+    r> drop
     halt
