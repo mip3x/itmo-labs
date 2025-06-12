@@ -23,10 +23,10 @@ read_input:
 fibonacci:
     dup 			    \ ds:[x:x]
     lit -2			    \ ds:[-2:x:x]
-    +	    			\ ds:[x-2:x]
-    -if fib_continue	\ ds:[x]  if (x >= 2) => fib_continue
+    +	    			    \ ds:[x-2:x]
+    -if fib_continue		    \ ds:[x]  if (x >= 2) => fib_continue
     dup				    \ ds:[x:x]
-    -if return_num		\ ds:[x]  if (x >= 0 && x < 2) => return_num
+    -if return_num		    \ ds:[x]  if (x >= 0 && x < 2) => return_num
      
 incorrect_range:
     lit -1			    \ ds:[-1]
@@ -46,10 +46,10 @@ fib_loop:
     a				    \ ds:[a:i:i]
     +				    \ ds:[a+i:i]
     dup 		 	    \ ds:[a+i:a+i:i]
-   -if c_fib_loop		\ ds:[a+i:i] if (a+i >= 0) => c_fib_loop
+   -if c_fib_loop		    \ ds:[a+i:i] if (a+i >= 0) => c_fib_loop
     
 overflow:
-    drop drop r> drop	\ clear stacks
+    drop drop r> drop		    \ clear stacks
     lit 0xCCCCCCCC
     fib_end ;
 
