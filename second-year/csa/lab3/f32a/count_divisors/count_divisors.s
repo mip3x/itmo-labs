@@ -11,8 +11,15 @@ divisor:        .word 0
 _start:
     read_input
     check_ranges
-    count_divisors_prep
+    if call_count_divisors
+
+count_divisors_finished:
     write_output
+    exit
+
+call_count_divisors:
+    count_divisors
+    count_divisors_finished ;    
 
 read_input:
     \ /------------------- T <- input_addr
@@ -32,16 +39,26 @@ check_ranges:
 x_not_in_range:
     drop                \ []
     lit -1              \ [-1]
-    write_output ;
+    dup                 \ [-1;-1]
+    ;
 
 x_is_positive:
     drop
+    lit 0               \ [0]
     ;
 
-count_divisors_prep:
-    count_divisors
-    r>                  \ T <- divisors_counter
+write_output:
+    \ /-------------------- T <- output_addr
+    \ |            /------- T -> B
+    \ |            |  /---- [B] -> T
+    \ v            v  v
+    @p output_addr b! !b
     ;
+   
+exit:
+    r> drop
+    halt
+
 
 count_divisors:
     lit 0 >r            \ R <- divisors_counter
@@ -71,24 +88,11 @@ continue:
     inv lit 1 +        \ ds:[-divisor]
     @p divisible
     +
-    if end             \ if (divisible == divisor) ==> end
+    if cd_end          \ if (divisible == divisor) ==> end
     @p divisor lit 1 + 
     !p divisor         \ divisor++
     main_loop ;
 
-end:
-    r> r>              \ rs:[counter,return_addr]
-    over
-    >r >r              \ rs:[return_addr,counter]
+cd_end:
+    r>
     ;
-
-write_output:
-    \ /-------------------- T <- output_addr
-    \ |            /------- T -> B
-    \ |            |  /---- [B] -> T
-    \ v            v  v
-    @p output_addr b! !b
-   
-exit:
-    r>                 \ drop return addr (clear return stack)
-    halt
