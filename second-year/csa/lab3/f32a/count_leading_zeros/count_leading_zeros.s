@@ -5,13 +5,18 @@ output_addr:    .word 0x84
 mask:           .word 0x80000000
 
     .text
+    .org 0x88
 
 _start:
     read_input
     check_0
+    if call_write_output
     enable_eam
     count_leading_zeros
+
+call_write_output:
     write_output
+    end
 
 read_input:
     \ /------------------- T <- input_addr
@@ -24,12 +29,14 @@ read_input:
 check_0:
     dup                 \ DS: x:x
     if load32
+    lit -1              \ DS: -1
     ;
 
 load32:
     drop                \ DS: [] - empty
     lit 32              \ DS: 32
-    write_output ;
+    lit 0               \ DS: 0:32
+    ;
 
 enable_eam:
     lit 1 eam
@@ -67,6 +74,8 @@ write_output:
     \ |            |  /---- [B] <- T
     \ v            v  v
     @p output_addr b! !b
+    ;
 
 end:
+    r> drop             \ RS: [] - empty
     halt
