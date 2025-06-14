@@ -6,7 +6,7 @@ greet:           .byte  'What is your name?\n'
     .org 0x88
 
 _start:
-    lui      sp, 0x1			                   ; initialize stack pointer with 0x1000
+    lui      sp, 0x1			              ; initialize stack pointer with 0x1000
     jal	     ra, main
     halt
 
@@ -19,13 +19,13 @@ main:
     sw       a5, 16(sp)
     sw       a6, 20(sp)
 
-    addi     s2, s2, 0x21		                 ; s2 <- exclamation mark
+    addi     s2, s2, 0x21		             ; s2 <- exclamation mark
     lui      s3, %hi(0xFFFF0000)
     addi     s3, s3, %lo(0xFFFF0000)         ; s3 <- zero-byte mask
 
     lui      a0, %hi(greet)
     addi     a0, a0, %lo(greet)
-    mv       s1, a0			                     ; s1 <- &greet
+    mv       s1, a0			                 ; s1 <- &greet
 
     addi     sp, sp, -4                      ; save value from register 'ra' on the stack
     sw       ra, 0(sp)
@@ -33,8 +33,8 @@ main:
     lw       ra, 0(sp)                       ; restore value from stack to 'ra'
     addi     sp, sp, 4
 
-    mv       a1, a0			                     ; a1 <- strlen(greet)
-    mv       a0, s1			                     ; a0 <- &greet
+    mv       a1, a0			                 ; a1 <- strlen(greet)
+    mv       a0, s1			                 ; a0 <- &greet
 
     addi     sp, sp, -4                      ; save value from register 'ra' on the stack
     sw       ra, 0(sp)
@@ -107,13 +107,13 @@ overflow:
 ; a0 - &greet
 strlen:
     addi     t0, zero, 0xFF                  ; t0 = 0xFF (byte mask)
-    mv       a1, zero			                   ; counter
+    mv       a1, zero			             ; counter
 
 strlen_loop:
     add      a2, a0, a1
     lw       a2, 0(a2)
-    and      a2, a2, t0			                 ; input & 0xFF
-    addi     a1, a1, 1			                 ; counter++
+    and      a2, a2, t0			             ; input & 0xFF
+    addi     a1, a1, 1			             ; counter++
     bnez     a2, strlen_loop                 ; run until zero-byte is met
     addi     a0, a1, -1                      ; exclude zero-byte from final result
     jr       ra
@@ -155,9 +155,9 @@ readline_loop:
     add      a5, a0, a1                      ; calculate current byte to set
     addi     a1, a1, 1                       ; bytes_counter++
 
-    lw       a6, 0(a5)			                 ; a6 = [calculated_address]
-    and      a6, a6, t1			                 ; a6 = a6 & 0xFFFFFF00
-    or       a4, a6, a4			                 ; a6 = a6 | a4
+    lw       a6, 0(a5)			             ; a6 = [calculated_address]
+    and      a6, a6, t1			             ; a6 = a6 & 0xFFFFFF00
+    or       a4, a6, a4			             ; a6 = a6 | a4
 
     sw       a4, 0(a5)                       ; store the byte in buffer, retaining higher ones
     bne      a2, a1, readline_loop           ; continue if buffer has enough space
