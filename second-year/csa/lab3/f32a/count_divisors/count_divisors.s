@@ -50,7 +50,7 @@ x_is_positive:
 write_output:
     \ /-------------------- T <- output_addr
     \ |            /------- T -> B
-    \ |            |  /---- [B] -> T
+    \ |            |  /---- [B] <- T
     \ v            v  v
     @p output_addr b! !b
     ;

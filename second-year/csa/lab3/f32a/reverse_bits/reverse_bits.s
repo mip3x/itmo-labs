@@ -40,7 +40,7 @@ reverse_loop:
 write_output:
     \ /-------------------- T <- output_addr
     \ |            /------- T -> B
-    \ |            |  /---- [A] -> T
+    \ |            |  /---- [B] <- T
     \ v            v  v
     @p output_addr b! !b
     ;
