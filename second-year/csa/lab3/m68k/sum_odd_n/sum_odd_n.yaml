@@ -1,16 +1,17 @@
-name: assert sum_odd_n(5) == 9
-limit: 1000
+name: assert sum_odd_n(10) == 25
+limit: 2000
 memory_size: 0x1000
 input_streams:
-  0x80: [5]
+  0x80: [100000]
   0x84: []
 reports:
   - name: Step-by-step
     slice: all
     view: |
       {pc}:	{instruction}	{pc:label}
-      A0:{A0} A1:{A1} D0:{D0} D1:{D1}
+      A0:{A0} A1:{A1} D0:{D0} D1:{D1} D2:{D2}
       A6:{A6} A7:{A7}
+      NZVC:{SR:bin}
   - name: Result
     slice: last
     view: |
@@ -18,4 +19,4 @@ reports:
       numio[0x84]: {io:0x84:dec}
     assert: |
       numio[0x80]: [] >>> []
-      numio[0x84]: [] >>> [9]
+      numio[0x84]: [] >>> [-858993460]
