@@ -6,12 +6,12 @@ greet:           .byte  'What is your name?\n'
     .org 0x88
 
 _start:
-    lui      sp, 0x1			              ; initialize stack pointer with 0x1000
+    lui      sp, 0x1			             ; initialize stack pointer with 0x1000
     jal	     ra, main
     halt
 
 main:
-    addi     sp, sp, -24                      ; save caller-saved registers a1-a6
+    addi     sp, sp, -24                     ; save caller-saved registers a1-a6
     sw       a1, 0(sp)
     sw       a2, 4(sp)
     sw       a3, 8(sp)
