@@ -1,0 +1,12 @@
+diff --git a/second-year/web/lab4/src/main/java/ru/mip3x/lab4/RestApplication.java b/second-year/web/lab4/src/main/java/ru/mip3x/lab4/RestApplication.java
+index 8919beb..4c134ca 100644
+--- a/second-year/web/lab4/src/main/java/ru/mip3x/lab4/RestApplication.java
++++ b/second-year/web/lab4/src/main/java/ru/mip3x/lab4/RestApplication.java
+@@ -9,6 +9,6 @@ import jakarta.ws.rs.core.Application;
+  * This class sets the base URI path ("/api") for all REST resources
+  * using the {@link ApplicationPath} annotation
+  */
+-@ApplicationPath("/api")
++@ApplicationPath("/api"
+ public class RestApplication extends Application {
+ }
