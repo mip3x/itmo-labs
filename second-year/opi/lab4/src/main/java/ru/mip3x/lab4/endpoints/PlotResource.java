@@ -13,6 +13,8 @@ import ru.mip3x.lab4.service.AuthService;
 import ru.mip3x.lab4.service.PointValidationService;
 import ru.mip3x.lab4.db.repository.ResultRepository;
 import ru.mip3x.lab4.db.repository.UserRepository;
+import ru.mip3x.lab4.beans.PointStatsBean;
+import ru.mip3x.lab4.beans.ClickIntervalBean;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +34,12 @@ public class PlotResource {
 
     @Inject
     private AuthService authService;
+
+    @Inject
+    private PointStatsBean pointStatsBean;
+
+    @Inject
+    private ClickIntervalBean clickIntervalBean;
 
     private final UserRepository userRepository = new UserRepository();
     private final ResultRepository resultRepository = new ResultRepository();
@@ -80,6 +88,9 @@ public class PlotResource {
                 System.currentTimeMillis(),
                 user
         );
+
+        pointStatsBean.recordPoint(pointDTO);
+        clickIntervalBean.recordClick();
 
         resultRepository.save(newResult);
 
