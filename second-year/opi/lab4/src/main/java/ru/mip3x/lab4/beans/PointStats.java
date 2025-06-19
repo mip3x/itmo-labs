@@ -2,8 +2,10 @@ package ru.mip3x.lab4.beans;
 
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
+import javax.management.ObjectName;
 import java.util.concurrent.atomic.AtomicLong;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import ru.mip3x.lab4.dto.PointDTO;
 import ru.mip3x.lab4.service.PointValidationService;
@@ -37,8 +39,8 @@ public class PointStats extends NotificationBroadcasterSupport implements PointS
         if (!validationService.isPointInArea(x, y, r)) {
             outOfBounds.incrementAndGet();
             Notification notification = new Notification(
-                "Point is out of bounds",
-                this,
+                "ru.mip3x.point.outOfBounds",
+                "lab4.beans:type=PointStats",
                 sequenceNumber++,
                 System.currentTimeMillis(),
                 "Point out of bounds: (" + x + ", " + y + "), r=" + r
