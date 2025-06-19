@@ -10,7 +10,7 @@ import ru.mip3x.lab4.service.PointValidationService;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class PointStatsBean extends NotificationBroadcasterSupport implements PointStatsMBean {
+public class PointStats extends NotificationBroadcasterSupport implements PointStatsMBean {
     private final AtomicLong totalPoints = new AtomicLong();
     private final AtomicLong outOfBounds = new AtomicLong();
     private int sequenceNumber = 1;
