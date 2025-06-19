@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import ru.mip3x.lab4.beans.PointStats;
 import ru.mip3x.lab4.beans.ClickInterval;

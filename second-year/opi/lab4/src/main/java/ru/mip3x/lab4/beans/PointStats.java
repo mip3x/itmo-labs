@@ -2,10 +2,8 @@ package ru.mip3x.lab4.beans;
 
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
-import javax.management.ObjectName;
 import java.util.concurrent.atomic.AtomicLong;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import ru.mip3x.lab4.dto.PointDTO;
 import ru.mip3x.lab4.service.PointValidationService;
@@ -51,4 +49,3 @@ public class PointStats extends NotificationBroadcasterSupport implements PointS
         }
     }
 }
-
