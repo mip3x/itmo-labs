@@ -1,3 +1,5 @@
-# RISC-IV scheme
-RISC-IV pipeline processor diagram
-![scheme](./risc-iv.png)
+# Лабораторная работа №3. Схема
+
+- [аккумуляторная архитектура `acc32`](./acc32),
+- [стековая архитектура `f32a`](./f32a),
+- [RISC архитектура `risc-iv-32`](./risc-iv-32).
