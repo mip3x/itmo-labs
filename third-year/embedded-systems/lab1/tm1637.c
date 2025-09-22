@@ -36,7 +36,7 @@ void tm1637_init(void) {
     tm1637_clear();
     tm1637_display_number(0);
 
-    last_display_update = 0;
+    lastDisplayUpdate = 0;
     counter = 0;
 }
 
@@ -166,8 +166,8 @@ void tm1637_clear(void) {
 }
 
 void tm1637_update(void) {
-    if ((tickCount - last_display_update) >= 1000) {
-        last_display_update = tickCount;
+    if ((tickCount - lastDisplayUpdate) >= 1000) {
+        lastDisplayUpdate = tickCount;
 
         // Отображаем текущее значение счетчика
         tm1637_display_number(counter);

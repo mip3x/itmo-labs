@@ -64,16 +64,16 @@ char readKey() {
     return '\0';
 }
 
-void scanKeyboard() {
+void scanKeyboard(char *currentKey) {
     // Сканируем клавиатуру каждые 100мс
     if (tickCount - lastScanTime > 100) {
         lastScanTime = tickCount;
-        char currentKey = readKey();
+        *currentKey = readKey();
 
-        if (currentKey != '\0' && currentKey != lastKey) {
-            printf("Pressed: %c\n", currentKey);
-            lastKey = currentKey;
-        } else if (currentKey == '\0') {
+        if (*currentKey != '\0' && *currentKey != lastKey) {
+            printf("Pressed: %c\n", *currentKey);
+            lastKey = *currentKey;
+        } else if (*currentKey == '\0') {
             lastKey = '\0';
         }
     }

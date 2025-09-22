@@ -9,6 +9,7 @@
 #define RCC_BASE 0x40021000
 #define GPIOA_BASE 0x50000000
 #define GPIOB_BASE 0x50000400
+#define GPIOC_BASE 0x50000800
 #define USART2_BASE 0x40004400
 #define SYSTICK_BASE 0xE000E010
 
@@ -62,12 +63,14 @@ typedef struct {
 #define RCC ((RCC_TypeDef *)RCC_BASE)
 #define GPIOA ((GPIO_TypeDef *)GPIOA_BASE)
 #define GPIOB ((GPIO_TypeDef *)GPIOB_BASE)
+#define GPIOC ((GPIO_TypeDef *)GPIOC_BASE)
 #define USART2 ((USART_TypeDef *)USART2_BASE)
 #define SysTick ((SysTick_TypeDef *)SYSTICK_BASE)
 
 // Бит маски
 #define RCC_AHBENR_GPIOAEN (1 << 17)
 #define RCC_AHBENR_GPIOBEN (1 << 18)
+#define RCC_AHBENR_GPIOCEN (1 << 19)
 #define RCC_APB1ENR_USART2EN (1 << 17)
 #define GPIO_MODER_MODER5_0 (1 << 10)
 #define GPIO_AFRL_AFSEL2_0 (1 << 8)
@@ -76,5 +79,14 @@ typedef struct {
 #define USART_ISR_TXE (1 << 7)
 
 extern volatile uint32_t tickCount;
+
+typedef enum {
+    MODE_BIN = 0,
+    MODE_DEC = 1,
+    MODE_HEX = 2,
+} display_mode_t;
+
+extern volatile display_mode_t displayMode;
+void set_mode(display_mode_t displayMode);
 
 #endif

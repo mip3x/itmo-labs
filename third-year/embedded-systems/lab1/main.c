@@ -6,6 +6,7 @@ uint32_t last_display_update;
 uint16_t counter;
 char lastKey;
 uint32_t lastScanTime;
+volatile display_mode_t displayMode;
 
 void osSystickHandler(void) { tickCount++; }
 
@@ -14,9 +15,21 @@ void initGPIO() {
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN;
 
     // Настраиваем PA5 как выход
-    GPIOA->MODER = (GPIOA->MODER & ~(3 << 10)) | (1 << 10);
+    GPIOA->MODER = (GPIOA->MODER & ~(3 << (5 * 2))) | (1 << (5 * 2));
     GPIOA->OTYPER &= ~(1 << 5);
     GPIOA->OSPEEDR |= (1 << 10);
+
+    // PA9 (DEC)
+    GPIOA->MODER = (GPIOA->MODER & ~(3 << (9 * 2)))  | (1 << (9 * 2));
+    GPIOA->OTYPER &= ~(1 << 9);
+
+    // PA15 (BIN)
+    GPIOA->MODER = (GPIOA->MODER & ~(3 << (15 * 2))) | (1 << (15 * 2));
+    GPIOA->OTYPER &= ~(1 << 15);
+
+    // PC7 (HEX)
+    GPIOC->MODER = (GPIOC->MODER & ~(3 << (7 * 2))) | (1 << (7 * 2));
+    GPIOC->OTYPER &= ~(1 << 7);
 }
 
 void initUSART2() {
@@ -63,7 +76,12 @@ int main(void) {
 
     printf("Hello, %s!\n", "Wokwi Simulation");
 
-    GPIOA->ODR |= (1 << 5); // Включаем LED
+    // GPIOA->ODR |= (1 << 5);
+    // Включаем LED
+    GPIOA->BSRR = (1 << 5) | (1 << 9) | (1 << 15);
+    GPIOC->BSRR = (1 << 7);
+
+    displayMode = MODE_DEC;
 
     while (1) {
         checkTickCount();
