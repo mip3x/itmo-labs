@@ -21,5 +21,5 @@
 ## Пособие и примеры программ
 
 - [Документация по симулятору](https://docs.wokwi.com/)
-- [Справочное руководство nucleo-c031c6](https://www.st.com/resource/en/reference_manual/rm0091-stm32f0x1stm32f0x2stm32f0x8-advanced-armbased-32bit-mcusstmicroelectronics.pdf)
+- [Справочное руководство nucleo-c031c6](https://www.st.com/resource/en/reference_manual/rm0490-stm32c0x1-advanced-armbased-64bit-mcus-stmicroelectronics.pdf)
 - [Пример программы](https://wokwi.com/projects/441248357913176065)
