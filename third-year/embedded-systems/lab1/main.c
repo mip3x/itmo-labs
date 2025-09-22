@@ -20,16 +20,16 @@ void initGPIO() {
     GPIOA->OSPEEDR |= (1 << 10);
 
     // PA9 (DEC)
-    GPIOA->MODER = (GPIOA->MODER & ~(3 << (DEC_LED * 2)))  | (1 << (DEC_LED * 2));
-    GPIOA->OTYPER &= ~(1 << DEC_LED);
+    GPIOA->MODER = (GPIOA->MODER & ~(3 << (DEC_LED_PIN * 2)))  | (1 << (DEC_LED_PIN * 2));
+    GPIOA->OTYPER &= ~(1 << DEC_LED_PIN);
 
     // PA15 (BIN)
-    GPIOA->MODER = (GPIOA->MODER & ~(3 << (BIN_LED * 2))) | (1 << (BIN_LED * 2));
-    GPIOA->OTYPER &= ~(1 << BIN_LED);
+    GPIOA->MODER = (GPIOA->MODER & ~(3 << (BIN_LED_PIN * 2))) | (1 << (BIN_LED_PIN * 2));
+    GPIOA->OTYPER &= ~(1 << BIN_LED_PIN);
 
     // PC7 (HEX)
-    GPIOC->MODER = (GPIOC->MODER & ~(3 << (HEX_LED * 2))) | (1 << (HEX_LED * 2));
-    GPIOC->OTYPER &= ~(1 << HEX_LED);
+    GPIOC->MODER = (GPIOC->MODER & ~(3 << (HEX_LED_PIN * 2))) | (1 << (HEX_LED_PIN * 2));
+    GPIOC->OTYPER &= ~(1 << HEX_LED_PIN);
 }
 
 void initUSART2() {
@@ -65,16 +65,16 @@ void checkTickCount() {
     if (tickCount - lastTick >= 2000) {
         lastTick = tickCount;
         GPIOA->ODR ^= (1 << 5); // Toggle LED
-        printf("tickCount = %d!\n", tickCount);
+        printf("tickCount = %d!\n", lastTick);
     }
 }
 
 static inline void leds_off(void) {
     // + 16 becase of RR (Reset Register)
     uint8_t resetOffset = 16;
-    GPIOA->BSRR = (1 << (DEC_LED + resetOffset))
-                | (1 << (BIN_LED + resetOffset));
-    GPIOC->BSRR = (1 << (HEX_LED + resetOffset));
+    GPIOA->BSRR = (1 << (DEC_LED_PIN + resetOffset))
+                | (1 << (BIN_LED_PIN + resetOffset));
+    GPIOC->BSRR = (1 << (HEX_LED_PIN + resetOffset));
 }
 
 void set_mode(display_mode_t mode) {
@@ -82,11 +82,11 @@ void set_mode(display_mode_t mode) {
     leds_off();
 
     if (mode == BIN_MODE)
-        GPIOA->BSRR = (1 << BIN_LED);
+        GPIOA->BSRR = (1 << BIN_LED_PIN);
     else if (mode == DEC_MODE)
-        GPIOA->BSRR = (1 << DEC_LED);
+        GPIOA->BSRR = (1 << DEC_LED_PIN);
     else if (mode == HEX_MODE)
-        GPIOC->BSRR = (1 << HEX_LED);
+        GPIOC->BSRR = (1 << HEX_LED_PIN);
 }
 
 int main(void) {

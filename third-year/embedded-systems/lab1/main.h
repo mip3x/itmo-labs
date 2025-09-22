@@ -86,9 +86,9 @@ typedef enum {
     HEX_MODE = 2,
 } display_mode_t;
 
-#define BIN_LED 15
-#define DEC_LED 9
-#define HEX_LED 7
+#define BIN_LED_PIN 15
+#define DEC_LED_PIN 9
+#define HEX_LED_PIN 7
 
 #define BIN_BUTTON 'B'
 #define DEC_BUTTON 'D'
