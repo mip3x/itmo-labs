@@ -81,10 +81,18 @@ typedef struct {
 extern volatile uint32_t tickCount;
 
 typedef enum {
-    MODE_BIN = 0,
-    MODE_DEC = 1,
-    MODE_HEX = 2,
+    BIN_MODE = 0,
+    DEC_MODE = 1,
+    HEX_MODE = 2,
 } display_mode_t;
+
+#define BIN_LED 15
+#define DEC_LED 9
+#define HEX_LED 7
+
+#define BIN_BUTTON 'B'
+#define DEC_BUTTON 'D'
+#define HEX_BUTTON 'H'
 
 extern volatile display_mode_t displayMode;
 void set_mode(display_mode_t displayMode);

@@ -26,7 +26,7 @@ void tm1637_clear(void);
 void delay_us(uint32_t us);
 void tm1637_update(void);
 
-extern uint32_t last_display_update;
+extern uint32_t lastDisplayUpdate;
 extern uint16_t counter;
 
 #endif

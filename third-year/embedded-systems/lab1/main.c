@@ -2,7 +2,7 @@
 #include "tm1637.h"
 
 volatile uint32_t tickCount;
-uint32_t last_display_update;
+uint32_t lastDisplayUpdate;
 uint16_t counter;
 char lastKey;
 uint32_t lastScanTime;
@@ -11,8 +11,8 @@ volatile display_mode_t displayMode;
 void osSystickHandler(void) { tickCount++; }
 
 void initGPIO() {
-    // Включаем тактирование GPIOA и GPIOB
-    RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN;
+    // Включаем тактирование GPIOA, GPIOB и GPIOC
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOCEN;
 
     // Настраиваем PA5 как выход
     GPIOA->MODER = (GPIOA->MODER & ~(3 << (5 * 2))) | (1 << (5 * 2));
@@ -20,16 +20,16 @@ void initGPIO() {
     GPIOA->OSPEEDR |= (1 << 10);
 
     // PA9 (DEC)
-    GPIOA->MODER = (GPIOA->MODER & ~(3 << (9 * 2)))  | (1 << (9 * 2));
-    GPIOA->OTYPER &= ~(1 << 9);
+    GPIOA->MODER = (GPIOA->MODER & ~(3 << (DEC_LED * 2)))  | (1 << (DEC_LED * 2));
+    GPIOA->OTYPER &= ~(1 << DEC_LED);
 
     // PA15 (BIN)
-    GPIOA->MODER = (GPIOA->MODER & ~(3 << (15 * 2))) | (1 << (15 * 2));
-    GPIOA->OTYPER &= ~(1 << 15);
+    GPIOA->MODER = (GPIOA->MODER & ~(3 << (BIN_LED * 2))) | (1 << (BIN_LED * 2));
+    GPIOA->OTYPER &= ~(1 << BIN_LED);
 
     // PC7 (HEX)
-    GPIOC->MODER = (GPIOC->MODER & ~(3 << (7 * 2))) | (1 << (7 * 2));
-    GPIOC->OTYPER &= ~(1 << 7);
+    GPIOC->MODER = (GPIOC->MODER & ~(3 << (HEX_LED * 2))) | (1 << (HEX_LED * 2));
+    GPIOC->OTYPER &= ~(1 << HEX_LED);
 }
 
 void initUSART2() {
@@ -61,10 +61,32 @@ int _write(int file, uint8_t *ptr, int len) {
 }
 
 void checkTickCount() {
-    if ((tickCount % 2000) == 0) {
+    static uint32_t lastTick = 0;
+    if (tickCount - lastTick >= 2000) {
+        lastTick = tickCount;
         GPIOA->ODR ^= (1 << 5); // Toggle LED
-        printf("tickCount = %d!\n", tickCount++);
+        printf("tickCount = %d!\n", tickCount);
     }
+}
+
+static inline void leds_off(void) {
+    // + 16 becase of RR (Reset Register)
+    uint8_t resetOffset = 16;
+    GPIOA->BSRR = (1 << (DEC_LED + resetOffset))
+                | (1 << (BIN_LED + resetOffset));
+    GPIOC->BSRR = (1 << (HEX_LED + resetOffset));
+}
+
+void set_mode(display_mode_t mode) {
+    displayMode = mode;
+    leds_off();
+
+    if (mode == BIN_MODE)
+        GPIOA->BSRR = (1 << BIN_LED);
+    else if (mode == DEC_MODE)
+        GPIOA->BSRR = (1 << DEC_LED);
+    else if (mode == HEX_MODE)
+        GPIOC->BSRR = (1 << HEX_LED);
 }
 
 int main(void) {
@@ -76,12 +98,9 @@ int main(void) {
 
     printf("Hello, %s!\n", "Wokwi Simulation");
 
-    // GPIOA->ODR |= (1 << 5);
     // Включаем LED
-    GPIOA->BSRR = (1 << 5) | (1 << 9) | (1 << 15);
-    GPIOC->BSRR = (1 << 7);
-
-    displayMode = MODE_DEC;
+    GPIOA->ODR = (1 << 5);
+    set_mode(DEC_MODE);
 
     while (1) {
         checkTickCount();
