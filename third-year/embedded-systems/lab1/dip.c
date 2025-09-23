@@ -36,7 +36,9 @@ void scanDip(void) {
         if (currentValue != lastValue) {
             lastValue = currentValue;
             printf("DIP = %u\n", (unsigned)currentValue);
-            tm1637_display_value(lastValue);
+
+            if (displayMode != BIN_MODE)
+                tm1637_display_value(lastValue);
         }
     }
 }

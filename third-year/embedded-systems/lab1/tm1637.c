@@ -1,4 +1,5 @@
 #include "tm1637.h"
+#include "dip.h"
 // Функция задержки
 void delay_us(uint32_t us) {
     // При 48 MHz, 1 цикл ≈ 20.83 нс
@@ -168,13 +169,28 @@ void tm1637_display_hex(uint8_t value) {
     tm1637_display_digit(3, digit_codes[low]);
 }
 
+void tm1637_display_bin(uint8_t ch, uint8_t level) {
+    // ch: 0..7, выводим бит2 бит1 бит0
+    uint8_t b2 = (ch >> 2) & 1;
+    uint8_t b1 = (ch >> 1) & 1;
+    uint8_t b0 = ch & 1;
+
+    // первые 3 позиции -- '0' или '1'
+    tm1637_display_digit(0, b2 ? digit_codes[1] : digit_codes[0]);
+    tm1637_display_digit(1, b1 ? digit_codes[1] : digit_codes[0]);
+    tm1637_display_digit(2, b0 ? digit_codes[1] : digit_codes[0]);
+
+    // последняя -- H(High) или L(Low)
+    tm1637_display_digit(3, level ? SEG_H : SEG_L);
+}
+
 void tm1637_display_value(int value) {
     if (displayMode == DEC_MODE)
         tm1637_display_dec(value);
     else if (displayMode == HEX_MODE)
         tm1637_display_hex(value);
     else if (displayMode == BIN_MODE)
-        tm1637_display_hex(value);
+        tm1637_display_bin(0, value & 1);
 }
 
 // Очистка дисплея
@@ -185,15 +201,19 @@ void tm1637_clear(void) {
 }
 
 void tm1637_update(void) {
+    static uint8_t bin_index = 0; // какой канал сейчас показывает семисегментный индикатор (0..7)
+
+    if (displayMode != BIN_MODE)
+        return;
+
     if ((tickCount - lastDisplayUpdate) >= 1000) {
         lastDisplayUpdate = tickCount;
 
-        // Отображаем текущее значение счетчика
-        tm1637_display_dec(counter);
-        printf("Counter: %d\n", counter);
+        uint8_t value = readDipValue(); // 8 бит состояний (тумблеры DIP)
+        uint8_t level = (value >> bin_index) & 1; // значение на текущем канале
 
-        counter++;
-        if (counter > 9999)
-            counter = 0;
+        tm1637_display_bin(bin_index, level);
+
+        bin_index = (bin_index + 1) & 7;
     }
 }

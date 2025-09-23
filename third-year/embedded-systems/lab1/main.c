@@ -82,8 +82,10 @@ void set_mode(display_mode_t mode) {
     displayMode = mode;
     leds_off();
 
-    if (mode == BIN_MODE)
+    if (mode == BIN_MODE) {
         GPIOA->BSRR = (1 << BIN_LED_PIN);
+        lastDisplayUpdate = 0;
+    }
     else if (mode == DEC_MODE)
         GPIOA->BSRR = (1 << DEC_LED_PIN);
     else if (mode == HEX_MODE)
@@ -108,9 +110,9 @@ int main(void) {
 
     while (1) {
         checkTickCount();
-        // tm1637_update();
-        scanKeyboard();
         scanDip();
+        scanKeyboard();
+        tm1637_update();
     }
 
     return 0;
