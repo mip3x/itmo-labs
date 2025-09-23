@@ -21,6 +21,7 @@
 
 - Основной: [Programming Language Foundations in Agda](https://plfa.github.io)
 - [Документация](https://agda.readthedocs.io/en/v2.8.0/)
+- [Подробное введение](https://www.cse.chalmers.se/~ulfn/papers/afp08/tutorial.pdf)
 
 ## Темы для ЛР4
 
