@@ -1,4 +1,5 @@
 #include "dip.h"
+#include "tm1637.h"
 
 void initDipInputsPullup(void) {
     for (uint8_t i = 0; i < SWITCH_PINS; i++) {
@@ -35,6 +36,7 @@ void scanDip(void) {
         if (currentValue != lastValue) {
             lastValue = currentValue;
             printf("DIP = %u\n", (unsigned)currentValue);
+            tm1637_display_value(lastValue);
         }
     }
 }

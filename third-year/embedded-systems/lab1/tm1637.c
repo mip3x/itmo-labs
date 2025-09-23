@@ -11,6 +11,9 @@ void delay_us(uint32_t us) {
 
 // Инициализация пинов TM1637
 void tm1637_init(void) {
+    // Включаем тактирование GPIOA (уже есть в вашем коде)
+    // RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+
     // Настраиваем PA6 и PA7 как выходы с открытым стоком
     GPIOA->MODER = (GPIOA->MODER & ~(0xF << (TM1637_CLK_PIN * 2))) |
                    (0x5 << (TM1637_CLK_PIN * 2));
@@ -31,7 +34,7 @@ void tm1637_init(void) {
     tm1637_stop();
 
     tm1637_clear();
-    tm1637_display_number(0);
+    tm1637_display_dec(0);
 
     lastDisplayUpdate = 0;
     counter = 0;
@@ -126,7 +129,7 @@ const uint8_t digit_codes[] = {
 };
 
 // Отображение числа на дисплее
-void tm1637_display_number(int number) {
+void tm1637_display_dec(int number) {
     uint8_t digits[4];
 
     // Извлекаем отдельные цифры
@@ -155,6 +158,25 @@ void tm1637_display_number(int number) {
     tm1637_stop();
 }
 
+void tm1637_display_hex(uint8_t value) {
+    uint8_t high = (value >> 4) & 0x0F;
+    uint8_t low = value & 0x0F;
+
+    tm1637_display_digit(0, 0x00);
+    tm1637_display_digit(1, 0x00);
+    tm1637_display_digit(2, digit_codes[high]);
+    tm1637_display_digit(3, digit_codes[low]);
+}
+
+void tm1637_display_value(int value) {
+    if (displayMode == DEC_MODE)
+        tm1637_display_dec(value);
+    else if (displayMode == HEX_MODE)
+        tm1637_display_hex(value);
+    else if (displayMode == BIN_MODE)
+        tm1637_display_hex(value);
+}
+
 // Очистка дисплея
 void tm1637_clear(void) {
     for (uint8_t i = 0; i < 4; i++) {
@@ -167,7 +189,7 @@ void tm1637_update(void) {
         lastDisplayUpdate = tickCount;
 
         // Отображаем текущее значение счетчика
-        tm1637_display_number(counter);
+        tm1637_display_dec(counter);
         printf("Counter: %d\n", counter);
 
         counter++;

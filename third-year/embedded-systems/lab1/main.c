@@ -88,6 +88,8 @@ void set_mode(display_mode_t mode) {
         GPIOA->BSRR = (1 << DEC_LED_PIN);
     else if (mode == HEX_MODE)
         GPIOC->BSRR = (1 << HEX_LED_PIN);
+
+    tm1637_display_value(readDipValue());
 }
 
 int main(void) {
@@ -106,7 +108,7 @@ int main(void) {
 
     while (1) {
         checkTickCount();
-        tm1637_update();
+        // tm1637_update();
         scanKeyboard();
         scanDip();
     }
