@@ -21,7 +21,6 @@ uint8_t readDipValue(void) {
         uint8_t pin = DIP_Switch_8[i].pin;
 
         uint8_t bit = (port->IDR >> pin) & 1;
-        bit ^= 1; // инвертируем: ON=1, OFF=0
         value |= (bit << i);
     }
     return value;
