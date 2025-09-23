@@ -11,9 +11,6 @@ void delay_us(uint32_t us) {
 
 // Инициализация пинов TM1637
 void tm1637_init(void) {
-    // Включаем тактирование GPIOA (уже есть в вашем коде)
-    // RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
-
     // Настраиваем PA6 и PA7 как выходы с открытым стоком
     GPIOA->MODER = (GPIOA->MODER & ~(0xF << (TM1637_CLK_PIN * 2))) |
                    (0x5 << (TM1637_CLK_PIN * 2));

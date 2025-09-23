@@ -90,27 +90,7 @@ typedef enum {
 #define DEC_LED_PIN 9
 #define HEX_LED_PIN 7
 
-#define BIN_BUTTON 'B'
-#define DEC_BUTTON 'D'
-#define HEX_BUTTON 'H'
-
 extern volatile display_mode_t displayMode;
 void set_mode(display_mode_t displayMode);
-
-typedef struct {
-    GPIO_TypeDef *port;
-    uint8_t pin;
-} GPIO_Pin;
-
-static const GPIO_Pin DIP_Switch_8[8] = {
-    { GPIOA, 12 },
-    { GPIOA, 11 },
-    { GPIOB, 1 },
-    { GPIOA, 4 },
-    { GPIOA, 1 },
-    { GPIOA, 0 },
-    { GPIOC, 14 },
-    { GPIOC, 13 },
-};
 
 #endif

@@ -1,4 +1,5 @@
 #include "main.h"
+#include "dip.h"
 #include "tm1637.h"
 
 volatile uint32_t tickCount;
@@ -16,7 +17,7 @@ void initGPIO() {
 
     // Настраиваем PA5 как выход
     GPIOA->MODER = (GPIOA->MODER & ~(3 << (5 * 2))) | (1 << (5 * 2));
-    GPIOA->OTYPER &= ~(1 << 5);
+    GPIOA->OTYPER &= ~(1 << 5); // push-pull
     GPIOA->OSPEEDR |= (1 << 10);
 
     // PA9 (DEC)
@@ -93,6 +94,7 @@ int main(void) {
     initGPIO();
     initUSART2();
     initSysTick();
+    initDipInputsPullup();
     initKeyboard();
     tm1637_init();
 
@@ -106,6 +108,7 @@ int main(void) {
         checkTickCount();
         tm1637_update();
         scanKeyboard();
+        scanDip();
     }
 
     return 0;
