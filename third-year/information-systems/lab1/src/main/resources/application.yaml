@@ -13,3 +13,7 @@ spring:
                         database:
                             action: update
         open-in-view: false
+
+logging:
+    level:
+        ru.mip3x: DEBUG

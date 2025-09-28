@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.mip3x.exception.ResourceNotFoundException;
 import ru.mip3x.model.Coordinates;
 import ru.mip3x.model.Location;
@@ -18,6 +19,7 @@ import ru.mip3x.repository.LocationRepository;
 import ru.mip3x.repository.PersonRepository;
 import ru.mip3x.service.PersonService;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Primary
@@ -119,12 +121,9 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void deletePerson(int id) {
-        try {
-            personRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException exception) {
+        if (!personRepository.existsById(id))
             throw new ResourceNotFoundException("Person " + id + " not found");
-        } catch (DataIntegrityViolationException exception) {
-            throw new IllegalStateException("Cannot delete person " + id + " due to references");
-        }
+
+        personRepository.deleteById(id);
     }
 }

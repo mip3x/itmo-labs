@@ -43,7 +43,6 @@ public class Person {
     @JoinColumn(name = "coordinates_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
     private Coordinates coordinates;
 
-    @NotNull
     @Column(nullable = false, updatable = false, name = "creation_date")
     private java.time.LocalDateTime creationDate;
 

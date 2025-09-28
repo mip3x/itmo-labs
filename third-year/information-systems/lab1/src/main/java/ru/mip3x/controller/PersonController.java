@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import ru.mip3x.dto.PersonDTO;
 import ru.mip3x.mapper.PersonMapper;
@@ -36,7 +37,7 @@ public class PersonController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonDTO> savePerson(@RequestBody Person person) {
+    public ResponseEntity<PersonDTO> createPerson(@Valid @RequestBody Person person) {
         Person savedPerson = personService.savePerson(person);
         return ResponseEntity
                .status(HttpStatus.CREATED)
@@ -49,7 +50,7 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDTO> updatePerson(@PathVariable int id, @RequestBody Person person) {
+    public ResponseEntity<PersonDTO> updatePerson(@PathVariable int id, @Valid @RequestBody Person person) {
         Person updatedPerson = personService.updatePerson(id, person);
         return ResponseEntity.ok(PersonMapper.toDTO(updatedPerson));
     }
