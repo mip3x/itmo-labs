@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: itmo-labs/third-year/information-systems/lab1
+        working-directory: third-year/information-systems/lab1
 
     steps:
       - name: Checkout
