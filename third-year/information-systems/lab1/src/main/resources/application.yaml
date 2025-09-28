@@ -1,0 +1,16 @@
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5432/islab1_db
+        username: islab1_user
+        password: pass
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        show-sql: true
+        properties:
+            jakarta:
+                persistence:
+                schema-generation:
+                    database:
+                        action: update
+        database-platform: org.eclipse.persistence.platform.database.PostgreSQLPlatform
+        open-in-view: false
