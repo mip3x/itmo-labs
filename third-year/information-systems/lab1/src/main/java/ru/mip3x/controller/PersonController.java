@@ -33,7 +33,7 @@ public class PersonController {
                             .toList();
     }
 
-    @PostMapping("save_person")
+    @PostMapping
     public String savePerson(@RequestBody Person person) {
         personService.savePerson(person);
         return "Person successfully saved";
