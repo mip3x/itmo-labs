@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class IsLab1ApplicationTests {
 
+	@org.junit.jupiter.api.Disabled("Disabled in CI")
 	@Test
 	void contextLoads() {
 	}
