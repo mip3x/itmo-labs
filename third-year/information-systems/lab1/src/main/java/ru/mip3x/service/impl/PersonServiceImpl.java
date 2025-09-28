@@ -3,6 +3,8 @@ package ru.mip3x.service.impl;
 import java.util.List;
 
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -117,6 +119,12 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void deletePerson(int id) {
-        personRepository.deleteById(id);
+        try {
+            personRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException exception) {
+            throw new ResourceNotFoundException("Person " + id + " not found");
+        } catch (DataIntegrityViolationException exception) {
+            throw new IllegalStateException("Cannot delete person " + id + " due to references");
+        }
     }
 }

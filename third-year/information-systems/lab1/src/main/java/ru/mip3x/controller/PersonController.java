@@ -2,9 +2,12 @@ package ru.mip3x.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +18,6 @@ import ru.mip3x.dto.PersonDTO;
 import ru.mip3x.mapper.PersonMapper;
 import ru.mip3x.model.Person;
 import ru.mip3x.service.PersonService;
-import org.springframework.web.bind.annotation.PostMapping;
 
 
 @RestController
@@ -34,9 +36,11 @@ public class PersonController {
     }
 
     @PostMapping
-    public String savePerson(@RequestBody Person person) {
-        personService.savePerson(person);
-        return "Person successfully saved";
+    public ResponseEntity<PersonDTO> savePerson(@RequestBody Person person) {
+        Person savedPerson = personService.savePerson(person);
+        return ResponseEntity
+               .status(HttpStatus.CREATED)
+               .body(PersonMapper.toDTO(savedPerson));
     }
 
     @GetMapping("/{id}")
@@ -45,13 +49,14 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public PersonDTO updatePerson(@PathVariable int id, @RequestBody Person person) {
-        return PersonMapper.toDTO(personService.updatePerson(id, person));
+    public ResponseEntity<PersonDTO> updatePerson(@PathVariable int id, @RequestBody Person person) {
+        Person updatedPerson = personService.updatePerson(id, person);
+        return ResponseEntity.ok(PersonMapper.toDTO(updatedPerson));
     }
 
     @DeleteMapping("/{id}")
-    public String deletePerson(@PathVariable int id) {
+    public ResponseEntity<Void> deletePerson(@PathVariable int id) {
         personService.deletePerson(id);
-        return "Person successfully deleted";
+        return ResponseEntity.noContent().build();
     }
 }
