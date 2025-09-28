@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import ru.mip3x.exception.ResourceNotFoundException;
 import ru.mip3x.model.Coordinates;
 import ru.mip3x.model.Location;
 import ru.mip3x.model.Person;
@@ -37,7 +38,10 @@ public class PersonServiceImpl implements PersonService {
 
         Coordinates coordinates = person.getCoordinates();
         if (coordinates.getId() != null) {
-            person.setCoordinates(coordinatesRepository.getReferenceById(coordinates.getId()));
+            final Long coordinatesId = coordinates.getId(); 
+            coordinates = coordinatesRepository.findById(coordinatesId)
+                                               .orElseThrow(() -> new IllegalArgumentException("Coordinates " + coordinatesId + " not found"));
+            person.setCoordinates(coordinates);
         }
 
         if (person.getLocation() == null) {
@@ -45,7 +49,10 @@ public class PersonServiceImpl implements PersonService {
         }
         Location location = person.getLocation();
         if (location.getId() != null) {
-            person.setLocation(locationRepository.getReferenceById(location.getId()));
+            final Long locationId = location.getId();
+            location = locationRepository.findById(locationId)
+                                         .orElseThrow(() -> new IllegalArgumentException("Location " + locationId + " not found"));
+            person.setLocation(location);
         }
 
         return personRepository.save(person);
@@ -59,7 +66,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public Person updatePerson(int id, Person incomingPerson) {
         Person existingPerson = personRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Person " + id + " not found"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Person " + id + " not found"));
         
         if (incomingPerson.getName() != null)
             existingPerson.setName(incomingPerson.getName());
@@ -68,7 +75,9 @@ public class PersonServiceImpl implements PersonService {
             Coordinates coordinates = incomingPerson.getCoordinates();
 
             if (coordinates.getId() != null) {
-                existingPerson.setCoordinates(coordinatesRepository.getReferenceById(coordinates.getId()));
+                existingPerson.setCoordinates(coordinatesRepository.findById(coordinates.getId())
+                              .orElseThrow(() -> new ResourceNotFoundException("Coordinates not found")));
+
             } else {
                 existingPerson.setCoordinates(coordinatesRepository.save(coordinates));
             }
@@ -84,7 +93,8 @@ public class PersonServiceImpl implements PersonService {
             Location location = incomingPerson.getLocation();
 
             if (location.getId() != null) {
-                existingPerson.setLocation(locationRepository.getReferenceById(location.getId()));
+                existingPerson.setLocation(locationRepository.findById(location.getId())
+                              .orElseThrow(() -> new ResourceNotFoundException("Location not found")));
             } else {
                 existingPerson.setLocation(locationRepository.save(location));
             }
