@@ -7,6 +7,7 @@ public class PersonDTO {
     private int id;
     private String name;
     private CoordinatesDTO coordinates;
+    private java.time.LocalDateTime creationDate;
     private String eyeColor;
     private String hairColor;
     private LocationDTO location;

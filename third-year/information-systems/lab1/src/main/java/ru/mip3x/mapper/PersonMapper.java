@@ -20,6 +20,7 @@ public class PersonMapper {
             personDTO.getCoordinates().setY(person.getCoordinates().getY());
         }
 
+        personDTO.setCreationDate(person.getCreationDate());
         personDTO.setEyeColor(person.getEyeColor().name());
         personDTO.setHairColor(person.getHairColor().name());
 
