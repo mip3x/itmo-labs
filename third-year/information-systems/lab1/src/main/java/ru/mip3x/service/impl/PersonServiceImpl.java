@@ -3,8 +3,6 @@ package ru.mip3x.service.impl;
 import java.util.List;
 
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -45,8 +43,10 @@ public class PersonServiceImpl implements PersonService {
             final Long coordinatesId = coordinates.getId(); 
             coordinates = coordinatesRepository.findById(coordinatesId)
                                                .orElseThrow(() -> new IllegalArgumentException("Coordinates " + coordinatesId + " not found"));
-            person.setCoordinates(coordinates);
+        } else {
+            coordinates = coordinatesRepository.save(coordinates);
         }
+        person.setCoordinates(coordinates);
 
         if (person.getLocation() == null) {
             throw new IllegalArgumentException("Location must be provided");
@@ -56,8 +56,10 @@ public class PersonServiceImpl implements PersonService {
             final Long locationId = location.getId();
             location = locationRepository.findById(locationId)
                                          .orElseThrow(() -> new IllegalArgumentException("Location " + locationId + " not found"));
-            person.setLocation(location);
+        } else {
+            location = locationRepository.save(location);
         }
+        person.setLocation(location);
 
         return personRepository.save(person);
     }
