@@ -9,8 +9,7 @@ spring:
         properties:
             jakarta:
                 persistence:
-                schema-generation:
-                    database:
-                        action: update
-        database-platform: org.eclipse.persistence.platform.database.PostgreSQLPlatform
+                    schema-generation:
+                        database:
+                            action: update
         open-in-view: false

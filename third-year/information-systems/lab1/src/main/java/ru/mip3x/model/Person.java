@@ -2,6 +2,7 @@ package ru.mip3x.model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -27,8 +28,7 @@ import lombok.Data;
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Positive
-    private int id;
+    private Integer id;
 
     @NotBlank
     @NotNull
@@ -36,7 +36,10 @@ public class Person {
     private String name;
 
     @NotNull
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY,
+               optional = false,
+               cascade = {CascadeType.MERGE}
+    )
     @JoinColumn(name = "coordinates_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
     private Coordinates coordinates;
 
@@ -55,7 +58,10 @@ public class Person {
     private Color hairColor;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY,
+               optional = false,
+               cascade = {CascadeType.MERGE}
+    )
     @JoinColumn(name = "location_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
     private Location location;
 
@@ -73,6 +79,7 @@ public class Person {
 
     @NotNull
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Country nationality;
 
     @PrePersist

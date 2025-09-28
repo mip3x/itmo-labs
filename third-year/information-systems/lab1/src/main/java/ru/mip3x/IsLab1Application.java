@@ -1,4 +1,4 @@
-package ru.mip3x.isLab1;
+package ru.mip3x;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
