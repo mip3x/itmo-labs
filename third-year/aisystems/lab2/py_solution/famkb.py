@@ -21,14 +21,15 @@ class Person:
 
 
 class FamilyKB:
-    def __init__(self):
+    def __init__(self, kb_path: str):
+        self.kb_path = kb_path
         self.people = {}
         self.married_raw = []
         self.divorced_raw = []
 
         self.name_forms_index = defaultdict(list)
 
-    def load_from_file(self, path="family.pl"):
+    def load_from_file(self):
         re_name = re.compile(r"name\s*\(\s*([a-zA-Z0-9_]+)\s*,\s*'([^']+)'\s*\)\s*\.")
         re_male = re.compile(r"male\s*\(\s*([a-zA-Z0-9_]+)\s*\)\s*\.")
         re_female = re.compile(r"female\s*\(\s*([a-zA-Z0-9_]+)\s*\)\s*\.")
@@ -44,7 +45,7 @@ class FamilyKB:
             return self.people[pid]
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(self.kb_path, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line or line.startswith("%"):
@@ -110,7 +111,7 @@ class FamilyKB:
             self._build_name_forms_index()
 
         except FileNotFoundError:
-            print("ОШИБКА: Не найден файл family.pl", file=sys.stderr)
+            print("ОШИБКА: Не найден файл kb.pl", file=sys.stderr)
             sys.exit(1)
 
     def _finalize_marriages(self):

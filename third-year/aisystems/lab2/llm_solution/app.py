@@ -9,7 +9,7 @@ from pyswip import Prolog
 
 OLLAMA_CHAT_URL = "http://localhost:11434/api/chat"
 MODEL = "llama3.1:8b"
-KB_PATH = Path("kb.pl")
+KB_PATH = Path(__file__).parent.parent / "kb.pl"
 HISTORY_LOG = Path("history.json")
 
 WELCOME = (

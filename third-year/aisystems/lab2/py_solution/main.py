@@ -1,6 +1,10 @@
 import sys
-from famkb import *
-from dialogue import *
+from famkb import FamilyKB
+from dialogue import DialogueEngine
+from pathlib import Path
+
+
+FAMILY_FILE = Path(__file__).parent.parent / "kb.pl"
 
 
 def main():
@@ -10,12 +14,12 @@ def main():
     except Exception:
         pass
 
-    kb = FamilyKB()
-    kb.load_from_file("family.pl")
+    kb = FamilyKB(FAMILY_FILE)
+    kb.load_from_file()
 
     engine = DialogueEngine(kb)
 
-    print("База: family.pl\n"
+    print("База: kb.pl\n"
           "Примеры:\n"
           "  я Алексей Иванов\n"
           "  кто мои дети?\n"
