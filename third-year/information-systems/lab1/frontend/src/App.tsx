@@ -31,6 +31,15 @@ type PersonDTO = {
     nationality: Country;
 };
 
+function countryFlag(country: string): string {
+    const map: Record<string, string> = {
+        RUSSIA: "🇷🇺",
+        SPAIN: "🇪🇸",
+        THAILAND: "🇹🇭",
+    };
+    return map[country] || "🏳️";
+}
+
 const API_BASE = "http://localhost:8080/api/v1/persons";
 
 function App() {
@@ -92,7 +101,7 @@ function App() {
                         <td>{p.weight}</td>
                         <td>{p.height ?? "-"}</td>
                         <td>{new Date(p.birthday).toLocaleDateString()}</td>
-                        <td>{p.nationality}</td>
+                        <td title={p.nationality}>{countryFlag(p.nationality)}</td>
                     </tr>
                     ))}
                 </tbody>
