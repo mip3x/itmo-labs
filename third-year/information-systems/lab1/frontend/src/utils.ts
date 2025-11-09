@@ -15,7 +15,12 @@ export function formatDateISO(d: string): string {
 }
 
 export function parseNumber(s: string): number | null {
-    const n = Number(s);
+    if (s == null) return null;
+    const str = String(s).trim().replace(",", ".");
+
+    if (str === "") return null;
+    const n = Number(str);
+
     return Number.isFinite(n) ? n : null;
 }
 
@@ -36,6 +41,8 @@ function cmp(a: number, op: CmpOp, b: number) {
             return a <= b;
         case "=":
             return a === b;
+        default:
+            return false;
     }
 }
 
@@ -45,6 +52,8 @@ export function searchableString(p: PersonDTO): string {
         p.location?.name,
         p.eyeColor,
         p.hairColor,
+        p.coordinates?.x, p.coordinates?.y,
+        p.location?.x, p.location?.y,
         p.nationality,
         p.height ?? "",
         p.weight ?? "",
@@ -60,6 +69,8 @@ export function makeFieldPredicate(token: string): ((p: PersonDTO) => boolean) |
     const rawField = token.slice(0, i).trim().toLowerCase();
     const expr = token.slice(i + 1).trim();
 
+    if (expr === "") return null;
+
     const field =
         rawField === "eye" ? "eyeColor" :
         rawField === "hair" ? "hairColor" :
@@ -68,6 +79,13 @@ export function makeFieldPredicate(token: string): ((p: PersonDTO) => boolean) |
         rawField === "w" ? "weight" :
         rawField === "h" ? "height" :
         rawField;
+
+    const numericCoordField: null | ((p: PersonDTO) => number | null) =
+        field === "coordx" || field === "cx" ? (p) => (p.coordinates?.x ?? null) :
+        field === "coordy" || field === "cy" ? (p) => (p.coordinates?.y ?? null) :
+        field === "locx"   || field === "lx" ? (p) => (p.location?.x ?? null) :
+        field === "locy"   || field === "ly" ? (p) => (p.location?.y ?? null) :
+        null;
 
     if (expr.includes("..")) {
         const [left, right] = expr.split("..").map(s => s.trim());
@@ -91,6 +109,17 @@ export function makeFieldPredicate(token: string): ((p: PersonDTO) => boolean) |
                 return v != null && v >= n1 && v <= n2;
             };
         }
+
+        if (numericCoordField) {
+            const n1 = parseNumber(left), n2 = parseNumber(right);
+            if (n1 == null || n2 == null) return null;
+
+            return (p) => {
+                const v = numericCoordField(p);
+                return v != null && v >= n1 && v <= n2;
+            };
+        }
+
         return null;
     }
 
@@ -118,6 +147,48 @@ export function makeFieldPredicate(token: string): ((p: PersonDTO) => boolean) |
                 return v != null && cmp(v, op, n);
             };
         }
+
+        if (numericCoordField) {
+            const n = parseNumber(val);
+            if (n == null) return null;
+
+            return (p) => {
+                const v = numericCoordField(p);
+                return v != null && cmp(v, op, n);
+            };
+        }
+    }
+
+     const asNum = parseNumber(expr);
+
+    if (numericCoordField && asNum != null) {
+        return (p) => {
+            const v = numericCoordField(p);
+            return v != null && v === asNum;
+        };
+    }
+
+    if ((field === "height" || field === "weight") && asNum != null) {
+        return (p) => {
+            const v = field === "height" ? (p.height ?? null) : p.weight;
+            return v != null && v === asNum;
+        };
+    }
+
+    const asDate = parseDate(expr);
+    if (field === "birthday" && asDate) {
+        return (p) => {
+        const bd = parseDate(p.birthday);
+        return !!bd &&
+            bd.getFullYear() === asDate.getFullYear() &&
+            bd.getMonth() === asDate.getMonth() &&
+            bd.getDate() === asDate.getDate();
+        };
+    }
+
+    if (field === "birthday" && /^\d{4}$/.test(expr)) {
+        const year = Number(expr);
+        return (p) => new Date(p.birthday).getFullYear() === year;
     }
 
     if (field === "eyeColor" || field === "hairColor" || field === "nationality") {

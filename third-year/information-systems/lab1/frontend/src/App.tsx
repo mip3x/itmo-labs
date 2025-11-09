@@ -181,6 +181,8 @@ export default function App() {
                 <li><code>height:&gt;175</code>, <code>weight:&lt;=80</code>, <code>height:170..190</code></li>
                 <li><code>birthday:&lt;1995-01-01</code>, <code>birthday:1990-01-01..2000-12-31</code></li>
                 <li><code>1993</code> — matches by birth year; <code>180</code> — matches height or weight = 180</li>
+                <li><code>cx:&gt;10</code>, <code>cy:0..100</code> — person coordinates (x/y)</li>
+                <li><code>lx:&lt;20</code>, <code>ly:&gt;=50</code> — location coordinates (x/y)</li>
                 </ul>
             </div>
         )}
