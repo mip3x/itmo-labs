@@ -19,6 +19,8 @@ export default function App() {
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
+    const [showHelp, setShowHelp] = useState(false);
+
     async function load() {
         setLoading(true);
         setError(null);
@@ -142,20 +144,46 @@ export default function App() {
 
     return (
         <div style={{ padding: 16 }}>
-        <h1>ИНТЕРПОЛ. ПАНЕЛЬ АДМИНИСТРИРОВАНИЯ</h1>
+        <h1>INTERPOL ADMINISTRATION PANEL</h1>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <input
-                placeholder="Поиск: имя, локация, цвет глаз/волос, страна, вес/рост/год"
+                placeholder="Search: name, location, eye/hair color, country, weight/height/year"
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setPage(1); }}
                 style={{ padding: "6px 10px", flex: 1 }}
             />
 
+            <button onClick={() => setShowHelp(v => !v)} title="Show InterpolQL syntax help">?</button>
+
             <button onClick={load} disabled={loading} style={{ marginLeft: "auto" }}>
                 Update
             </button>
         </div>
+
+        {showHelp && (
+            <div
+                style={{
+                marginTop: 8,
+                padding: 8,
+                border: "1px dashed #888",
+                borderRadius: 6,
+                background: "#fafafa",
+                fontSize: 14,
+                textAlign: "left",
+                }}
+            >
+                <b>InterpolQL Syntax:</b>
+                <ul style={{ margin: "6px 0 0 16px", padding: 0, lineHeight: 1.4 }}>
+                <li><code>oleg blue</code> — all words must appear (AND)</li>
+                <li><code>-spain</code> — exclude matches</li>
+                <li><code>name:anna</code>, <code>loc:dubai</code>, <code>eye:blue</code>, <code>hair:black</code>, <code>nat:russia</code></li>
+                <li><code>height:&gt;175</code>, <code>weight:&lt;=80</code>, <code>height:170..190</code></li>
+                <li><code>birthday:&lt;1995-01-01</code>, <code>birthday:1990-01-01..2000-12-31</code></li>
+                <li><code>1993</code> — matches by birth year; <code>180</code> — matches height or weight = 180</li>
+                </ul>
+            </div>
+        )}
 
         {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
 
