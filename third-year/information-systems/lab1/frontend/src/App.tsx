@@ -198,6 +198,7 @@ export default function App() {
                     <Th k="name" title="Name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                     <Th k="eyeColor" title="Eye Color" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                     <Th k="hairColor" title="Hair Color" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                    <Th k="coordinates" title="Coordinates" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                     <th>Location</th>
                     <Th k="weight" title="Weight" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                     <Th k="height" title="Height" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
@@ -212,6 +213,7 @@ export default function App() {
                     <td>{p.name}</td>
                     <td>{p.eyeColor}</td>
                     <td>{p.hairColor}</td>
+                    <td>({p.coordinates?.x ?? "—"}, {p.coordinates?.y ?? "—"})</td>
                     <td>{p.location?.name}</td>
                     <td>{p.weight}</td>
                     <td>{p.height ?? "-"}</td>
@@ -220,7 +222,7 @@ export default function App() {
                     </tr>
                 ))}
                 {pageData.length === 0 && (
-                    <tr><td colSpan={9} style={{ textAlign: "center", padding: 16 }}>Ничего не найдено</td></tr>
+                    <tr><td colSpan={10} style={{ textAlign: "center", padding: 16 }}>Ничего не найдено</td></tr>
                 )}
                 </tbody>
             </table>
