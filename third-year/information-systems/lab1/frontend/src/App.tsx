@@ -149,9 +149,12 @@ export default function App() {
                 placeholder="Поиск: имя, локация, цвет глаз/волос, страна, вес/рост/год"
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-                style={{ padding: "6px 10px", minWidth: 360 }}
+                style={{ padding: "6px 10px", flex: 1 }}
             />
-            <button onClick={load} disabled={loading}>Update</button>
+
+            <button onClick={load} disabled={loading} style={{ marginLeft: "auto" }}>
+                Update
+            </button>
         </div>
 
         {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
