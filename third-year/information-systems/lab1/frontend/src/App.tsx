@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import "./App.css";
 import Th from "./components/Th";
-import { countryFlag, formatDateISO, parseNumber, searchableString, makeFieldPredicate, formatLocationCell } from "./utils";
-import type { PersonDTO } from "./types";
+import { comparePersons, countryFlag, formatDateISO, parseNumber, searchableString, makeFieldPredicate, formatLocationCell } from "./utils";
+import type { PersonDTO, SortKey } from "./types";
 
 const API_BASE = "http://localhost:8080/api/v1/persons";
 
@@ -13,8 +13,10 @@ export default function App() {
     const [error, setError] = useState<string | null>(null);
 
     const [query, setQuery] = useState("");
-    const [sortKey, setSortKey] = useState<keyof PersonDTO | "">("");
-    const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+    const [sortKey, setSortKey] = useState<SortKey>("");
+
+    const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
     const [page, setPage] = useState(1);
     const pageSize = 10;
@@ -103,12 +105,12 @@ export default function App() {
         });
     }, [persons, query]);
 
-    function toggleSort(k: keyof PersonDTO) {
+    function toggleSort(k: SortKey) {
         if (sortKey !== k) {
             setSortKey(k);
-            setSortDir("asc");
+            setSortDirection("asc");
         } else {
-            setSortDir(d => (d === "asc" ? "desc" : "asc"));
+            setSortDirection(d => (d === "asc" ? "desc" : "asc"));
         }
         setPage(1);
     }
@@ -117,34 +119,10 @@ export default function App() {
         if (!sortKey) return filtered;
 
         const arr = [...filtered];
-        arr.sort((a: any, b: any) => {
-            const A = a[sortKey];
-            const B = b[sortKey];
-
-            if (A == null && B == null) return 0;
-            if (A == null) return 1;
-            if (B == null) return -1;
-
-            if (sortKey === "height" || sortKey === "weight") {
-                const nA = Number(A), nB = Number(B);
-                return (sortDir === "asc" ? nA - nB : nB - nA);
-            }
-
-            if (sortKey === "birthday") {
-                const tA = new Date(A).getTime();
-                const tB = new Date(B).getTime();
-                return (sortDir === "asc" ? tA - tB : tB - tA);
-            }
-
-            const sA = String(A).toLowerCase();
-            const sB = String(B).toLowerCase();
-            const r = sA.localeCompare(sB, undefined, { numeric: true });
-
-            return sortDir === "asc" ? r : -r;
-        });
+        arr.sort((a, b) => comparePersons(a, b, sortKey, sortDirection));
 
         return arr;
-    }, [filtered, sortKey, sortDir]);
+    }, [filtered, sortKey, sortDirection]);
 
     const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
 
@@ -207,16 +185,16 @@ export default function App() {
             <table border={1} cellPadding={6} style={{ borderCollapse: "collapse", marginTop: 16, width: "100%" }}>
                 <thead>
                 <tr>
-                    <Th k="id" title="ID" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <Th k="name" title="Name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <Th k="eyeColor" title="Eye Color" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <Th k="hairColor" title="Hair Color" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <Th k="coordinates" title="Coordinates" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <th>Location</th>
-                    <Th k="weight" title="Weight" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <Th k="height" title="Height" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <Th k="birthday" title="Birthday" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                    <Th k="nationality" title="Nationality" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                    <Th k="id" title="ID" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="name" title="Name" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="eyeColor" title="Eye Color" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="hairColor" title="Hair Color" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="coordXY" title="Coordinates" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="locXY" title="Location" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="weight" title="Weight" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="height" title="Height" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="birthday" title="Birthday" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
+                    <Th k="nationality" title="Nationality" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
                 </tr>
                 </thead>
                 <tbody>

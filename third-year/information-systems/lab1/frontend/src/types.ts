@@ -29,3 +29,5 @@ export type PersonDTO = {
 };
 
 export type CmpOp = ">" | "<" | ">=" | "<=" | "=";
+
+export type SortKey = keyof PersonDTO | "coordXY" | "locXY" | "";

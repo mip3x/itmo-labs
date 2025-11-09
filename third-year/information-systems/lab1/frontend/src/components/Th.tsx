@@ -1,9 +1,9 @@
-import type { PersonDTO } from "../types";
+import type { PersonDTO, SortKey } from "../types";
 
 export default function Th(props: {
         k: keyof PersonDTO;
         title: string;
-        sortKey: keyof PersonDTO | "";
+        sortKey: SortKey;
         sortDir: "asc" | "desc";
         onSort: (k: keyof PersonDTO) => void;
     }) {

@@ -1,4 +1,4 @@
-import type { PersonDTO, CmpOp } from "./types";
+import type { PersonDTO, CmpOp, SortKey } from "./types";
 
 export function countryFlag(country: string): string {
     const map: Record<string, string> = {
@@ -7,6 +7,64 @@ export function countryFlag(country: string): string {
         THAILAND: "🇹🇭",
     };
     return map[country] || "🏳️";
+}
+
+const cmpNum = (a: number | null | undefined, b: number | null | undefined) => {
+    if (a == null && b == null) return 0;
+    if (a == null) return 1;
+    if (b == null) return -1;
+    return a - b;
+};
+
+const applyDirection = (res: number, dir: "asc" | "desc") => (dir === "asc" ? res : -res);
+
+export function comparePersons(
+    a: PersonDTO,
+    b: PersonDTO,
+    sortKey: SortKey,
+    sortDir: "asc" | "desc"
+    ): number {
+        if (sortKey === "coordXY") {
+            const ax = a.coordinates?.x, ay = a.coordinates?.y;
+            const bx = b.coordinates?.x, by = b.coordinates?.y;
+            const r1 = cmpNum(ax, bx);
+
+            if (r1 !== 0) return applyDirection(r1, sortDir);
+            return applyDirection(cmpNum(ay, by), sortDir);
+        }
+
+        if (sortKey === "locXY") {
+            const ax = a.location?.x, ay = a.location?.y;
+            const bx = b.location?.x, by = b.location?.y;
+            const r1 = cmpNum(ax, bx);
+
+            if (r1 !== 0) return applyDirection(r1, sortDir);
+            return applyDirection(cmpNum(ay, by), sortDir);
+        }
+
+        if (!sortKey) return 0;
+
+        const A: any = (a as any)[sortKey];
+        const B: any = (b as any)[sortKey];
+
+        if (A == null && B == null) return 0;
+        if (A == null) return applyDirection(1, sortDir);
+        if (B == null) return applyDirection(-1, sortDir);
+
+        if (sortKey === "height" || sortKey === "weight") {
+            return applyDirection(Number(A) - Number(B), sortDir);
+        }
+
+        if (sortKey === "birthday") {
+            const tA = new Date(A).getTime();
+            const tB = new Date(B).getTime();
+            return applyDirection(tA - tB, sortDir);
+        }
+
+        const sA = String(A).toLowerCase();
+        const sB = String(B).toLowerCase();
+        const r = sA.localeCompare(sB, undefined, { numeric: true });
+        return applyDirection(r, sortDir);
 }
 
 function formatXY(x?: number | null, y?: number | null) {
