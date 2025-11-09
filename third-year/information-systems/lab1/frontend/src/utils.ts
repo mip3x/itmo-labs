@@ -9,6 +9,21 @@ export function countryFlag(country: string): string {
     return map[country] || "🏳️";
 }
 
+function formatXY(x?: number | null, y?: number | null) {
+    if (x == null || y == null) return "-";
+    return `(${x}, ${y})`;
+}
+
+export function formatLocationCell(loc?: { name?: string; x?: number | null; y?: number | null }) {
+    if (!loc) return "-";
+
+    const name = loc.name ?? "-";
+    const xy = (loc.x == null || loc.y == null) ? "" : ` ${formatXY(loc.x, loc.y)}`;
+
+    return `${name}${xy}`;
+}
+
+
 export function formatDateISO(d: string): string {
     const t = new Date(d);
     return isNaN(t.getTime()) ? "-" : t.toLocaleDateString("ru-RU");

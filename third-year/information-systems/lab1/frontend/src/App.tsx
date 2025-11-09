@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import "./App.css";
 import Th from "./components/Th";
-import { countryFlag, formatDateISO, parseNumber, searchableString, makeFieldPredicate } from "./utils";
+import { countryFlag, formatDateISO, parseNumber, searchableString, makeFieldPredicate, formatLocationCell } from "./utils";
 import type { PersonDTO } from "./types";
 
 const API_BASE = "http://localhost:8080/api/v1/persons";
@@ -216,7 +216,7 @@ export default function App() {
                     <td>{p.eyeColor}</td>
                     <td>{p.hairColor}</td>
                     <td>({p.coordinates?.x ?? "—"}, {p.coordinates?.y ?? "—"})</td>
-                    <td>{p.location?.name}</td>
+                    <td title={p.location ? `x=${p.location.x ?? "-"}, y=${p.location.y ?? "-"}` : ""}>{formatLocationCell(p.location)}</td>
                     <td>{p.weight}</td>
                     <td>{p.height ?? "-"}</td>
                     <td>{formatDateISO(p.birthday)}</td>
