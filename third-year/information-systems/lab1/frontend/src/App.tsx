@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import "./App.css";
 import Th from "./components/Th";
-import { countryFlag, formatDateISO, personToSearchText } from "./utils";
+import { countryFlag, formatDateISO, parseNumber, searchableString, makeFieldPredicate } from "./utils";
 import type { PersonDTO } from "./types";
 
 const API_BASE = "http://localhost:8080/api/v1/persons";
@@ -38,9 +38,56 @@ export default function App() {
     }, []);
 
     const filtered = useMemo(() => {
-        const inputQuery = query.trim().toLowerCase();
-        if (!inputQuery) return persons;
-        return persons.filter(p => personToSearchText(p).includes(inputQuery));
+        const q = query.trim().toLowerCase();
+        if (!q) return persons;
+
+        const tokens = q.split(/\s+/);
+
+        const positivePreds: ((p: PersonDTO) => boolean)[] = [];
+        const negativePreds: ((p: PersonDTO) => boolean)[] = [];
+        const positiveText: string[] = [];
+        const negativeText: string[] = [];
+
+        for (const tRaw of tokens) {
+            if (!tRaw) continue;
+            const isNeg = tRaw.startsWith("-");
+            const t = isNeg ? tRaw.slice(1) : tRaw;
+
+            if (t.includes(":")) {
+                const pred = makeFieldPredicate(t);
+                if (pred) (isNeg ? negativePreds : positivePreds).push(pred);
+                continue;
+            }
+
+            if (/^\d{4}$/.test(t)) {
+                const year = Number(t);
+                const pred = (p: PersonDTO) => new Date(p.birthday).getFullYear() === year;
+                (isNeg ? negativePreds : positivePreds).push(pred);
+                continue;
+            }
+
+            const num = parseNumber(t);
+            if (num != null) {
+                const pred = (p: PersonDTO) =>
+                (p.height != null && p.height === num) || p.weight === num;
+                (isNeg ? negativePreds : positivePreds).push(pred);
+                continue;
+            }
+
+            (isNeg ? negativeText : positiveText).push(t);
+        }
+
+        return persons.filter((person) => {
+            const text = searchableString(person);
+
+            for (const pred of positivePreds) if (!pred(person)) return false;
+            for (const pred of negativePreds) if (pred(person)) return false;
+
+            for (const tt of positiveText) if (!text.includes(tt)) return false;
+            for (const tt of negativeText) if (text.includes(tt)) return false;
+
+            return true;
+        });
     }, [persons, query]);
 
     function toggleSort(k: keyof PersonDTO) {

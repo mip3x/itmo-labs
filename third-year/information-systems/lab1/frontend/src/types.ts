@@ -27,3 +27,5 @@ export type PersonDTO = {
     weight: number;
     nationality: Country;
 };
+
+export type CmpOp = ">" | "<" | ">=" | "<=" | "=";
