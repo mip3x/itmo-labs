@@ -70,8 +70,19 @@ export default function App() {
 
             const num = parseNumber(t);
             if (num != null) {
-                const pred = (p: PersonDTO) =>
-                (p.height != null && p.height === num) || p.weight === num;
+                const EPS = 1e-6;
+                const pred = (p: PersonDTO) => {
+                    const values = [
+                        p.height ?? null,
+                        p.weight ?? null,
+                        p.coordinates?.x ?? null,
+                        p.coordinates?.y ?? null,
+                        p.location?.x ?? null,
+                        p.location?.y ?? null,
+                    ];
+                    return values.some(v => v != null && Math.abs(Number(v) - num) < EPS);
+                };
+
                 (isNeg ? negativePreds : positivePreds).push(pred);
                 continue;
             }
