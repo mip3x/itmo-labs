@@ -2,10 +2,46 @@ import { useEffect, useMemo, useState } from "react";
 
 import "./App.css";
 import Th from "./components/Th";
-import { comparePersons, countryFlag, formatDateISO, parseNumber, searchableString, makeFieldPredicate, formatLocationCell } from "./utils";
-import type { PersonDTO, SortKey } from "./types";
+import PersonModal from "./components/PersonModal";
+
+import {
+    comparePersons,
+    countryFlag,
+    formatDateISO,
+    parseNumber,
+    searchableString,
+    makeFieldPredicate,
+    formatLocationCell
+} from "./utils";
+
+import type {
+    Coordinates,
+    Location,
+    PersonDTO,
+    PersonFormValues,
+    SortKey
+} from "./types";
 
 const API_BASE = "http://localhost:8080/api/v1/persons";
+
+const EMPTY_PERSON_FORM: PersonFormValues = {
+    name: "",
+    eyeColor: "BLUE",
+    hairColor: "BLACK",
+    nationality: "RUSSIA",
+
+    weight: "",
+    height: "",
+
+    birthday: "",
+
+    coordX: "",
+    coordY: "",
+
+    locX: "",
+    locY: "",
+    locName: "",
+};
 
 export default function App() {
     const [persons, setPerson] = useState<PersonDTO[]>([]);
@@ -15,13 +51,15 @@ export default function App() {
     const [query, setQuery] = useState("");
 
     const [sortKey, setSortKey] = useState<SortKey>("");
-
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
     const [showHelp, setShowHelp] = useState(false);
+
+    const [activeModalMode, setActiveModalMode] = useState<"create" | "edit" | null>(null);
+    const [editingPerson, setEditingPerson] = useState<PersonDTO | null>(null);
 
     async function load() {
         setLoading(true);
@@ -131,6 +169,155 @@ export default function App() {
         return sorted.slice(start, start + pageSize);
     }, [sorted, page]);
 
+    const existingCoords = useMemo<Coordinates[]>(() => {
+        const map = new Map<string, Coordinates>();
+        for (const person of persons) {
+            if (!person.coordinates) continue;
+
+            const key = `${person.coordinates.x}|${person.coordinates.y}`;
+
+            if (!map.has(key)) {
+                map.set(key, person.coordinates);
+            }
+        }
+
+        return Array.from(map.values());
+    }, [persons]);
+
+    const existingLocations = useMemo<Location[]>(() => {
+        const map = new Map<string, Location>();
+        for (const person of persons) {
+            if (!person.location) continue;
+
+            const key = `${person.location.x}|${person.location.y}|${person.location.name}`;
+
+            if (!map.has(key)) {
+                map.set(key, person.location);
+            }
+        }
+
+        return Array.from(map.values());
+    }, [persons]);
+
+    function openCreateModal() {
+        setEditingPerson(null);
+        setActiveModalMode("create");
+    }
+
+    function openEditModal(person: PersonDTO) {
+        setEditingPerson(person);
+        setActiveModalMode("edit");
+    }
+
+    function closeModal() {
+        setActiveModalMode(null);
+        setEditingPerson(null);
+    }
+
+    function personToFormValues(p: PersonDTO): PersonFormValues {
+        return {
+            name: p.name ?? "",
+            eyeColor: p.eyeColor,
+            hairColor: p.hairColor,
+            nationality: p.nationality,
+            weight: p.weight != null ? String(p.weight) : "",
+            height: p.height != null ? String(p.height) : "",
+            birthday: p.birthday ? p.birthday.slice(0, 10) : "",
+
+            coordX: p.coordinates ? String(p.coordinates.x) : "",
+            coordY: p.coordinates ? String(p.coordinates.y) : "",
+
+            locX: p.location ? String(p.location.x) : "",
+            locY: p.location ? String(p.location.y) : "",
+            locName: p.location?.name ?? "",
+        };
+    }
+
+    async function handlePersonModalSubmit(values: PersonFormValues) {
+        setError(null);
+
+        const datePart = values.birthday.trim();
+        let birthdayIso: string;
+
+        if (activeModalMode === "edit" && editingPerson && editingPerson.birthday) {
+            const tIndex = editingPerson.birthday.indexOf("T");
+
+            if (tIndex !== -1) {
+                const timeAndOffset = editingPerson.birthday.substring(tIndex);
+                birthdayIso = `${datePart}${timeAndOffset}`;
+            } else {
+                birthdayIso = `${datePart}T00:00:00Z`;
+            }
+        } else {
+            birthdayIso = `${datePart}T00:00:00Z`;
+        }
+
+        const payload = {
+            name: values.name.trim(),
+            eyeColor: values.eyeColor,
+            hairColor: values.hairColor,
+            nationality: values.nationality,
+            weight: Number(values.weight),
+            height: values.height.trim() === "" ? null : Number(values.height),
+            birthday: birthdayIso,
+
+            coordinates: {
+                x: Number(values.coordX),
+                y: Number(values.coordY),
+            },
+            location: {
+                x: Number(values.locX),
+                y: Number(values.locY),
+                name: values.locName.trim(),
+            },
+        };
+
+        const jsonBody = JSON.stringify(payload);
+        console.log("Sending payload to server:", jsonBody);
+
+        try {
+            let response: Response;
+
+            if (activeModalMode === "create") {
+                response = await fetch(API_BASE, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            } else if (activeModalMode === "edit" && editingPerson) {
+                response = await fetch(`${API_BASE}/${editingPerson.id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            } else {
+                return;
+            }
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || `Request error: ${response.status}`);
+            }
+
+            const saved: PersonDTO = await response.json();
+
+            setPerson(prev => {
+                const index = prev.findIndex(p => p.id === saved.id);
+                if (index === -1) {
+                    return [...prev, saved]; // creating
+                } else {
+                    const copy = [...prev];
+                    copy[index] = saved; // updating
+                    return copy;
+                }
+            });
+
+            closeModal();
+        } catch (e: any) {
+            setError(e?.message ?? "Error saving object");
+        }
+    }
+
     return (
         <div style={{ padding: 16 }}>
         <h1>INTERPOL ADMINISTRATION PANEL</h1>
@@ -144,6 +331,8 @@ export default function App() {
             />
 
             <button onClick={() => setShowHelp(v => !v)} title="Show InterpolQL syntax help">?</button>
+
+            <button onClick={openCreateModal}>+ Add</button>
 
             <button onClick={load} disabled={loading} style={{ marginLeft: "auto" }}>
                 Update
@@ -176,45 +365,142 @@ export default function App() {
             </div>
         )}
 
+        {activeModalMode && (
+            <PersonModal
+                mode={activeModalMode}
+                initialValues={
+                    activeModalMode === "create" || !editingPerson
+                        ? EMPTY_PERSON_FORM
+                        : personToFormValues(editingPerson)
+                }
+                existingCoords={existingCoords}
+                existingLocations={existingLocations}
+                onCancel={closeModal}
+                onSubmit={handlePersonModalSubmit}
+            />
+        )}
+
         {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
 
         {loading ? (
             <div style={{ marginTop: 16 }}>Loading...</div>
         ) : (
             <>
-            <table border={1} cellPadding={6} style={{ borderCollapse: "collapse", marginTop: 16, width: "100%" }}>
+            <table
+                border={1}
+                cellPadding={6}
+                style={{ borderCollapse: "collapse", marginTop: 16, width: "100%" }}
+            >
                 <thead>
-                <tr>
-                    <Th k="id" title="ID" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="name" title="Name" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="eyeColor" title="Eye Color" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="hairColor" title="Hair Color" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="coordXY" title="Coordinates" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="locXY" title="Location" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="weight" title="Weight" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="height" title="Height" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="birthday" title="Birthday" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                    <Th k="nationality" title="Nationality" sortKey={sortKey} sortDir={sortDirection} onSort={toggleSort} />
-                </tr>
+                    <tr>
+                        <Th
+                            k="id"
+                            title="ID"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="name"
+                            title="Name"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="eyeColor"
+                            title="Eye Color"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="hairColor"
+                            title="Hair Color"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="coordXY"
+                            title="Coordinates"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="locXY"
+                            title="Location"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="weight"
+                            title="Weight"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="height"
+                            title="Height"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="birthday"
+                            title="Birthday"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <Th
+                            k="nationality"
+                            title="Nationality"
+                            sortKey={sortKey}
+                            sortDir={sortDirection}
+                            onSort={toggleSort}
+                        />
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {pageData.map((p) => (
-                    <tr key={p.id}>
-                    <td>{p.id}</td>
-                    <td>{p.name}</td>
-                    <td>{p.eyeColor}</td>
-                    <td>{p.hairColor}</td>
-                    <td>({p.coordinates?.x ?? "—"}, {p.coordinates?.y ?? "—"})</td>
-                    <td title={p.location ? `x=${p.location.x ?? "-"}, y=${p.location.y ?? "-"}` : ""}>{formatLocationCell(p.location)}</td>
-                    <td>{p.weight}</td>
-                    <td>{p.height ?? "-"}</td>
-                    <td>{formatDateISO(p.birthday)}</td>
-                    <td title={p.nationality}>{countryFlag(p.nationality)}</td>
-                    </tr>
-                ))}
-                {pageData.length === 0 && (
-                    <tr><td colSpan={10} style={{ textAlign: "center", padding: 16 }}>Ничего не найдено</td></tr>
-                )}
+                    {pageData.map((p) => (
+                        <tr key={p.id}>
+                            <td>{p.id}</td>
+                            <td>{p.name}</td>
+                            <td>{p.eyeColor}</td>
+                            <td>{p.hairColor}</td>
+                            <td>({p.coordinates?.x ?? "—"}, {p.coordinates?.y ?? "—"})</td>
+                            <td
+                                title={
+                                    p.location
+                                        ? `x=${p.location.x ?? "-"}, y=${p.location.y ?? "-"}`
+                                        : ""
+                                }
+                            >
+                                {formatLocationCell(p.location)}
+                            </td>
+                            <td>{p.weight}</td>
+                            <td>{p.height ?? "-"}</td>
+                            <td>{formatDateISO(p.birthday)}</td>
+                            <td title={p.nationality}>{countryFlag(p.nationality)}</td>
+                            <td>
+                                <button onClick={() => openEditModal(p)}>
+                                    Edit
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                    {pageData.length === 0 && (
+                        <tr>
+                            <td colSpan={11} style={{ textAlign: "center", padding: 16 }}>
+                                Nothing found
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
 
