@@ -36,8 +36,20 @@ export default function PersonModal(props: PersonModalProps) {
     const [errors, setErrors] = useState<PersonFormErrors>({});
 
     function setField<K extends keyof PersonFormValues>(key: K, value: PersonFormValues[K]) {
-        setForm(prev => ({ ...prev, [key]: value }));
-        setErrors(prev => ({ ...prev, [key]: undefined }));
+        setForm(prev => {
+            const next = { ...prev, [key]: value };
+            setErrors(prevErrors => {
+                const nextErrors: PersonFormErrors = { ...prevErrors };
+                const fieldError = validateField(key, next);
+                if (fieldError) {
+                    nextErrors[key] = fieldError;
+                } else {
+                    delete nextErrors[key];
+                }
+                return nextErrors;
+            });
+            return next;
+        });
     }
 
     function validate(values: PersonFormValues): PersonFormErrors {
@@ -157,6 +169,10 @@ export default function PersonModal(props: PersonModalProps) {
         }
 
         return errs;
+    }
+
+    function validateField<K extends keyof PersonFormValues>(key: K, values: PersonFormValues) {
+        return validate(values)[key];
     }
 
     function handleSubmit(event: FormEvent) {
