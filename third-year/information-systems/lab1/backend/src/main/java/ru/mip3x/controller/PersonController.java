@@ -35,7 +35,7 @@ public class PersonController {
     public List<PersonDTO> findAllPersons() {
         return personService.findAllPersons()
                             .stream()
-                            .map(PersonMapper::toDTO)
+                            .map(PersonMapper::toDto)
                             .toList();
     }
 
@@ -44,18 +44,18 @@ public class PersonController {
         Person savedPerson = personService.savePerson(person);
         return ResponseEntity
                .status(HttpStatus.CREATED)
-               .body(PersonMapper.toDTO(savedPerson));
+               .body(PersonMapper.toDto(savedPerson));
     }
 
     @GetMapping("/{id}")
     public PersonDTO findById(@PathVariable int id) {
-        return PersonMapper.toDTO(personService.findById(id));
+        return PersonMapper.toDto(personService.findById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PersonDTO> updatePerson(@PathVariable int id, @Valid @RequestBody Person person) {
         Person updatedPerson = personService.updatePerson(id, person);
-        return ResponseEntity.ok(PersonMapper.toDTO(updatedPerson));
+        return ResponseEntity.ok(PersonMapper.toDto(updatedPerson));
     }
 
     @DeleteMapping("/{id}")
@@ -78,7 +78,7 @@ public class PersonController {
     public List<PersonDTO> birthdayBefore(@RequestParam("date") String isoDate) {
         java.time.ZonedDateTime date = java.time.ZonedDateTime.parse(isoDate);
         return personService.findBirthdayBefore(date).stream()
-                            .map(PersonMapper::toDTO)
+                            .map(PersonMapper::toDto)
                             .toList();
     }
 

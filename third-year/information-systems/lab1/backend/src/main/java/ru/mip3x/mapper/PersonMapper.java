@@ -6,7 +6,7 @@ import ru.mip3x.dto.PersonDTO;
 import ru.mip3x.model.Person;
 
 public class PersonMapper {
-    public static PersonDTO toDTO(Person person) {
+    public static PersonDTO toDto(Person person) {
         if (person == null)
             return null;
 
