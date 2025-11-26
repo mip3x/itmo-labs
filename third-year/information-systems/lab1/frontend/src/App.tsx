@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import Th from "./components/Th";
 import PersonModal from "./components/PersonModal";
+import SpecialOpsModal from "./components/SpecialOpsModal";
 
 import {
     comparePersons,
@@ -15,6 +16,7 @@ import {
 } from "./utils";
 
 import type {
+    Color,
     Coordinates,
     Location,
     PersonDTO,
@@ -22,7 +24,10 @@ import type {
     SortKey
 } from "./types";
 
+import { COLOR_VALUES } from "./types";
+
 const API_BASE = "http://localhost:8080/api/v1/persons";
+const MAX_INT = 2147483647;
 
 const EMPTY_PERSON_FORM: PersonFormValues = {
     name: "",
@@ -60,6 +65,26 @@ export default function App() {
 
     const [activeModalMode, setActiveModalMode] = useState<"create" | "edit" | null>(null);
     const [editingPerson, setEditingPerson] = useState<PersonDTO | null>(null);
+    const [weightLimit, setWeightLimit] = useState("");
+    const [birthdayBefore, setBirthdayBefore] = useState("");
+    const [hairColorShareColor, setHairColorShareColor] = useState<Color>(COLOR_VALUES[0]);
+    const [eyeColorShareColor, setEyeColorShareColor] = useState<Color>(COLOR_VALUES[0]);
+    const [heightSum, setHeightSum] = useState<number | null>(null);
+    const [weightLessResult, setWeightLessResult] = useState<number | null>(null);
+    const [birthdayBeforeList, setBirthdayBeforeList] = useState<PersonDTO[]>([]);
+    const [hairShare, setHairShare] = useState<number | null>(null);
+    const [eyeShare, setEyeShare] = useState<number | null>(null);
+    const [specialError, setSpecialError] = useState<string | null>(null);
+    const [weightLimitError, setWeightLimitError] = useState<string | null>(null);
+    const [birthdayBeforeError, setBirthdayBeforeError] = useState<string | null>(null);
+    const [loadingOps, setLoadingOps] = useState({
+        height: false,
+        weight: false,
+        birthday: false,
+        hair: false,
+        eye: false,
+    });
+    const [showSpecialOps, setShowSpecialOps] = useState(false);
 
     async function load() {
         setLoading(true);
@@ -346,6 +371,155 @@ export default function App() {
         }
     }
 
+    function setOpLoading<K extends keyof typeof loadingOps>(key: K, value: boolean) {
+        setLoadingOps(prev => ({ ...prev, [key]: value }));
+    }
+
+    function sanitizeIntInput(value: string): string {
+        const digits = value.replace(/\D+/g, "");
+        if (!digits) return "";
+        const num = Number(digits);
+        if (!Number.isFinite(num)) return "";
+        return String(Math.min(num, MAX_INT));
+    }
+
+    function handleWeightLimitChange(v: string) {
+        setSpecialError(null);
+        setWeightLimitError(null);
+        const sanitized = sanitizeIntInput(v);
+        if (sanitized === "") {
+            setWeightLimit("");
+            return;
+        }
+        const num = Number(sanitized);
+        if (num < 1 || num > MAX_INT) {
+            setWeightLimitError("Enter integer 1.." + MAX_INT);
+            return;
+        }
+        setWeightLimit(sanitized);
+    }
+
+    function handleBirthdayBeforeChange(v: string) {
+        setSpecialError(null);
+        setBirthdayBeforeError(null);
+        setBirthdayBefore(v);
+    }
+
+    function isValidDateInput(dateStr: string) {
+        if (!dateStr || dateStr.length < 10) return false;
+
+        const yearStr = dateStr.slice(0, 4);
+        const monthStr = dateStr.slice(5, 7);
+        const dayStr = dateStr.slice(8, 10);
+
+        const year = Number(yearStr);
+        const month = Number(monthStr);
+        const day = Number(dayStr);
+        const currentYear = new Date().getFullYear();
+
+        if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return false;
+        if (year < 1900 || year > currentYear) return false;
+
+        const d = new Date(dateStr);
+        if (Number.isNaN(d.getTime())) return false;
+        if (d.getFullYear() !== year || d.getMonth() + 1 !== month || d.getDate() !== day) return false;
+
+        return true;
+    }
+
+    async function runHeightSum() {
+        setSpecialError(null);
+        setOpLoading("height", true);
+        try {
+            const response = await fetch(`${API_BASE}/stats/height/sum`);
+            if (!response.ok) throw new Error((await response.text()) || response.statusText);
+            const val = await response.json();
+            setHeightSum(val);
+        } catch (e: any) {
+            setSpecialError(e?.message ?? "Failed to calculate height sum");
+        } finally {
+            setOpLoading("height", false);
+        }
+    }
+
+    async function runWeightLess() {
+        setSpecialError(null);
+        setWeightLimitError(null);
+        const limit = Number(weightLimit);
+        if (!Number.isFinite(limit) || limit < 1 || limit > MAX_INT) {
+            setWeightLimitError("Enter integer 1.." + MAX_INT);
+            return;
+        }
+        setOpLoading("weight", true);
+        try {
+            const response = await fetch(`${API_BASE}/stats/weight/less-than?value=${limit}`);
+            if (!response.ok) throw new Error((await response.text()) || response.statusText);
+            const val = await response.json();
+            setWeightLessResult(val);
+        } catch (e: any) {
+            setSpecialError(e?.message ?? "Failed to count weight");
+        } finally {
+            setOpLoading("weight", false);
+        }
+    }
+
+    async function runBirthdayBefore() {
+        setSpecialError(null);
+        setBirthdayBeforeError(null);
+        const dateStr = birthdayBefore.trim();
+        if (!dateStr) {
+            setBirthdayBeforeError("Enter a valid date");
+            return;
+        }
+        if (!isValidDateInput(dateStr)) {
+            setBirthdayBeforeError("Invalid date: use calendar picker or YYYY-MM-DD");
+            return;
+        }
+
+        const iso = `${dateStr}T00:00:00Z`;
+        setOpLoading("birthday", true);
+        try {
+            const response = await fetch(`${API_BASE}/stats/birthday/before?date=${encodeURIComponent(iso)}`);
+            if (!response.ok) throw new Error((await response.text()) || response.statusText);
+            const list: PersonDTO[] = await response.json();
+            setBirthdayBeforeList(list);
+        } catch (e: any) {
+            setSpecialError(e?.message ?? "Failed to fetch birthday list");
+        } finally {
+            setOpLoading("birthday", false);
+        }
+    }
+
+    async function runHairShare() {
+        setSpecialError(null);
+        setOpLoading("hair", true);
+        try {
+            const response = await fetch(`${API_BASE}/stats/hair/share?color=${hairColorShareColor}`);
+            if (!response.ok) throw new Error((await response.text()) || response.statusText);
+            const val = await response.json();
+            setHairShare(val);
+        } catch (e: any) {
+            setSpecialError(e?.message ?? "Failed to calc hair share");
+        } finally {
+            setOpLoading("hair", false);
+        }
+    }
+
+    async function runEyeShare() {
+        setSpecialError(null);
+        setOpLoading("eye", true);
+        try {
+            const response = await fetch(`${API_BASE}/stats/eye/share?color=${eyeColorShareColor}`);
+            if (!response.ok) throw new Error((await response.text()) || response.statusText);
+            const val = await response.json();
+            setEyeShare(val);
+        } catch (e: any) {
+            setSpecialError(e?.message ?? "Failed to calc eye share");
+        } finally {
+            setOpLoading("eye", false);
+        }
+    }
+
     return (
         <div style={{ padding: 16 }}>
         <h1>INTERPOL ADMINISTRATION PANEL</h1>
@@ -361,6 +535,7 @@ export default function App() {
             <button onClick={() => setShowHelp(v => !v)} title="Show InterpolQL syntax help">?</button>
 
             <button onClick={openCreateModal}>+ Add</button>
+            <button onClick={() => setShowSpecialOps(true)}>Special Ops</button>
 
             <button onClick={load} disabled={loading} style={{ marginLeft: "auto" }}>
                 Update
@@ -391,6 +566,34 @@ export default function App() {
                 <li><code>lx:&lt;20</code>, <code>ly:&gt;=50</code> — location coordinates (x/y)</li>
                 </ul>
             </div>
+        )}
+
+        {showSpecialOps && (
+            <SpecialOpsModal
+                onClose={() => setShowSpecialOps(false)}
+                error={specialError}
+                loading={loadingOps}
+                heightSum={heightSum}
+                onHeight={runHeightSum}
+                weightLimit={weightLimit}
+                setWeightLimit={handleWeightLimitChange}
+                weightLimitError={weightLimitError}
+                weightLessResult={weightLessResult}
+                onWeightLess={runWeightLess}
+                birthdayBefore={birthdayBefore}
+                setBirthdayBefore={handleBirthdayBeforeChange}
+                birthdayBeforeError={birthdayBeforeError}
+                birthdayBeforeList={birthdayBeforeList}
+                onBirthdayBefore={runBirthdayBefore}
+                hairColor={hairColorShareColor}
+                setHairColor={setHairColorShareColor}
+                hairShare={hairShare}
+                onHairShare={runHairShare}
+                eyeColor={eyeColorShareColor}
+                setEyeColor={setEyeColorShareColor}
+                eyeShare={eyeShare}
+                onEyeShare={runEyeShare}
+            />
         )}
 
         {activeModalMode && (
@@ -538,7 +741,7 @@ export default function App() {
             <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12 }}>
                 <button onClick={() => setPage(1)} disabled={page <= 1}>«</button>
                 <button onClick={() => setPage(p => p - 1)} disabled={page <= 1}>‹</button>
-                <span>Page. {page} / {totalPages}</span>
+                <span>Page {page} / {totalPages}</span>
                 <button onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}>›</button>
                 <button onClick={() => setPage(totalPages)} disabled={page >= totalPages}>»</button>
             </div>
