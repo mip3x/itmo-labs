@@ -11,6 +11,16 @@ import {
     type PersonFormValues,
 } from "../types";
 
+const MAX_INT = 2147483647;
+const MIN_INT = -2147483648;
+const MAX_LONG = Number.MAX_SAFE_INTEGER;
+const MIN_LONG = -Number.MAX_SAFE_INTEGER;
+
+const WEIGHT_MIN = 1;
+const HEIGHT_MIN = 1;
+const COORD_X_MIN_EXCLUSIVE = -860;
+const COORD_Y_MAX = 396;
+
 export type PersonModalMode = "create" | "edit";
 
 export type PersonModalProps = {
@@ -58,13 +68,74 @@ export default function PersonModal(props: PersonModalProps) {
         });
     }
 
+    function sanitizeNumericInput(key: keyof PersonFormValues, raw: string): string {
+        const value = raw.replace(/,/g, ".");
+        const allowSign = key === "coordX" || key === "coordY" || key === "locX" || key === "locY";
+        const allowDot = key === "coordX" || key === "coordY" || key === "locX";
+
+        let result = "";
+        let hasDot = false;
+
+        for (let i = 0; i < value.length; i++) {
+            const ch = value[i];
+
+            if (ch >= "0" && ch <= "9") {
+                result += ch;
+                continue;
+            }
+
+            if (ch === "-" && allowSign && i === 0) {
+                result += ch;
+                continue;
+            }
+
+            if (ch === "." && allowDot && !hasDot) {
+                result += ch;
+                hasDot = true;
+            }
+        }
+
+        return result;
+    }
+
+    function handleNumericChange<K extends keyof PersonFormValues>(key: K, rawValue: PersonFormValues[K]) {
+        const sanitized = sanitizeNumericInput(key, String(rawValue));
+        const partial = sanitized === "" || sanitized === "-" || sanitized === "." || sanitized === "-.";
+
+        if (!partial) {
+            const num = Number(sanitized);
+            if (!Number.isFinite(num)) return;
+
+            switch (key) {
+                case "weight":
+                    if (num < WEIGHT_MIN || num > MAX_INT) return;
+                    break;
+                case "height":
+                    if (num < HEIGHT_MIN || num > MAX_LONG) return;
+                    break;
+                case "coordX":
+                    if (num <= COORD_X_MIN_EXCLUSIVE || num < MIN_LONG || num > MAX_LONG) return;
+                    break;
+                case "coordY":
+                    if (num > COORD_Y_MAX || num < MIN_LONG || num > MAX_LONG) return;
+                    break;
+                case "locX":
+                    if (num < MIN_LONG || num > MAX_LONG) return;
+                    break;
+                case "locY":
+                    if (num < MIN_LONG || num > MAX_LONG) return;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        setField(key, sanitized as PersonFormValues[K]);
+    }
+
     function validate(values: PersonFormValues): PersonFormErrors {
         const errs: PersonFormErrors = {};
 
-        const MAX_INT = 2147483647;
-        const MIN_INT = -2147483648;
-        const MAX_LONG = 9223372036854775807;
-        const MIN_LONG = -9223372036854775808;
         const intPattern = /^-?\d+$/;
         const floatPattern = /^-?\d+(\.\d+)?$/;
 
@@ -147,7 +218,7 @@ export default function PersonModal(props: PersonModalProps) {
             errs.coordX = "Coordinate X must be a number";
         } else if (!Number.isFinite(cx)) {
             errs.coordX = "Coordinate X must be a valid number";
-        } else if (cx <= -860) {
+        } else if (cx <= COORD_X_MIN_EXCLUSIVE) {
             errs.coordX = "Coordinate X must be > -860";
         } else if (cx < MIN_LONG || cx > MAX_LONG) {
             errs.coordX = "Coordinate X exceeds number limits";
@@ -158,7 +229,7 @@ export default function PersonModal(props: PersonModalProps) {
             errs.coordY = "Coordinate Y must be a number";
         } else if (!Number.isFinite(cy)) {
             errs.coordY = "Coordinate Y must be a valid number";
-        } else if (cy > 396) {
+        } else if (cy > COORD_Y_MAX) {
             errs.coordY = "Coordinate Y must be <= 396";
         } else if (cy < MIN_LONG || cy > MAX_LONG) {
             errs.coordY = "Coordinate Y exceeds number limits";
@@ -300,6 +371,7 @@ export default function PersonModal(props: PersonModalProps) {
                             <input
                                 type="text"
                                 value={form.name}
+                                maxLength={255}
                                 onChange={e => setField("name", e.target.value)}
                                 style={{ width: "100%", marginTop: 4 }}
                             />
@@ -355,12 +427,16 @@ export default function PersonModal(props: PersonModalProps) {
                         <div style={{ display: "flex", gap: 8 }}>
                             <label style={{ flex: 1, textAlign: "left" }}>
                                 Weight (kg, &gt; 0):
-                                <input
-                                    type="number"
-                                    value={form.weight}
-                                    onChange={e => setField("weight", e.target.value)}
-                                    style={{ width: "100%", marginTop: 4 }}
-                                />
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="^\d*$"
+                                value={form.weight}
+                                min={WEIGHT_MIN}
+                                max={MAX_INT}
+                                onChange={e => handleNumericChange("weight", e.target.value)}
+                                style={{ width: "100%", marginTop: 4 }}
+                            />
                                 {errors.weight && (
                                     <div style={{ color: "red", fontSize: 12 }}>{errors.weight}</div>
                                 )}
@@ -368,12 +444,16 @@ export default function PersonModal(props: PersonModalProps) {
 
                             <label style={{ flex: 1, textAlign: "left" }}>
                                 Height (cm, &gt; 0, could be empty):
-                                <input
-                                    type="number"
-                                    value={form.height}
-                                    onChange={e => setField("height", e.target.value)}
-                                    style={{ width: "100%", marginTop: 4 }}
-                                />
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="^\d*$"
+                                value={form.height}
+                                min={HEIGHT_MIN}
+                                max={MAX_LONG}
+                                onChange={e => handleNumericChange("height", e.target.value)}
+                                style={{ width: "100%", marginTop: 4 }}
+                            />
                                 {errors.height && (
                                     <div style={{ color: "red", fontSize: 12 }}>{errors.height}</div>
                                 )}
@@ -400,24 +480,28 @@ export default function PersonModal(props: PersonModalProps) {
                             <div style={{ display: "flex", gap: 8 }}>
                                 <label style={{ flex: 1, textAlign: "left" }}>
                                     x (&gt; -860):
-                                    <input
-                                        type="number"
-                                        value={form.coordX}
-                                        onChange={e => setField("coordX", e.target.value)}
-                                        style={{ width: "100%", marginTop: 4 }}
-                                    />
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={form.coordX}
+                                min={COORD_X_MIN_EXCLUSIVE + 1}
+                                onChange={e => handleNumericChange("coordX", e.target.value)}
+                                style={{ width: "100%", marginTop: 4 }}
+                            />
                                     {errors.coordX && (
                                         <div style={{ color: "red", fontSize: 12 }}>{errors.coordX}</div>
                                     )}
                                 </label>
                                 <label style={{ flex: 1, textAlign: "left" }}>
                                     y (≤ 396):
-                                    <input
-                                        type="number"
-                                        value={form.coordY}
-                                        onChange={e => setField("coordY", e.target.value)}
-                                        style={{ width: "100%", marginTop: 4 }}
-                                    />
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={form.coordY}
+                                max={COORD_Y_MAX}
+                                onChange={e => handleNumericChange("coordY", e.target.value)}
+                                style={{ width: "100%", marginTop: 4 }}
+                            />
                                     {errors.coordY && (
                                         <div style={{ color: "red", fontSize: 12 }}>{errors.coordY}</div>
                                     )}
@@ -444,24 +528,26 @@ export default function PersonModal(props: PersonModalProps) {
                             <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
                                 <label style={{ flex: 1, textAlign: "left" }}>
                                     x:
-                                    <input
-                                        type="number"
-                                        value={form.locX}
-                                        onChange={e => setField("locX", e.target.value)}
-                                        style={{ width: "100%", marginTop: 4 }}
-                                    />
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={form.locX}
+                                    onChange={e => handleNumericChange("locX", e.target.value)}
+                                    style={{ width: "100%", marginTop: 4 }}
+                                />
                                     {errors.locX && (
                                         <div style={{ color: "red", fontSize: 12 }}>{errors.locX}</div>
                                     )}
                                 </label>
                                 <label style={{ flex: 1, textAlign: "left" }}>
                                     y:
-                                    <input
-                                        type="number"
-                                        value={form.locY}
-                                        onChange={e => setField("locY", e.target.value)}
-                                        style={{ width: "100%", marginTop: 4 }}
-                                    />
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={form.locY}
+                                    onChange={e => handleNumericChange("locY", e.target.value)}
+                                    style={{ width: "100%", marginTop: 4 }}
+                                />
                                     {errors.locY && (
                                         <div style={{ color: "red", fontSize: 12 }}>{errors.locY}</div>
                                     )}
