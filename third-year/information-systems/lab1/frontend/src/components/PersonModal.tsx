@@ -61,6 +61,8 @@ export default function PersonModal(props: PersonModalProps) {
         const MIN_INT = -2147483648;
         const MAX_LONG = 9223372036854775807;
         const MIN_LONG = -9223372036854775808;
+        const intPattern = /^-?\d+$/;
+        const floatPattern = /^-?\d+(\.\d+)?$/;
 
         // name
         if (!values.name.trim()) {
@@ -70,6 +72,8 @@ export default function PersonModal(props: PersonModalProps) {
         // weight
         if (!values.weight.trim()) {
             errs.weight = "Weight is obligatory";
+        } else if (!intPattern.test(values.weight.trim())) {
+            errs.weight = "Weight must contain only digits";
         } else {
             const w = Number(values.weight);
             if (!Number.isFinite(w)) {
@@ -85,6 +89,10 @@ export default function PersonModal(props: PersonModalProps) {
 
         // height
         if (values.height.trim()) {
+            if (!intPattern.test(values.height.trim())) {
+                errs.height = "Height must contain only digits";
+            }
+
             const h = Number(values.height);
             if (!Number.isFinite(h)) {
                 errs.height = "Height must be a valid number";
@@ -125,11 +133,15 @@ export default function PersonModal(props: PersonModalProps) {
         }
 
         // coords
+        const cxValid = floatPattern.test(values.coordX.trim());
+        const cyValid = floatPattern.test(values.coordY.trim());
         const cx = Number(values.coordX);
         const cy = Number(values.coordY);
 
         // x must be > -860
-        if (!Number.isFinite(cx)) {
+        if (!cxValid) {
+            errs.coordX = "Coordinate X must be a number";
+        } else if (!Number.isFinite(cx)) {
             errs.coordX = "Coordinate X must be a valid number";
         } else if (cx <= -860) {
             errs.coordX = "Coordinate X must be > -860";
@@ -138,7 +150,9 @@ export default function PersonModal(props: PersonModalProps) {
         }
 
         // y must be <= 396 and not null
-        if (!Number.isFinite(cy)) {
+        if (!cyValid) {
+            errs.coordY = "Coordinate Y must be a number";
+        } else if (!Number.isFinite(cy)) {
             errs.coordY = "Coordinate Y must be a valid number";
         } else if (cy > 396) {
             errs.coordY = "Coordinate Y must be <= 396";
@@ -147,16 +161,22 @@ export default function PersonModal(props: PersonModalProps) {
         }
 
         // location
+        const lxValid = floatPattern.test(values.locX.trim());
+        const lyValid = intPattern.test(values.locY.trim());
         const lx = Number(values.locX);
         const ly = Number(values.locY);
 
-        if (!Number.isFinite(lx)) {
+        if (!lxValid) {
+            errs.locX = "Location X must be a number";
+        } else if (!Number.isFinite(lx)) {
             errs.locX = "Location X must be a valid number";
         } else if (lx < MIN_LONG || lx > MAX_LONG) {
             errs.locX = "Location X exceeds number limits";
         }
 
-        if (!Number.isFinite(ly)) {
+        if (!lyValid) {
+            errs.locY = "Location Y must be an integer";
+        } else if (!Number.isFinite(ly)) {
             errs.locY = "Location Y must be a valid number";
         } else if (ly < MIN_LONG || ly > MAX_LONG) {
             errs.locY = "Location Y exceeds number limits";
