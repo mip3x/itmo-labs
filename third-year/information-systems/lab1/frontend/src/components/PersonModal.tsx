@@ -36,6 +36,10 @@ export default function PersonModal(props: PersonModalProps) {
 
     const [form, setForm] = useState<PersonFormValues>(initialValues);
     const [errors, setErrors] = useState<PersonFormErrors>({});
+    const [coordsPickerOpen, setCoordsPickerOpen] = useState(false);
+    const [coordsSearch, setCoordsSearch] = useState("");
+    const [locPickerOpen, setLocPickerOpen] = useState(false);
+    const [locSearch, setLocSearch] = useState("");
 
     function setField<K extends keyof PersonFormValues>(key: K, value: PersonFormValues[K]) {
         setForm(prev => {
@@ -218,6 +222,38 @@ export default function PersonModal(props: PersonModalProps) {
         setField("locName", l.name);
     }
 
+    const coordItems = existingCoords
+        .filter(c => {
+            const needle = coordsSearch.trim().toLowerCase();
+            if (!needle) return true;
+            const text = `${c.x} ${c.y}`.toLowerCase();
+            return text.includes(needle);
+        })
+        .map(c => ({
+            key: `${c.x}|${c.y}`,
+            label: `(${c.x}, ${c.y})`,
+            onPick: () => {
+                useExistingCoords(c);
+                setCoordsPickerOpen(false);
+            },
+        }));
+
+    const locItems = existingLocations
+        .filter(l => {
+            const needle = locSearch.trim().toLowerCase();
+            if (!needle) return true;
+            const text = `${l.name} ${l.x} ${l.y}`.toLowerCase();
+            return text.includes(needle);
+        })
+        .map(l => ({
+            key: `${l.x}|${l.y}|${l.name}`,
+            label: `${l.name} (x=${l.x}, y=${l.y})`,
+            onPick: () => {
+                useExistingLocation(l);
+                setLocPickerOpen(false);
+            },
+        }));
+
     useEffect(() => {
         function onKeyDown(e: KeyboardEvent) {
             if (e.key === "Escape") {
@@ -230,291 +266,364 @@ export default function PersonModal(props: PersonModalProps) {
     }, [onCancel]);
 
     return (
+        <>
+            <div
+                style={{
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.4)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000,
+                }}
+            >
+                <div
+                    style={{
+                        background: "#fff",
+                        color: "#000",
+                        padding: 16,
+                        borderRadius: 8,
+                        minWidth: 480,
+                        maxWidth: 640,
+                    }}
+                >
+                    <h2>{mode === "create" ? "New Person" : "Edit Person"}</h2>
+
+                    <form
+                        onSubmit={handleSubmit}
+                        style={{ display: "grid", gap: 8 }}
+                    >
+                        {/* Name */}
+                        <label style={{ textAlign: "left" }}>
+                            Name:
+                            <input
+                                type="text"
+                                value={form.name}
+                                onChange={e => setField("name", e.target.value)}
+                                style={{ width: "100%", marginTop: 4 }}
+                            />
+                            {errors.name && (
+                                <div style={{ color: "red", fontSize: 12 }}>{errors.name}</div>
+                            )}
+                        </label>
+
+                        {/* Color of eye / hair */}
+                        <div style={{ display: "flex", gap: 8 }}>
+                            <label style={{ flex: 1, textAlign: "left" }}>
+                                Eye Color:
+                                <select
+                                    value={form.eyeColor}
+                                    onChange={e => setField("eyeColor", e.target.value as Color)}
+                                    style={{ width: "100%", marginTop: 4 }}
+                                >
+                                    {COLOR_VALUES.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label style={{ flex: 1, textAlign: "left" }}>
+                                Hair Color:
+                                <select
+                                    value={form.hairColor}
+                                    onChange={e => setField("hairColor", e.target.value as Color)}
+                                    style={{ width: "100%", marginTop: 4 }}
+                                >
+                                    {COLOR_VALUES.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+
+                        {/* Nationality */}
+                        <label style={{ textAlign: "left" }}>
+                            Nationality:
+                            <select
+                                value={form.nationality}
+                                onChange={e => setField("nationality", e.target.value as Country)}
+                                style={{ width: "100%", marginTop: 4 }}
+                            >
+                                {COUNTRY_VALUES.map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        </label>
+
+                        {/* Weight / Height */}
+                        <div style={{ display: "flex", gap: 8 }}>
+                            <label style={{ flex: 1, textAlign: "left" }}>
+                                Weight (kg, &gt; 0):
+                                <input
+                                    type="number"
+                                    value={form.weight}
+                                    onChange={e => setField("weight", e.target.value)}
+                                    style={{ width: "100%", marginTop: 4 }}
+                                />
+                                {errors.weight && (
+                                    <div style={{ color: "red", fontSize: 12 }}>{errors.weight}</div>
+                                )}
+                            </label>
+
+                            <label style={{ flex: 1, textAlign: "left" }}>
+                                Height (cm, &gt; 0, could be empty):
+                                <input
+                                    type="number"
+                                    value={form.height}
+                                    onChange={e => setField("height", e.target.value)}
+                                    style={{ width: "100%", marginTop: 4 }}
+                                />
+                                {errors.height && (
+                                    <div style={{ color: "red", fontSize: 12 }}>{errors.height}</div>
+                                )}
+                            </label>
+                        </div>
+
+                        {/* Birthday */}
+                        <label style={{ textAlign: "left" }}>
+                            Birthday:
+                            <input
+                                type="date"
+                                value={form.birthday}
+                                onChange={e => setField("birthday", e.target.value)}
+                                style={{ width: "100%", marginTop: 4 }}
+                            />
+                            {errors.birthday && (
+                                <div style={{ color: "red", fontSize: 12 }}>{errors.birthday}</div>
+                            )}
+                        </label>
+
+                        {/* Coordinates */}
+                        <fieldset style={{ border: "1px solid #ccc", padding: 8 }}>
+                            <legend>Coordinates</legend>
+                            <div style={{ display: "flex", gap: 8 }}>
+                                <label style={{ flex: 1, textAlign: "left" }}>
+                                    x (&gt; -860):
+                                    <input
+                                        type="number"
+                                        value={form.coordX}
+                                        onChange={e => setField("coordX", e.target.value)}
+                                        style={{ width: "100%", marginTop: 4 }}
+                                    />
+                                    {errors.coordX && (
+                                        <div style={{ color: "red", fontSize: 12 }}>{errors.coordX}</div>
+                                    )}
+                                </label>
+                                <label style={{ flex: 1, textAlign: "left" }}>
+                                    y (≤ 396):
+                                    <input
+                                        type="number"
+                                        value={form.coordY}
+                                        onChange={e => setField("coordY", e.target.value)}
+                                        style={{ width: "100%", marginTop: 4 }}
+                                    />
+                                    {errors.coordY && (
+                                        <div style={{ color: "red", fontSize: 12 }}>{errors.coordY}</div>
+                                    )}
+                                </label>
+                            </div>
+
+                            {existingCoords.length > 0 && (
+                                <div style={{ marginTop: 8, textAlign: "left", fontSize: 12 }}>
+                                    Use existing coordinates:
+                                    <button
+                                        type="button"
+                                        style={{ marginLeft: 8, fontSize: 12 }}
+                                        onClick={() => setCoordsPickerOpen(true)}
+                                    >
+                                        Open list
+                                    </button>
+                                </div>
+                            )}
+                        </fieldset>
+
+                        {/* Location */}
+                        <fieldset style={{ border: "1px solid #ccc", padding: 8 }}>
+                            <legend>Location</legend>
+                            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                                <label style={{ flex: 1, textAlign: "left" }}>
+                                    x:
+                                    <input
+                                        type="number"
+                                        value={form.locX}
+                                        onChange={e => setField("locX", e.target.value)}
+                                        style={{ width: "100%", marginTop: 4 }}
+                                    />
+                                    {errors.locX && (
+                                        <div style={{ color: "red", fontSize: 12 }}>{errors.locX}</div>
+                                    )}
+                                </label>
+                                <label style={{ flex: 1, textAlign: "left" }}>
+                                    y:
+                                    <input
+                                        type="number"
+                                        value={form.locY}
+                                        onChange={e => setField("locY", e.target.value)}
+                                        style={{ width: "100%", marginTop: 4 }}
+                                    />
+                                    {errors.locY && (
+                                        <div style={{ color: "red", fontSize: 12 }}>{errors.locY}</div>
+                                    )}
+                                </label>
+                            </div>
+
+                            <label style={{ textAlign: "left" }}>
+                                Name:
+                                <input
+                                    type="text"
+                                    value={form.locName}
+                                    onChange={e => setField("locName", e.target.value)}
+                                    style={{ width: "100%", marginTop: 4 }}
+                                />
+                                {errors.locName && (
+                                    <div style={{ color: "red", fontSize: 12 }}>{errors.locName}</div>
+                                )}
+                            </label>
+
+                            {existingLocations.length > 0 && (
+                                <div style={{ marginTop: 8, textAlign: "left", fontSize: 12 }}>
+                                    Use existing location:
+                                    <button
+                                        type="button"
+                                        style={{ marginLeft: 8, fontSize: 12 }}
+                                        onClick={() => setLocPickerOpen(true)}
+                                    >
+                                        Open list
+                                    </button>
+                                </div>
+                            )}
+                        </fieldset>
+
+                        {/* Buttons */}
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: 8,
+                                marginTop: 8,
+                            }}
+                        >
+                            {mode === "edit" && onDelete && (
+                                <button
+                                    type="button"
+                                    onClick={onDelete}
+                                    style={{ marginRight: "auto", color: "white", background: "#c00" }}
+                                >
+                                    Delete
+                                </button>
+                            )}
+
+                            <button type="button" onClick={onCancel}>
+                                Cancel
+                            </button>
+                            <button type="submit">
+                                Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {coordsPickerOpen && (
+                <PickerModal
+                    title="Choose coordinates"
+                    search={coordsSearch}
+                    onSearch={setCoordsSearch}
+                    items={coordItems}
+                    onClose={() => {
+                        setCoordsPickerOpen(false);
+                        setCoordsSearch("");
+                    }}
+                />
+            )}
+            {locPickerOpen && (
+                <PickerModal
+                    title="Choose location"
+                    search={locSearch}
+                    onSearch={setLocSearch}
+                    items={locItems}
+                    onClose={() => {
+                        setLocPickerOpen(false);
+                        setLocSearch("");
+                    }}
+                />
+            )}
+        </>
+    );
+}
+
+function PickerModal<T extends { key: string; label: string; onPick: () => void }>(props: {
+    title: string;
+    search: string;
+    onSearch: (v: string) => void;
+    items: T[];
+    onClose: () => void;
+}) {
+    const { title, search, onSearch, items, onClose } = props;
+
+    return (
         <div
             style={{
                 position: "fixed",
                 inset: 0,
-                background: "rgba(0,0,0,0.4)",
+                background: "rgba(0,0,0,0.35)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                zIndex: 1000,
+                zIndex: 1100,
             }}
+            onClick={onClose}
         >
             <div
                 style={{
                     background: "#fff",
                     color: "#000",
-                    padding: 16,
+                    padding: 12,
                     borderRadius: 8,
-                    minWidth: 480,
-                    maxWidth: 640,
+                    minWidth: 320,
+                    maxWidth: 520,
+                    maxHeight: "80vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
                 }}
+                onClick={e => e.stopPropagation()}
             >
-                <h2>{mode === "create" ? "New Person" : "Edit Person"}</h2>
-
-                <form
-                    onSubmit={handleSubmit}
-                    style={{ display: "grid", gap: 8 }}
-                >
-                    {/* Name */}
-                    <label style={{ textAlign: "left" }}>
-                        Name:
-                        <input
-                            type="text"
-                            value={form.name}
-                            onChange={e => setField("name", e.target.value)}
-                            style={{ width: "100%", marginTop: 4 }}
-                        />
-                        {errors.name && (
-                            <div style={{ color: "red", fontSize: 12 }}>{errors.name}</div>
-                        )}
-                    </label>
-
-                    {/* Color of eye / hair */}
-                    <div style={{ display: "flex", gap: 8 }}>
-                        <label style={{ flex: 1, textAlign: "left" }}>
-                            Eye Color:
-                            <select
-                                value={form.eyeColor}
-                                onChange={e => setField("eyeColor", e.target.value as Color)}
-                                style={{ width: "100%", marginTop: 4 }}
-                            >
-                                {COLOR_VALUES.map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </label>
-
-                        <label style={{ flex: 1, textAlign: "left" }}>
-                            Hair Color:
-                            <select
-                                value={form.hairColor}
-                                onChange={e => setField("hairColor", e.target.value as Color)}
-                                style={{ width: "100%", marginTop: 4 }}
-                            >
-                                {COLOR_VALUES.map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
-
-                    {/* Nationality */}
-                    <label style={{ textAlign: "left" }}>
-                        Nationality:
-                        <select
-                            value={form.nationality}
-                            onChange={e => setField("nationality", e.target.value as Country)}
-                            style={{ width: "100%", marginTop: 4 }}
-                        >
-                            {COUNTRY_VALUES.map(c => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
-                    </label>
-
-                    {/* Weight / Height */}
-                    <div style={{ display: "flex", gap: 8 }}>
-                        <label style={{ flex: 1, textAlign: "left" }}>
-                            Weight (kg, &gt; 0):
-                            <input
-                                type="number"
-                                value={form.weight}
-                                onChange={e => setField("weight", e.target.value)}
-                                style={{ width: "100%", marginTop: 4 }}
-                            />
-                            {errors.weight && (
-                                <div style={{ color: "red", fontSize: 12 }}>{errors.weight}</div>
-                            )}
-                        </label>
-
-                        <label style={{ flex: 1, textAlign: "left" }}>
-                            Height (cm, &gt; 0, could be empty):
-                            <input
-                                type="number"
-                                value={form.height}
-                                onChange={e => setField("height", e.target.value)}
-                                style={{ width: "100%", marginTop: 4 }}
-                            />
-                            {errors.height && (
-                                <div style={{ color: "red", fontSize: 12 }}>{errors.height}</div>
-                            )}
-                        </label>
-                    </div>
-
-                    {/* Birthday */}
-                    <label style={{ textAlign: "left" }}>
-                        Birthday:
-                        <input
-                            type="date"
-                            value={form.birthday}
-                            onChange={e => setField("birthday", e.target.value)}
-                            style={{ width: "100%", marginTop: 4 }}
-                        />
-                        {errors.birthday && (
-                            <div style={{ color: "red", fontSize: 12 }}>{errors.birthday}</div>
-                        )}
-                    </label>
-
-                    {/* Coordinates */}
-                    <fieldset style={{ border: "1px solid #ccc", padding: 8 }}>
-                        <legend>Coordinates</legend>
-                        <div style={{ display: "flex", gap: 8 }}>
-                            <label style={{ flex: 1, textAlign: "left" }}>
-                                x (&gt; -860):
-                                <input
-                                    type="number"
-                                    value={form.coordX}
-                                    onChange={e => setField("coordX", e.target.value)}
-                                    style={{ width: "100%", marginTop: 4 }}
-                                />
-                                {errors.coordX && (
-                                    <div style={{ color: "red", fontSize: 12 }}>{errors.coordX}</div>
-                                )}
-                            </label>
-                            <label style={{ flex: 1, textAlign: "left" }}>
-                                y (≤ 396):
-                                <input
-                                    type="number"
-                                    value={form.coordY}
-                                    onChange={e => setField("coordY", e.target.value)}
-                                    style={{ width: "100%", marginTop: 4 }}
-                                />
-                                {errors.coordY && (
-                                    <div style={{ color: "red", fontSize: 12 }}>{errors.coordY}</div>
-                                )}
-                            </label>
-                        </div>
-
-                        {existingCoords.length > 0 && (
-                            <div style={{ marginTop: 8, textAlign: "left", fontSize: 12 }}>
-                                Use existing coordinates:
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        flexWrap: "wrap",
-                                        gap: 4,
-                                        marginTop: 4,
-                                    }}
-                                >
-                                    {existingCoords.map(c => (
-                                        <button
-                                            type="button"
-                                            key={`${c.x}|${c.y}`}
-                                            onClick={() => useExistingCoords(c)}
-                                            style={{ fontSize: 12, padding: "2px 6px" }}
-                                        >
-                                            ({c.x}, {c.y})
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </fieldset>
-
-                    {/* Location */}
-                    <fieldset style={{ border: "1px solid #ccc", padding: 8 }}>
-                        <legend>Location</legend>
-                        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                            <label style={{ flex: 1, textAlign: "left" }}>
-                                x:
-                                <input
-                                    type="number"
-                                    value={form.locX}
-                                    onChange={e => setField("locX", e.target.value)}
-                                    style={{ width: "100%", marginTop: 4 }}
-                                />
-                                {errors.locX && (
-                                    <div style={{ color: "red", fontSize: 12 }}>{errors.locX}</div>
-                                )}
-                            </label>
-                            <label style={{ flex: 1, textAlign: "left" }}>
-                                y:
-                                <input
-                                    type="number"
-                                    value={form.locY}
-                                    onChange={e => setField("locY", e.target.value)}
-                                    style={{ width: "100%", marginTop: 4 }}
-                                />
-                                {errors.locY && (
-                                    <div style={{ color: "red", fontSize: 12 }}>{errors.locY}</div>
-                                )}
-                            </label>
-                        </div>
-
-                        <label style={{ textAlign: "left" }}>
-                            Name:
-                            <input
-                                type="text"
-                                value={form.locName}
-                                onChange={e => setField("locName", e.target.value)}
-                                style={{ width: "100%", marginTop: 4 }}
-                            />
-                            {errors.locName && (
-                                <div style={{ color: "red", fontSize: 12 }}>{errors.locName}</div>
-                            )}
-                        </label>
-
-                        {existingLocations.length > 0 && (
-                            <div style={{ marginTop: 8, textAlign: "left", fontSize: 12 }}>
-                                Use existing location:
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: 4,
-                                        marginTop: 4,
-                                        maxHeight: 120,
-                                        overflowY: "auto",
-                                    }}
-                                >
-                                    {existingLocations.map(l => (
-                                        <button
-                                            type="button"
-                                            key={`${l.x}|${l.y}|${l.name}`}
-                                            onClick={() => useExistingLocation(l)}
-                                            style={{
-                                                fontSize: 12,
-                                                padding: "2px 6px",
-                                                textAlign: "left",
-                                            }}
-                                        >
-                                            {l.name} (x={l.x}, y={l.y})
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </fieldset>
-
-                    {/* Buttons */}
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 8,
-                            marginTop: 8,
-                        }}
-                    >
-                        {mode === "edit" && onDelete && (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <strong>{title}</strong>
+                    <button type="button" onClick={onClose}>×</button>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    value={search}
+                    onChange={e => onSearch(e.target.value)}
+                    style={{ padding: "6px 8px" }}
+                />
+                <div style={{ overflowY: "auto", flex: 1, border: "1px solid #ddd", borderRadius: 4 }}>
+                    {items.length === 0 ? (
+                        <div style={{ padding: 8, fontSize: 12 }}>Nothing found</div>
+                    ) : (
+                        items.map(item => (
                             <button
                                 type="button"
-                                onClick={onDelete}
-                                style={{ marginRight: "auto", color: "white", background: "#c00" }}
+                                key={item.key}
+                                onClick={item.onPick}
+                                style={{
+                                    display: "block",
+                                    width: "100%",
+                                    textAlign: "left",
+                                    padding: "6px 8px",
+                                    borderBottom: "1px solid #eee",
+                                    background: "transparent",
+                                }}
                             >
-                                Delete
+                                {item.label}
                             </button>
-                        )}
-
-                        <button type="button" onClick={onCancel}>
-                            Cancel
-                        </button>
-                        <button type="submit">
-                            Save
-                        </button>
-                    </div>
-                </form>
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );

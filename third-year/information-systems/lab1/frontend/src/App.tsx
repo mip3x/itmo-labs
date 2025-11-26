@@ -178,34 +178,33 @@ export default function App() {
         return sorted.slice(start, start + pageSize);
     }, [sorted, page]);
 
-    const existingCoords = useMemo<Coordinates[]>(() => {
-        const map = new Map<string, Coordinates>();
-        for (const person of persons) {
-            if (!person.coordinates) continue;
+    const [knownCoords, setKnownCoords] = useState<Coordinates[]>([]);
+    const [knownLocations, setKnownLocations] = useState<Location[]>([]);
 
-            const key = `${person.coordinates.x}|${person.coordinates.y}`;
-
-            if (!map.has(key)) {
-                map.set(key, person.coordinates);
+    useEffect(() => {
+        setKnownCoords(prev => {
+            const map = new Map<string, Coordinates>();
+            for (const c of prev) {
+                map.set(`${c.x}|${c.y}`, c);
             }
-        }
-
-        return Array.from(map.values());
-    }, [persons]);
-
-    const existingLocations = useMemo<Location[]>(() => {
-        const map = new Map<string, Location>();
-        for (const person of persons) {
-            if (!person.location) continue;
-
-            const key = `${person.location.x}|${person.location.y}|${person.location.name}`;
-
-            if (!map.has(key)) {
-                map.set(key, person.location);
+            for (const person of persons) {
+                if (!person.coordinates) continue;
+                map.set(`${person.coordinates.x}|${person.coordinates.y}`, person.coordinates);
             }
-        }
+            return Array.from(map.values());
+        });
 
-        return Array.from(map.values());
+        setKnownLocations(prev => {
+            const map = new Map<string, Location>();
+            for (const l of prev) {
+                map.set(`${l.x}|${l.y}|${l.name}`, l);
+            }
+            for (const person of persons) {
+                if (!person.location) continue;
+                map.set(`${person.location.x}|${person.location.y}|${person.location.name}`, person.location);
+            }
+            return Array.from(map.values());
+        });
     }, [persons]);
 
     function openCreateModal() {
@@ -402,8 +401,8 @@ export default function App() {
                         ? EMPTY_PERSON_FORM
                         : personToFormValues(editingPerson)
                 }
-                existingCoords={existingCoords}
-                existingLocations={existingLocations}
+                existingCoords={knownCoords}
+                existingLocations={knownLocations}
                 onCancel={closeModal}
                 onSubmit={handlePersonModalSubmit}
                 onDelete={activeModalMode === "edit" && editingPerson
