@@ -318,6 +318,26 @@ export default function App() {
         }
     }
 
+    async function handleDeletePerson(id: number) {
+        if (!window.confirm(`Delete object #${id}?`)) return;
+
+        setError(null);
+
+        try {
+            const response = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || `Request error: ${response.status}`);
+            }
+
+            setPerson(prev => prev.filter(p => p.id !== id));
+            closeModal();
+        } catch (e: any) {
+            setError(e?.message ?? "Error deleting object");
+        }
+    }
+
     return (
         <div style={{ padding: 16 }}>
         <h1>INTERPOL ADMINISTRATION PANEL</h1>
@@ -377,6 +397,9 @@ export default function App() {
                 existingLocations={existingLocations}
                 onCancel={closeModal}
                 onSubmit={handlePersonModalSubmit}
+                onDelete={activeModalMode === "edit" && editingPerson
+                    ? () => handleDeletePerson(editingPerson.id)
+                    : undefined}
             />
         )}
 

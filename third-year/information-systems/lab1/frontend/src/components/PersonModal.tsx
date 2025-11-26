@@ -20,6 +20,7 @@ export type PersonModalProps = {
     existingLocations: Location[];
     onSubmit: (values: PersonFormValues) => void;
     onCancel: () => void;
+    onDelete?: () => void;
 };
 
 export default function PersonModal(props: PersonModalProps) {
@@ -30,6 +31,7 @@ export default function PersonModal(props: PersonModalProps) {
         existingLocations,
         onSubmit,
         onCancel,
+        onDelete,
     } = props;
 
     const [form, setForm] = useState<PersonFormValues>(initialValues);
@@ -464,6 +466,16 @@ export default function PersonModal(props: PersonModalProps) {
                             marginTop: 8,
                         }}
                     >
+                        {mode === "edit" && onDelete && (
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                style={{ marginRight: "auto", color: "white", background: "#c00" }}
+                            >
+                                Delete
+                            </button>
+                        )}
+
                         <button type="button" onClick={onCancel}>
                             Cancel
                         </button>
