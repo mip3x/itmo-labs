@@ -1,5 +1,6 @@
 package ru.mip3x.service.impl;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.context.annotation.Primary;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.mip3x.model.Color;
 import ru.mip3x.exception.ResourceNotFoundException;
 import ru.mip3x.model.Coordinates;
 import ru.mip3x.model.Location;
@@ -127,5 +129,36 @@ public class PersonServiceImpl implements PersonService {
             throw new ResourceNotFoundException("Person " + id + " not found");
 
         personRepository.deleteById(id);
+    }
+
+    @Override
+    public long sumHeight() {
+        return personRepository.sumHeight();
+    }
+
+    @Override
+    public long countWeightLessThan(int weight) {
+        return personRepository.countByWeightLessThan(weight);
+    }
+
+    @Override
+    public List<Person> findBirthdayBefore(ZonedDateTime date) {
+        return personRepository.findByBirthdayBefore(date);
+    }
+
+    @Override
+    public double hairColorShare(Color hairColor) {
+        long total = personRepository.count();
+        if (total == 0) return 0.0;
+        long matched = personRepository.countByHairColor(hairColor);
+        return (matched * 100.0) / total;
+    }
+
+    @Override
+    public double eyeColorShare(Color eyeColor) {
+        long total = personRepository.count();
+        if (total == 0) return 0.0;
+        long matched = personRepository.countByEyeColor(eyeColor);
+        return (matched * 100.0) / total;
     }
 }

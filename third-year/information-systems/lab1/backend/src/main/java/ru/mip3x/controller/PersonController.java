@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import ru.mip3x.model.Color;
 import ru.mip3x.dto.PersonDTO;
 import ru.mip3x.mapper.PersonMapper;
 import ru.mip3x.model.Person;
@@ -60,5 +62,33 @@ public class PersonController {
     public ResponseEntity<Void> deletePerson(@PathVariable int id) {
         personService.deletePerson(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/stats/height/sum")
+    public long sumHeight() {
+        return personService.sumHeight();
+    }
+
+    @GetMapping("/stats/weight/less-than")
+    public long countWeightLessThan(@RequestParam("value") int value) {
+        return personService.countWeightLessThan(value);
+    }
+
+    @GetMapping("/stats/birthday/before")
+    public List<PersonDTO> birthdayBefore(@RequestParam("date") String isoDate) {
+        java.time.ZonedDateTime date = java.time.ZonedDateTime.parse(isoDate);
+        return personService.findBirthdayBefore(date).stream()
+                            .map(PersonMapper::toDTO)
+                            .toList();
+    }
+
+    @GetMapping("/stats/hair/share")
+    public double hairShare(@RequestParam("color") Color color) {
+        return personService.hairColorShare(color);
+    }
+
+    @GetMapping("/stats/eye/share")
+    public double eyeShare(@RequestParam("color") Color color) {
+        return personService.eyeColorShare(color);
     }
 }

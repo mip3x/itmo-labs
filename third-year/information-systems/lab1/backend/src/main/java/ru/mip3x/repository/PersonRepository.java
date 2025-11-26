@@ -1,10 +1,13 @@
 package ru.mip3x.repository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import ru.mip3x.model.Color;
 import ru.mip3x.model.Person;
 
 public interface PersonRepository extends JpaRepository<Person, Integer> {
@@ -13,4 +16,16 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
 
     @EntityGraph(attributePaths = {"coordinates", "location"})
     Person findPersonById(int id);
+
+    @Query("select coalesce(sum(p.height), 0) from Person p")
+    long sumHeight();
+
+    long countByWeightLessThan(Integer weight);
+
+    @EntityGraph(attributePaths = {"coordinates", "location"})
+    List<Person> findByBirthdayBefore(ZonedDateTime date);
+
+    long countByHairColor(Color hairColor);
+
+    long countByEyeColor(Color eyeColor);
 }
