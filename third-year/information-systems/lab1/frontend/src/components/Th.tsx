@@ -14,7 +14,7 @@ export default function Th(props: {
             <th
                 onClick={() => onSort(k)}
                 style={{ cursor: "pointer", userSelect: "none" }}
-                title="Сортировать"
+                title="Sort"
             >
                 {title} {isActive ? (sortDir === "asc" ? "▲" : "▼") : ""}
             </th>

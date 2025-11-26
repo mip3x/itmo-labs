@@ -103,14 +103,18 @@ export default function App() {
 
             if (/^\d{4}$/.test(t)) {
                 const year = Number(t);
-                const pred = (p: PersonDTO) => new Date(p.birthday).getFullYear() === year;
-                (isNeg ? negativePreds : positivePreds).push(pred);
-                continue;
+                const currentYear = new Date().getFullYear();
+                if (year >= 1900 && year <= currentYear + 5) {
+                    const pred = (p: PersonDTO) => new Date(p.birthday).getFullYear() === year;
+                    (isNeg ? negativePreds : positivePreds).push(pred);
+                    continue;
+                }
             }
 
             const num = parseNumber(t);
             if (num != null) {
                 const EPS = 1e-6;
+                const needle = t.toLowerCase();
                 const pred = (p: PersonDTO) => {
                     const values = [
                         p.height ?? null,
@@ -120,7 +124,12 @@ export default function App() {
                         p.location?.x ?? null,
                         p.location?.y ?? null,
                     ];
-                    return values.some(v => v != null && Math.abs(Number(v) - num) < EPS);
+
+                    const exactMatch = values.some(v => v != null && Math.abs(Number(v) - num) < EPS);
+                    if (exactMatch) return true;
+
+                    const text = searchableString(p);
+                    return text.includes(needle);
                 };
 
                 (isNeg ? negativePreds : positivePreds).push(pred);
@@ -530,7 +539,7 @@ export default function App() {
             <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12 }}>
                 <button onClick={() => setPage(1)} disabled={page <= 1}>«</button>
                 <button onClick={() => setPage(p => p - 1)} disabled={page <= 1}>‹</button>
-                <span>Стр. {page} / {totalPages}</span>
+                <span>Page. {page} / {totalPages}</span>
                 <button onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}>›</button>
                 <button onClick={() => setPage(totalPages)} disabled={page >= totalPages}>»</button>
             </div>
