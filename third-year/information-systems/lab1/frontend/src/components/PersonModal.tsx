@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import {
     COLOR_VALUES,
@@ -217,6 +217,17 @@ export default function PersonModal(props: PersonModalProps) {
         setField("locY", String(l.y));
         setField("locName", l.name);
     }
+
+    useEffect(() => {
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") {
+                onCancel();
+            }
+        }
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [onCancel]);
 
     return (
         <div
