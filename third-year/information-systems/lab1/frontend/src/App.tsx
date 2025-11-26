@@ -19,7 +19,7 @@ import type {
     Color,
     Coordinates,
     Location,
-    PersonDTO,
+    PersonDto,
     PersonFormValues,
     SortKey
 } from "./types";
@@ -49,7 +49,7 @@ const EMPTY_PERSON_FORM: PersonFormValues = {
 };
 
 export default function App() {
-    const [persons, setPerson] = useState<PersonDTO[]>([]);
+    const [persons, setPerson] = useState<PersonDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -64,14 +64,14 @@ export default function App() {
     const [showHelp, setShowHelp] = useState(false);
 
     const [activeModalMode, setActiveModalMode] = useState<"create" | "edit" | null>(null);
-    const [editingPerson, setEditingPerson] = useState<PersonDTO | null>(null);
+    const [editingPerson, setEditingPerson] = useState<PersonDto | null>(null);
     const [weightLimit, setWeightLimit] = useState("");
     const [birthdayBefore, setBirthdayBefore] = useState("");
     const [hairColorShareColor, setHairColorShareColor] = useState<Color>(COLOR_VALUES[0]);
     const [eyeColorShareColor, setEyeColorShareColor] = useState<Color>(COLOR_VALUES[0]);
     const [heightSum, setHeightSum] = useState<number | null>(null);
     const [weightLessResult, setWeightLessResult] = useState<number | null>(null);
-    const [birthdayBeforeList, setBirthdayBeforeList] = useState<PersonDTO[]>([]);
+    const [birthdayBeforeList, setBirthdayBeforeList] = useState<PersonDto[]>([]);
     const [hairShare, setHairShare] = useState<number | null>(null);
     const [eyeShare, setEyeShare] = useState<number | null>(null);
     const [specialError, setSpecialError] = useState<string | null>(null);
@@ -110,8 +110,8 @@ export default function App() {
 
         const tokens = q.split(/\s+/);
 
-        const positivePreds: ((p: PersonDTO) => boolean)[] = [];
-        const negativePreds: ((p: PersonDTO) => boolean)[] = [];
+        const positivePreds: ((p: PersonDto) => boolean)[] = [];
+        const negativePreds: ((p: PersonDto) => boolean)[] = [];
         const positiveText: string[] = [];
         const negativeText: string[] = [];
 
@@ -130,7 +130,7 @@ export default function App() {
                 const year = Number(t);
                 const currentYear = new Date().getFullYear();
                 if (year >= 1900 && year <= currentYear + 5) {
-                    const pred = (p: PersonDTO) => new Date(p.birthday).getFullYear() === year;
+                    const pred = (p: PersonDto) => new Date(p.birthday).getFullYear() === year;
                     (isNeg ? negativePreds : positivePreds).push(pred);
                     continue;
                 }
@@ -140,7 +140,7 @@ export default function App() {
             if (num != null) {
                 const EPS = 1e-6;
                 const needle = t.toLowerCase();
-                const pred = (p: PersonDTO) => {
+                const pred = (p: PersonDto) => {
                     const values = [
                         p.height ?? null,
                         p.weight ?? null,
@@ -237,7 +237,7 @@ export default function App() {
         setActiveModalMode("create");
     }
 
-    function openEditModal(person: PersonDTO) {
+    function openEditModal(person: PersonDto) {
         setEditingPerson(person);
         setActiveModalMode("edit");
     }
@@ -247,7 +247,7 @@ export default function App() {
         setEditingPerson(null);
     }
 
-    function personToFormValues(p: PersonDTO): PersonFormValues {
+    function personToFormValues(p: PersonDto): PersonFormValues {
         return {
             name: p.name ?? "",
             eyeColor: p.eyeColor,
@@ -332,7 +332,7 @@ export default function App() {
                 throw new Error(text || `Request error: ${response.status}`);
             }
 
-            const saved: PersonDTO = await response.json();
+            const saved: PersonDto = await response.json();
 
             setPerson(prev => {
                 const index = prev.findIndex(p => p.id === saved.id);
@@ -481,7 +481,7 @@ export default function App() {
         try {
             const response = await fetch(`${API_BASE}/stats/birthday/before?date=${encodeURIComponent(iso)}`);
             if (!response.ok) throw new Error((await response.text()) || response.statusText);
-            const list: PersonDTO[] = await response.json();
+            const list: PersonDto[] = await response.json();
             setBirthdayBeforeList(list);
         } catch (e: any) {
             setSpecialError(e?.message ?? "Failed to fetch birthday list");

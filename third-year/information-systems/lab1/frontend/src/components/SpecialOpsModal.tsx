@@ -1,4 +1,4 @@
-import { COLOR_VALUES, type Color, type PersonDTO } from "../types";
+import { COLOR_VALUES, type Color, type PersonDto } from "../types";
 
 type LoadingOps = {
     height: boolean;
@@ -25,7 +25,7 @@ type SpecialOpsModalProps = {
     birthdayBefore: string;
     setBirthdayBefore: (v: string) => void;
     birthdayBeforeError: string | null;
-    birthdayBeforeList: PersonDTO[];
+    birthdayBeforeList: PersonDto[];
     onBirthdayBefore: () => void;
 
     hairColor: Color;

@@ -17,7 +17,7 @@ export type Location = {
     name: string;
 };
 
-export type PersonDTO = {
+export type PersonDto = {
     id: number;
     name: string;
     coordinates: Coordinates;
@@ -54,4 +54,4 @@ export type PersonFormErrors = Partial<Record<keyof PersonFormValues, string>>;
 
 export type CmpOp = ">" | "<" | ">=" | "<=" | "=";
 
-export type SortKey = keyof PersonDTO | "coordXY" | "locXY" | "";
+export type SortKey = keyof PersonDto | "coordXY" | "locXY" | "";

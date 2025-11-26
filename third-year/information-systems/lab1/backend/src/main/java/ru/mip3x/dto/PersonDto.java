@@ -3,7 +3,7 @@ package ru.mip3x.dto;
 import lombok.Data;
 
 @Data
-public class PersonDTO {
+public class PersonDto {
     private int id;
     private String name;
     private CoordinatesDTO coordinates;

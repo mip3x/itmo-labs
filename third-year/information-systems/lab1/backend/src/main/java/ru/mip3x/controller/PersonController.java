@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import ru.mip3x.model.Color;
-import ru.mip3x.dto.PersonDTO;
+import ru.mip3x.dto.PersonDto;
 import ru.mip3x.mapper.PersonMapper;
 import ru.mip3x.model.Person;
 import ru.mip3x.service.PersonService;
@@ -32,7 +32,7 @@ public class PersonController {
     private final PersonService personService;
 
     @GetMapping
-    public List<PersonDTO> findAllPersons() {
+    public List<PersonDto> findAllPersons() {
         return personService.findAllPersons()
                             .stream()
                             .map(PersonMapper::toDto)
@@ -40,7 +40,7 @@ public class PersonController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonDTO> createPerson(@Valid @RequestBody Person person) {
+    public ResponseEntity<PersonDto> createPerson(@Valid @RequestBody Person person) {
         Person savedPerson = personService.savePerson(person);
         return ResponseEntity
                .status(HttpStatus.CREATED)
@@ -48,12 +48,12 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public PersonDTO findById(@PathVariable int id) {
+    public PersonDto findById(@PathVariable int id) {
         return PersonMapper.toDto(personService.findById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDTO> updatePerson(@PathVariable int id, @Valid @RequestBody Person person) {
+    public ResponseEntity<PersonDto> updatePerson(@PathVariable int id, @Valid @RequestBody Person person) {
         Person updatedPerson = personService.updatePerson(id, person);
         return ResponseEntity.ok(PersonMapper.toDto(updatedPerson));
     }
@@ -75,7 +75,7 @@ public class PersonController {
     }
 
     @GetMapping("/stats/birthday/before")
-    public List<PersonDTO> birthdayBefore(@RequestParam("date") String isoDate) {
+    public List<PersonDto> birthdayBefore(@RequestParam("date") String isoDate) {
         java.time.ZonedDateTime date = java.time.ZonedDateTime.parse(isoDate);
         return personService.findBirthdayBefore(date).stream()
                             .map(PersonMapper::toDto)

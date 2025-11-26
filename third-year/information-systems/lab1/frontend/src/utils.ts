@@ -1,4 +1,4 @@
-import type { PersonDTO, CmpOp, SortKey } from "./types";
+import type { PersonDto, CmpOp, SortKey } from "./types";
 
 export function countryFlag(country: string): string {
     const map: Record<string, string> = {
@@ -19,8 +19,8 @@ const cmpNum = (a: number | null | undefined, b: number | null | undefined) => {
 const applyDirection = (res: number, dir: "asc" | "desc") => (dir === "asc" ? res : -res);
 
 export function comparePersons(
-    a: PersonDTO,
-    b: PersonDTO,
+    a: PersonDto,
+    b: PersonDto,
     sortKey: SortKey,
     sortDir: "asc" | "desc"
     ): number {
@@ -119,7 +119,7 @@ function cmp(a: number, op: CmpOp, b: number) {
     }
 }
 
-export function searchableString(p: PersonDTO): string {
+export function searchableString(p: PersonDto): string {
     return [
         p.name,
         p.location?.name,
@@ -135,7 +135,7 @@ export function searchableString(p: PersonDTO): string {
     ].join(" ").toLowerCase();
 }
 
-export function makeFieldPredicate(token: string): ((p: PersonDTO) => boolean) | null {
+export function makeFieldPredicate(token: string): ((p: PersonDto) => boolean) | null {
     const i = token.indexOf(":");
     if (i === -1)return null;
 
@@ -153,7 +153,7 @@ export function makeFieldPredicate(token: string): ((p: PersonDTO) => boolean) |
         rawField === "h" ? "height" :
         rawField;
 
-    const numericCoordField: null | ((p: PersonDTO) => number | null) =
+    const numericCoordField: null | ((p: PersonDto) => number | null) =
         field === "coordx" || field === "cx" ? (p) => (p.coordinates?.x ?? null) :
         field === "coordy" || field === "cy" ? (p) => (p.coordinates?.y ?? null) :
         field === "locx"   || field === "lx" ? (p) => (p.location?.x ?? null) :

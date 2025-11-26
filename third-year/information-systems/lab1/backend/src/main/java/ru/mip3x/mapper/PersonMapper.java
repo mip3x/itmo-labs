@@ -2,15 +2,15 @@ package ru.mip3x.mapper;
 
 import ru.mip3x.dto.CoordinatesDTO;
 import ru.mip3x.dto.LocationDTO;
-import ru.mip3x.dto.PersonDTO;
+import ru.mip3x.dto.PersonDto;
 import ru.mip3x.model.Person;
 
 public class PersonMapper {
-    public static PersonDTO toDto(Person person) {
+    public static PersonDto toDto(Person person) {
         if (person == null)
             return null;
 
-        PersonDTO personDTO = new PersonDTO();
+        PersonDto personDTO = new PersonDto();
         personDTO.setId(person.getId());
         personDTO.setName(person.getName());
 
