@@ -319,7 +319,7 @@ export default function App() {
                 });
             } else if (activeModalMode === "edit" && editingPerson) {
                 response = await fetch(`${API_BASE}/${editingPerson.id}`, {
-                    method: "PUT",
+                    method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
