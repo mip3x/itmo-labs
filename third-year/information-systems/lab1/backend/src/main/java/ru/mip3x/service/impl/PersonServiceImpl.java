@@ -72,51 +72,9 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public Person updatePerson(int id, Person incomingPerson) {
         Person existingPerson = personRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Person " + id + " not found"));
-        
-        if (incomingPerson.getName() != null)
-            existingPerson.setName(incomingPerson.getName());
+                .orElseThrow(() -> new ResourceNotFoundException("Person " + id + " not found"));
 
-        if (incomingPerson.getCoordinates() != null) {
-            Coordinates coordinates = incomingPerson.getCoordinates();
-
-            if (coordinates.getId() != null) {
-                existingPerson.setCoordinates(coordinatesRepository.findById(coordinates.getId())
-                              .orElseThrow(() -> new ResourceNotFoundException("Coordinates not found")));
-
-            } else {
-                existingPerson.setCoordinates(coordinatesRepository.save(coordinates));
-            }
-        }
-
-        if (incomingPerson.getEyeColor() != null)
-            existingPerson.setEyeColor(incomingPerson.getEyeColor());
-
-        if (incomingPerson.getHairColor() != null)
-            existingPerson.setHairColor(incomingPerson.getHairColor());
-        
-        if (incomingPerson.getLocation() != null) {
-            Location location = incomingPerson.getLocation();
-
-            if (location.getId() != null) {
-                existingPerson.setLocation(locationRepository.findById(location.getId())
-                              .orElseThrow(() -> new ResourceNotFoundException("Location not found")));
-            } else {
-                existingPerson.setLocation(locationRepository.save(location));
-            }
-        }
-
-        if (incomingPerson.getHeight() != null)
-            existingPerson.setHeight(incomingPerson.getHeight());
-
-        if (incomingPerson.getBirthday() != null)
-            existingPerson.setBirthday(incomingPerson.getBirthday());
-
-        if (incomingPerson.getWeight() != null)
-            existingPerson.setWeight(incomingPerson.getWeight());
-
-        if (incomingPerson.getNationality() != null)
-            existingPerson.setNationality(incomingPerson.getNationality());
+        mergePerson(existingPerson, incomingPerson);
 
         return personRepository.save(existingPerson);
     }
@@ -158,5 +116,57 @@ public class PersonServiceImpl implements PersonService {
         if (total == 0) return 0.0;
         long matched = personRepository.countByEyeColor(eyeColor);
         return (matched * 100.0) / total;
+    }
+
+    private void mergePerson(Person target, Person incoming) {
+        if (incoming.getName() != null) {
+            target.setName(incoming.getName());
+        }
+
+        if (incoming.getCoordinates() != null) {
+            Coordinates coordinates = incoming.getCoordinates();
+            if (coordinates.getId() != null) {
+                Coordinates persisted = coordinatesRepository.findById(coordinates.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Coordinates not found"));
+                target.setCoordinates(persisted);
+            } else {
+                target.setCoordinates(coordinatesRepository.save(coordinates));
+            }
+        }
+
+        if (incoming.getEyeColor() != null) {
+            target.setEyeColor(incoming.getEyeColor());
+        }
+
+        if (incoming.getHairColor() != null) {
+            target.setHairColor(incoming.getHairColor());
+        }
+
+        if (incoming.getLocation() != null) {
+            Location location = incoming.getLocation();
+            if (location.getId() != null) {
+                Location persisted = locationRepository.findById(location.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
+                target.setLocation(persisted);
+            } else {
+                target.setLocation(locationRepository.save(location));
+            }
+        }
+
+        if (incoming.getHeight() != null) {
+            target.setHeight(incoming.getHeight());
+        }
+
+        if (incoming.getBirthday() != null) {
+            target.setBirthday(incoming.getBirthday());
+        }
+
+        if (incoming.getWeight() != null) {
+            target.setWeight(incoming.getWeight());
+        }
+
+        if (incoming.getNationality() != null) {
+            target.setNationality(incoming.getNationality());
+        }
     }
 }
