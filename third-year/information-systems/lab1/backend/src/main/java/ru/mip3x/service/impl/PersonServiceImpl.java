@@ -3,7 +3,6 @@ package ru.mip3x.service.impl;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
