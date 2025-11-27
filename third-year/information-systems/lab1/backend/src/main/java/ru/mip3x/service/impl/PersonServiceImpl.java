@@ -22,7 +22,6 @@ import ru.mip3x.service.PersonService;
 @Slf4j
 @Service
 @AllArgsConstructor
-@Primary
 public class PersonServiceImpl implements PersonService {
     private final PersonRepository personRepository;
     private final CoordinatesRepository coordinatesRepository;
