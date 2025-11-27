@@ -52,6 +52,8 @@ export default function App() {
     const [persons, setPerson] = useState<PersonDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [useServerPaging, setUseServerPaging] = useState(true);
+    const [serverTotalPages, setServerTotalPages] = useState(1);
 
     const [query, setQuery] = useState("");
 
@@ -86,13 +88,26 @@ export default function App() {
     });
     const [showSpecialOps, setShowSpecialOps] = useState(false);
 
+    const serverPaging = useServerPaging && query.trim() === "";
+
     async function load() {
         setLoading(true);
         setError(null);
         try {
-            const result = await fetch(`${API_BASE}`);
-            if (!result.ok) throw new Error(result.statusText);
-            setPerson(await result.json());
+            if (serverPaging) {
+                try {
+                    await loadPage(page, sortKey, sortDirection);
+                    setError(null);
+                    return;
+                } catch (err: any) {
+                    setUseServerPaging(false); // fallback to client paging
+                    setPage(1);
+                    setServerTotalPages(1);
+                    // swallow error, fallback to loadAll below
+                }
+            }
+
+            await loadAll();
         } catch (exception: any) {
             setError(exception.message ?? "Error");
         } finally {
@@ -100,11 +115,43 @@ export default function App() {
         }
     }
 
+    async function loadPage(pageNumber: number, sort: SortKey, dir: "asc" | "desc") {
+        const params = new URLSearchParams();
+        params.set("page", String(Math.max(0, pageNumber - 1)));
+        params.set("size", String(pageSize));
+        if (sort && sort !== "coordXY" && sort !== "locXY") {
+            params.set("sort", `${sort},${dir}`);
+        }
+
+        const result = await fetch(`${API_BASE}/paged?${params.toString()}`);
+        if (!result.ok) throw new Error(result.statusText);
+        const data = await result.json();
+        setPerson(data.content ?? []);
+        setServerTotalPages(data.totalPages ?? 1);
+    }
+
+    async function loadAll() {
+        const result = await fetch(`${API_BASE}`);
+        if (!result.ok) throw new Error(result.statusText);
+        setPerson(await result.json());
+    }
+
     useEffect(() => {
-        load();
-    }, []);
+        if (serverPaging) {
+            load();
+        }
+    }, [serverPaging, page, sortKey, sortDirection]);
+
+    useEffect(() => {
+        if (!serverPaging) {
+            load();
+        }
+    }, [serverPaging]);
+
 
     const filtered = useMemo(() => {
+        if (serverPaging) return persons;
+
         const q = query.trim().toLowerCase();
         if (!q) return persons;
 
@@ -175,7 +222,7 @@ export default function App() {
 
             return true;
         });
-    }, [persons, query]);
+    }, [persons, query, serverPaging]);
 
     function toggleSort(k: SortKey) {
         if (sortKey !== k) {
@@ -188,20 +235,22 @@ export default function App() {
     }
 
     const sorted = useMemo(() => {
+        if (serverPaging) return filtered;
         if (!sortKey) return filtered;
 
         const arr = [...filtered];
         arr.sort((a, b) => comparePersons(a, b, sortKey, sortDirection));
 
         return arr;
-    }, [filtered, sortKey, sortDirection]);
+    }, [filtered, sortKey, sortDirection, serverPaging]);
 
-    const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+    const totalPages = serverPaging ? serverTotalPages : Math.max(1, Math.ceil(sorted.length / pageSize));
 
     const pageData = useMemo(() => {
+        if (serverPaging) return sorted;
         const start = (page - 1) * pageSize;
         return sorted.slice(start, start + pageSize);
-    }, [sorted, page]);
+    }, [sorted, page, serverPaging]);
 
     const [knownCoords, setKnownCoords] = useState<Coordinates[]>([]);
     const [knownLocations, setKnownLocations] = useState<Location[]>([]);
@@ -334,16 +383,20 @@ export default function App() {
 
             const saved: PersonDto = await response.json();
 
-            setPerson(prev => {
-                const index = prev.findIndex(p => p.id === saved.id);
-                if (index === -1) {
-                    return [...prev, saved]; // creating
-                } else {
-                    const copy = [...prev];
-                    copy[index] = saved; // updating
-                    return copy;
-                }
-            });
+            if (serverPaging) {
+                await loadPage(page, sortKey, sortDirection);
+            } else {
+                setPerson(prev => {
+                    const index = prev.findIndex(p => p.id === saved.id);
+                    if (index === -1) {
+                        return [...prev, saved]; // creating
+                    } else {
+                        const copy = [...prev];
+                        copy[index] = saved; // updating
+                        return copy;
+                    }
+                });
+            }
 
             closeModal();
         } catch (e: any) {
@@ -364,7 +417,11 @@ export default function App() {
                 throw new Error(text || `Request error: ${response.status}`);
             }
 
-            setPerson(prev => prev.filter(p => p.id !== id));
+            if (serverPaging) {
+                await loadPage(page, sortKey, sortDirection);
+            } else {
+                setPerson(prev => prev.filter(p => p.id !== id));
+            }
             closeModal();
         } catch (e: any) {
             setError(e?.message ?? "Error deleting object");

@@ -3,11 +3,15 @@ package ru.mip3x.service;
 import java.util.List;
 import java.time.ZonedDateTime;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import ru.mip3x.model.Color;
 import ru.mip3x.model.Person;
 
 public interface PersonService {
     List<Person> findAllPersons();
+    Page<Person> findAllPersons(Pageable pageable);
     Person savePerson(Person person);
     Person findById(int id);
     Person updatePerson(int id, Person person);

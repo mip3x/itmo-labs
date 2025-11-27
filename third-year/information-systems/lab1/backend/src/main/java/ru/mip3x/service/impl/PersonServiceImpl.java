@@ -3,6 +3,8 @@ package ru.mip3x.service.impl;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -29,6 +31,11 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public List<Person> findAllPersons() {
         return personRepository.findAll();
+    }
+
+    @Override
+    public Page<Person> findAllPersons(Pageable pageable) {
+        return personRepository.findAll(pageable);
     }
 
     @Override
