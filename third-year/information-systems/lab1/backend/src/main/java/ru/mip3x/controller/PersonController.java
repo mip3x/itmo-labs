@@ -27,7 +27,7 @@ import ru.mip3x.service.PersonService;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1/persons")
+@RequestMapping("/api/v1/people")
 @AllArgsConstructor
 public class PersonController {
 
