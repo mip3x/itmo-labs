@@ -1,5 +1,7 @@
 package ru.mip3x.controller;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -34,7 +37,18 @@ public class PersonController {
     private final PersonService personService;
 
     @GetMapping
-    public List<PersonDto> findAllPersons() {
+    public List<PersonDto> findAllPersons(@RequestParam(value = "birthday_before", required = false) String birthdayBefore) {
+        if (birthdayBefore != null && !birthdayBefore.isBlank()) {
+            try {
+                ZonedDateTime date = ZonedDateTime.parse(birthdayBefore);
+                return personService.findBirthdayBefore(date).stream()
+                                    .map(PersonMapper::toDto)
+                                    .toList();
+            } catch (DateTimeParseException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format, expected ISO date", e);
+            }
+        }
+
         return personService.findAllPersons()
                             .stream()
                             .map(PersonMapper::toDto)
@@ -80,14 +94,6 @@ public class PersonController {
     @GetMapping("/stats/weight/less-than")
     public long countWeightLessThan(@RequestParam("value") int value) {
         return personService.countWeightLessThan(value);
-    }
-
-    @GetMapping("/stats/birthday/before")
-    public List<PersonDto> birthdayBefore(@RequestParam("date") String isoDate) {
-        java.time.ZonedDateTime date = java.time.ZonedDateTime.parse(isoDate);
-        return personService.findBirthdayBefore(date).stream()
-                            .map(PersonMapper::toDto)
-                            .toList();
     }
 
     @GetMapping("/stats/hair/share")

@@ -536,7 +536,8 @@ export default function App() {
         const iso = `${dateStr}T00:00:00Z`;
         setOpLoading("birthday", true);
         try {
-            const response = await fetch(`${API_BASE}/stats/birthday/before?date=${encodeURIComponent(iso)}`);
+            const params = new URLSearchParams({ birthday_before: iso });
+            const response = await fetch(`${API_BASE}?${params.toString()}`);
             if (!response.ok) throw new Error((await response.text()) || response.statusText);
             const list: PersonDto[] = await response.json();
             setBirthdayBeforeList(list);
