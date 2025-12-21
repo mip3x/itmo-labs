@@ -2,13 +2,13 @@ package ru.mip3x.mapper;
 
 import java.util.Objects;
 
-import ru.mip3x.dto.CoordinatesDTO;
-import ru.mip3x.dto.LocationDTO;
-import ru.mip3x.dto.PersonDTO;
+import ru.mip3x.dto.CoordinatesResponse;
+import ru.mip3x.dto.LocationResponse;
+import ru.mip3x.dto.PersonResponse;
 import ru.mip3x.model.Person;
 
 public class PersonMapper {
-    public static PersonDTO toDTO(Person person) {
+    public static PersonResponse toDTO(Person person) {
         Objects.requireNonNull(person, "person is required");
         Objects.requireNonNull(person.getCoordinates(), "coordinates is required");
         Objects.requireNonNull(person.getLocation(), "location is required");
@@ -19,16 +19,16 @@ public class PersonMapper {
         Objects.requireNonNull(person.getNationality(), "nationality is required");
         Objects.requireNonNull(person.getCreationDate(), "creationDate is required");
 
-        CoordinatesDTO coordinatesDTO = new CoordinatesDTO(
+        CoordinatesResponse coordinatesDTO = new CoordinatesResponse(
                 person.getCoordinates().getX(),
                 person.getCoordinates().getY());
 
-        LocationDTO locationDTO = new LocationDTO(
+        LocationResponse locationDTO = new LocationResponse(
                 person.getLocation().getX(),
                 person.getLocation().getY(),
                 person.getLocation().getName());
 
-        return new PersonDTO(
+        return new PersonResponse(
                 person.getId(),
                 person.getName(),
                 coordinatesDTO,

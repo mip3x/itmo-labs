@@ -1,13 +1,13 @@
 package ru.mip3x.dto;
 
-public record PersonDTO(
+public record PersonResponse(
         int id,
         String name,
-        CoordinatesDTO coordinates,
+        CoordinatesResponse coordinates,
         java.time.LocalDateTime creationDate,
         String eyeColor,
         String hairColor,
-        LocationDTO location,
+        LocationResponse location,
         Long height,
         java.time.ZonedDateTime birthday,
         Integer weight,

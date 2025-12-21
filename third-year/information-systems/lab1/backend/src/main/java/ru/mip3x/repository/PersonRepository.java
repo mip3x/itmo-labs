@@ -25,7 +25,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     @Query("select coalesce(sum(p.height), 0) from Person p")
     long sumHeight();
 
-    long countByWeightLessThan(Integer weight);
+    long countByWeightLessThan(int weight);
 
     @EntityGraph(attributePaths = {"coordinates", "location"})
     List<Person> findByBirthdayBefore(ZonedDateTime date);

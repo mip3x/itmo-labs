@@ -2,6 +2,7 @@ package ru.mip3x.service.impl;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -126,17 +127,18 @@ public class BasicPersonService implements PersonService {
 
     @Override
     public double hairColorShare(Color hairColor) {
-        long total = personRepository.count();
-        if (total == 0) return 0.0;
-        long matched = personRepository.countByHairColor(hairColor);
-        return (matched * 100.0) / total;
+        return share(() -> personRepository.countByHairColor(hairColor));
     }
 
     @Override
     public double eyeColorShare(Color eyeColor) {
+        return share(() -> personRepository.countByEyeColor(eyeColor));
+    }
+
+    private double share(LongSupplier countFn) {
         long total = personRepository.count();
         if (total == 0) return 0.0;
-        long matched = personRepository.countByEyeColor(eyeColor);
+        long matched = countFn.getAsLong();
         return (matched * 100.0) / total;
     }
 

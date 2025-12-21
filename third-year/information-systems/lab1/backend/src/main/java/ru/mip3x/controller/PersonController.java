@@ -23,7 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import ru.mip3x.model.Color;
-import ru.mip3x.dto.PersonDTO;
+import ru.mip3x.dto.PersonResponse;
 import ru.mip3x.mapper.PersonMapper;
 import ru.mip3x.model.Person;
 import ru.mip3x.service.PersonService;
@@ -37,7 +37,7 @@ public class PersonController {
     private final PersonService personService;
 
     @GetMapping
-    public List<PersonDTO> findAllPersons(@RequestParam(value = "birthday_before", required = false) String birthdayBefore) {
+    public List<PersonResponse> findAllPersons(@RequestParam(value = "birthday_before", required = false) String birthdayBefore) {
         if (birthdayBefore != null && !birthdayBefore.isBlank()) {
             try {
                 ZonedDateTime date = ZonedDateTime.parse(birthdayBefore);
@@ -56,13 +56,13 @@ public class PersonController {
     }
 
     @GetMapping("/paged")
-    public Page<PersonDTO> findAllPersonsPaged(Pageable pageable) {
+    public Page<PersonResponse> findAllPersonsPaged(Pageable pageable) {
         return personService.findAllPersons(pageable)
                             .map(PersonMapper::toDTO);
     }
 
     @PostMapping
-    public ResponseEntity<PersonDTO> createPerson(@Valid @RequestBody Person person) {
+    public ResponseEntity<PersonResponse> createPerson(@Valid @RequestBody Person person) {
         Person savedPerson = personService.savePerson(person);
         return ResponseEntity
                .status(HttpStatus.CREATED)
@@ -70,12 +70,12 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public PersonDTO findById(@PathVariable int id) {
+    public PersonResponse findById(@PathVariable int id) {
         return PersonMapper.toDTO(personService.findById(id));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PersonDTO> updatePerson(@PathVariable int id, @Valid @RequestBody Person person) {
+    public ResponseEntity<PersonResponse> updatePerson(@PathVariable int id, @Valid @RequestBody Person person) {
         Person updatedPerson = personService.updatePerson(id, person);
         return ResponseEntity.ok(PersonMapper.toDTO(updatedPerson));
     }
