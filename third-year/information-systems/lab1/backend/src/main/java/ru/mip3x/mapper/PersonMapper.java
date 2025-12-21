@@ -1,5 +1,7 @@
 package ru.mip3x.mapper;
 
+import java.util.Objects;
+
 import ru.mip3x.dto.CoordinatesDTO;
 import ru.mip3x.dto.LocationDTO;
 import ru.mip3x.dto.PersonDTO;
@@ -7,22 +9,24 @@ import ru.mip3x.model.Person;
 
 public class PersonMapper {
     public static PersonDTO toDto(Person person) {
-        if (person == null)
-            return null;
+        Objects.requireNonNull(person, "person is required");
+        Objects.requireNonNull(person.getCoordinates(), "coordinates is required");
+        Objects.requireNonNull(person.getLocation(), "location is required");
+        Objects.requireNonNull(person.getEyeColor(), "eyeColor is required");
+        Objects.requireNonNull(person.getHairColor(), "hairColor is required");
+        Objects.requireNonNull(person.getBirthday(), "birthday is required");
+        Objects.requireNonNull(person.getWeight(), "weight is required");
+        Objects.requireNonNull(person.getNationality(), "nationality is required");
+        Objects.requireNonNull(person.getCreationDate(), "creationDate is required");
 
-        CoordinatesDTO coordinatesDTO = null;
-        if (person.getCoordinates() != null) {
-            coordinatesDTO = new CoordinatesDTO(person.getCoordinates().getX(),
-                                                person.getCoordinates().getY());
-        }
+        CoordinatesDTO coordinatesDTO = new CoordinatesDTO(
+                person.getCoordinates().getX(),
+                person.getCoordinates().getY());
 
-        LocationDTO locationDTO = null;
-        if (person.getLocation() != null) {
-            locationDTO = new LocationDTO(
-                    person.getLocation().getX(),
-                    person.getLocation().getY(),
-                    person.getLocation().getName());
-        }
+        LocationDTO locationDTO = new LocationDTO(
+                person.getLocation().getX(),
+                person.getLocation().getY(),
+                person.getLocation().getName());
 
         return new PersonDTO(
                 person.getId(),
