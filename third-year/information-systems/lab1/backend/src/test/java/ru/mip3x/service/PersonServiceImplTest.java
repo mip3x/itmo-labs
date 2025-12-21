@@ -22,7 +22,7 @@ import ru.mip3x.model.Person;
 import ru.mip3x.repository.CoordinatesRepository;
 import ru.mip3x.repository.LocationRepository;
 import ru.mip3x.repository.PersonRepository;
-import ru.mip3x.service.impl.PersonServiceImpl;
+import ru.mip3x.service.impl.BasicPersonService;
 
 @ExtendWith(MockitoExtension.class)
 class PersonServiceImplUnitTest {
@@ -35,7 +35,7 @@ class PersonServiceImplUnitTest {
     LocationRepository locationRepository;
 
     @InjectMocks
-    PersonServiceImpl service;
+    BasicPersonService service;
 
     @Test
     void deletePerson_whenNotExists_shouldThrow404() {
