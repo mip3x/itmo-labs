@@ -67,11 +67,14 @@ public class RandomPersonSeeder implements CommandLineRunner {
     @Value("${seed.reuse-existing:true}")
     private boolean reuseExisting;
 
-    private final Random random = new Random();
+    @Value("${app.seed:#{null}}")
+    private Long appSeed;
+
+    private final Random random;
 
     @Override
     public void run(String... args) {
-        log.info("Seeding {} random persons (reuseExisting={})", count, reuseExisting);
+        log.info("Seeding {} random persons (reuseExisting={}, seed={})", count, reuseExisting, appSeed == null ? "default" : appSeed);
 
         final List<Coordinates> coordPool = reuseExisting
                 ? new ArrayList<>(coordinatesRepository.findAll())
