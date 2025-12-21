@@ -103,7 +103,8 @@ public class GlobalExceptionHandler {
     // 400 Wrong data in request
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException exception) {
-        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", exception.getMessage(), null);
+        log.warn("Bad request", exception);
+        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "Invalid request", null);
     }
 
     // 500 Unexpected Internal Server Errors
