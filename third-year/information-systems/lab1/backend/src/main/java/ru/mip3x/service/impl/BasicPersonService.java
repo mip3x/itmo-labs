@@ -49,7 +49,7 @@ public class BasicPersonService implements PersonService {
         if (coordinates.getId() != null) {
             final Long coordinatesId = coordinates.getId(); 
             coordinates = coordinatesRepository.findById(coordinatesId)
-                                               .orElseThrow(() -> new IllegalArgumentException("Coordinates " + coordinatesId + " not found"));
+                                               .orElseThrow(() -> new IllegalArgumentException(String.format("Coordinates %d not found", coordinatesId)));
         } else {
             coordinates = coordinatesRepository.save(coordinates);
         }
@@ -62,7 +62,7 @@ public class BasicPersonService implements PersonService {
         if (location.getId() != null) {
             final Long locationId = location.getId();
             location = locationRepository.findById(locationId)
-                                         .orElseThrow(() -> new IllegalArgumentException("Location " + locationId + " not found"));
+                                         .orElseThrow(() -> new IllegalArgumentException(String.format("Location %d not found", locationId)));
         } else {
             location = locationRepository.save(location);
         }
@@ -149,7 +149,7 @@ public class BasicPersonService implements PersonService {
             Coordinates coordinates = incoming.getCoordinates();
             if (coordinates.getId() != null) {
                 Coordinates persisted = coordinatesRepository.findById(coordinates.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Coordinates not found"));
+                        .orElseThrow(() -> new ResourceNotFoundException(String.format("Coordinates %d not found", coordinates.getId())));
                 target.setCoordinates(persisted);
             } else {
                 target.setCoordinates(coordinatesRepository.save(coordinates));
@@ -168,7 +168,7 @@ public class BasicPersonService implements PersonService {
             Location location = incoming.getLocation();
             if (location.getId() != null) {
                 Location persisted = locationRepository.findById(location.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
+                        .orElseThrow(() -> new ResourceNotFoundException(String.format("Location %d not found", location.getId())));
                 target.setLocation(persisted);
             } else {
                 target.setLocation(locationRepository.save(location));
