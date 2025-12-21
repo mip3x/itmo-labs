@@ -131,9 +131,13 @@ export default function App() {
     }
 
     async function loadAll() {
-        const result = await fetch(`${API_BASE}`);
+        const params = new URLSearchParams();
+        params.set("page", "0");
+        params.set("size", "10000"); // fetch a large page to support client-side filtering
+        const result = await fetch(`${API_BASE}/paged?${params.toString()}`);
         if (!result.ok) throw new Error(result.statusText);
-        setPerson(await result.json());
+        const data = await result.json();
+        setPerson(data.content ?? []);
     }
 
     useEffect(() => {
@@ -537,11 +541,11 @@ export default function App() {
         const iso = `${dateStr}T00:00:00Z`;
         setOpLoading("birthday", true);
         try {
-            const params = new URLSearchParams({ birthday_before: iso });
-            const response = await fetch(`${API_BASE}?${params.toString()}`);
+            const params = new URLSearchParams({ birthday_before: iso, page: "0", size: "10000" });
+            const response = await fetch(`${API_BASE}/paged?${params.toString()}`);
             if (!response.ok) throw new Error((await response.text()) || response.statusText);
-            const list: PersonDto[] = await response.json();
-            setBirthdayBeforeList(list);
+            const data = await response.json();
+            setBirthdayBeforeList(data.content ?? []);
         } catch (e: any) {
             setSpecialError(e?.message ?? "Failed to fetch birthday list");
         } finally {

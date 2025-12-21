@@ -10,7 +10,6 @@ import ru.mip3x.model.Color;
 import ru.mip3x.model.Person;
 
 public interface PersonService {
-    List<Person> findAllPersons();
     Page<Person> findAllPersons(Pageable pageable);
     Person savePerson(Person person);
     Person findById(int id);
@@ -22,6 +21,7 @@ public interface PersonService {
     long countByHairColor(Color hairColor);
     long countByEyeColor(Color eyeColor);
     List<Person> findBirthdayBefore(ZonedDateTime date);
+    Page<Person> findBirthdayBefore(ZonedDateTime date, Pageable pageable);
     double hairColorShare(Color hairColor);
     double eyeColorShare(Color eyeColor);
 }

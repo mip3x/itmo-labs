@@ -14,9 +14,6 @@ import ru.mip3x.model.Person;
 
 public interface PersonRepository extends JpaRepository<Person, Integer> {
     @EntityGraph(attributePaths = {"coordinates", "location"})
-    List<Person> findAll();
-
-    @EntityGraph(attributePaths = {"coordinates", "location"})
     Page<Person> findAll(Pageable pageable);
 
     @EntityGraph(attributePaths = {"coordinates", "location"})
@@ -29,6 +26,9 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
 
     @EntityGraph(attributePaths = {"coordinates", "location"})
     List<Person> findByBirthdayBefore(ZonedDateTime date);
+
+    @EntityGraph(attributePaths = {"coordinates", "location"})
+    Page<Person> findByBirthdayBefore(ZonedDateTime date, Pageable pageable);
 
     long countByHairColor(Color hairColor);
 

@@ -2,7 +2,6 @@ package ru.mip3x.controller;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,27 +35,19 @@ public class PersonController {
 
     private final PersonService personService;
 
-    @GetMapping
-    public List<PersonResponse> findAllPersons(@RequestParam(value = "birthday_before", required = false) String birthdayBefore) {
+    @GetMapping("/paged")
+    public Page<PersonResponse> findAllPersonsPaged(Pageable pageable,
+                                                    @RequestParam(value = "birthday_before", required = false) String birthdayBefore) {
         if (birthdayBefore != null && !birthdayBefore.isBlank()) {
             try {
                 ZonedDateTime date = ZonedDateTime.parse(birthdayBefore);
-                return personService.findBirthdayBefore(date).stream()
-                                    .map(PersonMapper::toDTO)
-                                    .toList();
+                return personService.findBirthdayBefore(date, pageable)
+                                    .map(PersonMapper::toDTO);
             } catch (DateTimeParseException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format, expected ISO date", e);
             }
         }
 
-        return personService.findAllPersons()
-                            .stream()
-                            .map(PersonMapper::toDTO)
-                            .toList();
-    }
-
-    @GetMapping("/paged")
-    public Page<PersonResponse> findAllPersonsPaged(Pageable pageable) {
         return personService.findAllPersons(pageable)
                             .map(PersonMapper::toDTO);
     }

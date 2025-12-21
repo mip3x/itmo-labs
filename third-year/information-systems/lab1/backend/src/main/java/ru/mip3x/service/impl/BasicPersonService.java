@@ -30,11 +30,6 @@ public class BasicPersonService implements PersonService {
     private final LocationRepository locationRepository;
 
     @Override
-    public List<Person> findAllPersons() {
-        return personRepository.findAll();
-    }
-
-    @Override
     public Page<Person> findAllPersons(Pageable pageable) {
         return personRepository.findAll(pageable);
     }
@@ -123,6 +118,11 @@ public class BasicPersonService implements PersonService {
     @Override
     public List<Person> findBirthdayBefore(ZonedDateTime date) {
         return personRepository.findByBirthdayBefore(date);
+    }
+
+    @Override
+    public Page<Person> findBirthdayBefore(ZonedDateTime date, Pageable pageable) {
+        return personRepository.findByBirthdayBefore(date, pageable);
     }
 
     @Override
