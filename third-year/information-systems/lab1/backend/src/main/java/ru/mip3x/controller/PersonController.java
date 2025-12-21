@@ -86,22 +86,7 @@ public class PersonController {
     public long count(@RequestParam(value = "max_weight", required = false) Integer maxWeight,
                       @RequestParam(value = "hair_color", required = false) Color hairColor,
                       @RequestParam(value = "eye_color", required = false) Color eyeColor) {
-        int provided = (maxWeight != null ? 1 : 0) + (hairColor != null ? 1 : 0) + (eyeColor != null ? 1 : 0);
-        if (provided > 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Specify only one filter parameter");
-        }
-
-        if (maxWeight != null) {
-            return personService.countWeightLessThan(maxWeight);
-        }
-        if (hairColor != null) {
-            return personService.countByHairColor(hairColor);
-        }
-        if (eyeColor != null) {
-            return personService.countByEyeColor(eyeColor);
-        }
-
-        return personService.countAll();
+        return personService.countFiltered(maxWeight, hairColor, eyeColor);
     }
 
     @GetMapping("/stats/hair/share")

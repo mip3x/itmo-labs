@@ -101,6 +101,14 @@ public class BasicPersonService implements PersonService {
     }
 
     @Override
+    public long countFiltered(Integer maxWeight, Color hairColor, Color eyeColor) {
+        if (maxWeight == null && hairColor == null && eyeColor == null) {
+            return countAll();
+        }
+        return personRepository.countFiltered(maxWeight, hairColor, eyeColor);
+    }
+
+    @Override
     public long countAll() {
         return personRepository.count();
     }
