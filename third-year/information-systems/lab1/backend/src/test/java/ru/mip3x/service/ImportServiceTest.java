@@ -15,7 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.transaction.support.ResourcelessTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -36,7 +39,7 @@ class ImportServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        importService = new ImportService(personService, operationService, validator, new ResourcelessTransactionManager());
+        importService = new ImportService(personService, operationService, validator, new NoOpTxManager());
     }
 
     @Test
@@ -82,7 +85,7 @@ class ImportServiceTest {
 
         ImportOperationDto response = importService.importFromFile(file);
 
-        verify(personService).savePerson(any());
+        verify(personService, org.mockito.Mockito.times(2)).savePerson(any());
         verify(operationService).markSuccess(op.getId(), 2);
         org.assertj.core.api.Assertions.assertThat(response.getStatus().name()).isEqualTo("SUCCESS");
     }
@@ -143,5 +146,22 @@ class ImportServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
 
         verify(operationService).markFailed(eq(op.getId()), any());
+    }
+
+    private static class NoOpTxManager implements PlatformTransactionManager {
+        @Override
+        public TransactionStatus getTransaction(TransactionDefinition definition) {
+            return new SimpleTransactionStatus();
+        }
+
+        @Override
+        public void commit(TransactionStatus status) {
+            // no-op
+        }
+
+        @Override
+        public void rollback(TransactionStatus status) {
+            // no-op
+        }
     }
 }
