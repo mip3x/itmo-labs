@@ -29,11 +29,6 @@ public class BasicPersonService implements PersonService {
     private final LocationRepository locationRepository;
 
     @Override
-    public List<Person> findAllPersons() {
-        return personRepository.findAll();
-    }
-
-    @Override
     public Page<Person> findAllPersons(Pageable pageable) {
         return personRepository.findAll(pageable);
     }

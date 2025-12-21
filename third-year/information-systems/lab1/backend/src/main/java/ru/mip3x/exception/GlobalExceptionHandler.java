@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -92,11 +92,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.NOT_FOUND, "NOT_FOUND", exception.getMessage(), null);
     }
 
-    // 409 DataBase Conflict Error
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(DataIntegrityViolationException exception) {
-        return build(HttpStatus.CONFLICT, "CONFLICT",
-                "Operation violates data integrity constraints", null);
+    // 500 Database / lower-layer technical errors
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleDataAccess(DataAccessException exception) {
+        log.error("Database error", exception);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
+                "Unexpected error", null);
     }
 
     // 400 Wrong data in request
@@ -108,7 +109,7 @@ public class GlobalExceptionHandler {
     // 500 Unexpected Internal Server Errors
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception) {
-        log.error(exception.getMessage());
+        log.error("Unexpected error", exception);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                 "Unexpected error", null);
     }
