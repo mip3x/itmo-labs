@@ -42,7 +42,7 @@ public class PersonController {
             try {
                 ZonedDateTime date = ZonedDateTime.parse(birthdayBefore);
                 return personService.findBirthdayBefore(date).stream()
-                                    .map(PersonMapper::toDto)
+                                    .map(PersonMapper::toDTO)
                                     .toList();
             } catch (DateTimeParseException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format, expected ISO date", e);
@@ -51,14 +51,14 @@ public class PersonController {
 
         return personService.findAllPersons()
                             .stream()
-                            .map(PersonMapper::toDto)
+                            .map(PersonMapper::toDTO)
                             .toList();
     }
 
     @GetMapping("/paged")
     public Page<PersonDTO> findAllPersonsPaged(Pageable pageable) {
         return personService.findAllPersons(pageable)
-                            .map(PersonMapper::toDto);
+                            .map(PersonMapper::toDTO);
     }
 
     @PostMapping
@@ -66,18 +66,18 @@ public class PersonController {
         Person savedPerson = personService.savePerson(person);
         return ResponseEntity
                .status(HttpStatus.CREATED)
-               .body(PersonMapper.toDto(savedPerson));
+               .body(PersonMapper.toDTO(savedPerson));
     }
 
     @GetMapping("/{id}")
     public PersonDTO findById(@PathVariable int id) {
-        return PersonMapper.toDto(personService.findById(id));
+        return PersonMapper.toDTO(personService.findById(id));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<PersonDTO> updatePerson(@PathVariable int id, @Valid @RequestBody Person person) {
         Person updatedPerson = personService.updatePerson(id, person);
-        return ResponseEntity.ok(PersonMapper.toDto(updatedPerson));
+        return ResponseEntity.ok(PersonMapper.toDTO(updatedPerson));
     }
 
     @DeleteMapping("/{id}")

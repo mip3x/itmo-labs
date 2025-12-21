@@ -8,7 +8,7 @@ import ru.mip3x.dto.PersonDTO;
 import ru.mip3x.model.Person;
 
 public class PersonMapper {
-    public static PersonDTO toDto(Person person) {
+    public static PersonDTO toDTO(Person person) {
         Objects.requireNonNull(person, "person is required");
         Objects.requireNonNull(person.getCoordinates(), "coordinates is required");
         Objects.requireNonNull(person.getLocation(), "location is required");
