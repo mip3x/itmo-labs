@@ -105,6 +105,21 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
+    public long countAll() {
+        return personRepository.count();
+    }
+
+    @Override
+    public long countByHairColor(Color hairColor) {
+        return personRepository.countByHairColor(hairColor);
+    }
+
+    @Override
+    public long countByEyeColor(Color eyeColor) {
+        return personRepository.countByEyeColor(eyeColor);
+    }
+
+    @Override
     public List<Person> findBirthdayBefore(ZonedDateTime date) {
         return personRepository.findByBirthdayBefore(date);
     }

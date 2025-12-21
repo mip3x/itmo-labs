@@ -18,6 +18,9 @@ public interface PersonService {
     void deletePerson(int id);
     long sumHeight();
     long countWeightLessThan(int weight);
+    long countAll();
+    long countByHairColor(Color hairColor);
+    long countByEyeColor(Color eyeColor);
     List<Person> findBirthdayBefore(ZonedDateTime date);
     double hairColorShare(Color hairColor);
     double eyeColorShare(Color eyeColor);

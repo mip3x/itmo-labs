@@ -509,7 +509,8 @@ export default function App() {
         }
         setOpLoading("weight", true);
         try {
-            const response = await fetch(`${API_BASE}/stats/weight/less-than?value=${limit}`);
+            const params = new URLSearchParams({ max_weight: String(limit) });
+            const response = await fetch(`${API_BASE}/count?${params.toString()}`);
             if (!response.ok) throw new Error((await response.text()) || response.statusText);
             const val = await response.json();
             setWeightLessResult(val);
@@ -552,10 +553,17 @@ export default function App() {
         setSpecialError(null);
         setOpLoading("hair", true);
         try {
-            const response = await fetch(`${API_BASE}/stats/hair/share?color=${hairColorShareColor}`);
+            const totalResp = await fetch(`${API_BASE}/count`);
+            if (!totalResp.ok) throw new Error((await totalResp.text()) || totalResp.statusText);
+            const total = await totalResp.json();
+
+            const params = new URLSearchParams({ hair_color: hairColorShareColor });
+            const response = await fetch(`${API_BASE}/count?${params.toString()}`);
             if (!response.ok) throw new Error((await response.text()) || response.statusText);
-            const val = await response.json();
-            setHairShare(val);
+            const count = await response.json();
+
+            const share = total === 0 ? 0 : (count * 100) / total;
+            setHairShare(share);
         } catch (e: any) {
             setSpecialError(e?.message ?? "Failed to calc hair share");
         } finally {
@@ -567,10 +575,17 @@ export default function App() {
         setSpecialError(null);
         setOpLoading("eye", true);
         try {
-            const response = await fetch(`${API_BASE}/stats/eye/share?color=${eyeColorShareColor}`);
+            const totalResp = await fetch(`${API_BASE}/count`);
+            if (!totalResp.ok) throw new Error((await totalResp.text()) || totalResp.statusText);
+            const total = await totalResp.json();
+
+            const params = new URLSearchParams({ eye_color: eyeColorShareColor });
+            const response = await fetch(`${API_BASE}/count?${params.toString()}`);
             if (!response.ok) throw new Error((await response.text()) || response.statusText);
-            const val = await response.json();
-            setEyeShare(val);
+            const count = await response.json();
+
+            const share = total === 0 ? 0 : (count * 100) / total;
+            setEyeShare(share);
         } catch (e: any) {
             setSpecialError(e?.message ?? "Failed to calc eye share");
         } finally {
