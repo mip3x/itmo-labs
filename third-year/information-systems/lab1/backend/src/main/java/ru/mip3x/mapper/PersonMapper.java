@@ -25,10 +25,10 @@ public class PersonMapper {
         personDTO.setHairColor(person.getHairColor().name());
 
         if (person.getLocation() != null) {
-            personDTO.setLocation(new LocationDTO());
-            personDTO.getLocation().setName(person.getLocation().getName());
-            personDTO.getLocation().setX(person.getLocation().getX());
-            personDTO.getLocation().setY(person.getLocation().getY());
+            personDTO.setLocation(new LocationDTO(
+                    person.getLocation().getX(),
+                    person.getLocation().getY(),
+                    person.getLocation().getName()));
         }
 
         personDTO.setHeight(person.getHeight());
