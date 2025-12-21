@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.mip3x.model.Color;
 import ru.mip3x.exception.ResourceNotFoundException;
+import ru.mip3x.model.Color;
 import ru.mip3x.model.Coordinates;
 import ru.mip3x.model.Location;
 import ru.mip3x.model.Person;
@@ -27,6 +27,11 @@ public class BasicPersonService implements PersonService {
     private final PersonRepository personRepository;
     private final CoordinatesRepository coordinatesRepository;
     private final LocationRepository locationRepository;
+
+    @Override
+    public List<Person> findAllPersons() {
+        return personRepository.findAll();
+    }
 
     @Override
     public Page<Person> findAllPersons(Pageable pageable) {
