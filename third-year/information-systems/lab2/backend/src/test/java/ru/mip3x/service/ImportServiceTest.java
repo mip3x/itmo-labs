@@ -44,6 +44,7 @@ class ImportServiceTest {
 
     @Test
     void importFromFile_whenValid_shouldPersistAllAndMarkSuccess() {
+        // Given
         String yaml = """
                 persons:
                   - name: Alice
@@ -83,8 +84,10 @@ class ImportServiceTest {
         when(operationService.start()).thenReturn(op);
         when(personService.savePerson(any())).thenAnswer(inv -> inv.getArgument(0));
 
+        // When
         ImportOperationDto response = importService.importFromFile(file);
 
+        // Then
         verify(personService, org.mockito.Mockito.times(2)).savePerson(any());
         verify(operationService).markSuccess(op.getId(), 2);
         org.assertj.core.api.Assertions.assertThat(response.getStatus().name()).isEqualTo("SUCCESS");
@@ -92,6 +95,7 @@ class ImportServiceTest {
 
     @Test
     void importFromFile_whenValidationFails_shouldNotStartOperation() {
+        // Given
         String yaml = """
                 persons:
                   - coordinates:
@@ -109,6 +113,7 @@ class ImportServiceTest {
                 """;
         MockMultipartFile file = new MockMultipartFile("file", "invalid.yaml", "application/x-yaml", yaml.getBytes(StandardCharsets.UTF_8));
 
+        // When // Then
         assertThatThrownBy(() -> importService.importFromFile(file))
                 .isInstanceOf(Exception.class);
 
@@ -117,6 +122,7 @@ class ImportServiceTest {
 
     @Test
     void importFromFile_whenPersonServiceFails_shouldMarkFailed() {
+        // Given
         String yaml = """
                 persons:
                   - name: Alice
@@ -142,6 +148,7 @@ class ImportServiceTest {
         when(operationService.start()).thenReturn(op);
         when(personService.savePerson(any())).thenThrow(new IllegalArgumentException("boom"));
 
+        // When // Then
         assertThatThrownBy(() -> importService.importFromFile(file))
                 .isInstanceOf(IllegalArgumentException.class);
 
