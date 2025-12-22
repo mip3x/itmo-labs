@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -31,7 +32,8 @@ public class ImportService {
     private final ImportOperationService operationService;
     private final Validator validator;
     private final TransactionTemplate transactionTemplate;
-    private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory()).findAndRegisterModules();
+    private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory())
+            .registerModule(new JavaTimeModule());
 
     public ImportService(PersonService personService,
                          ImportOperationService operationService,
