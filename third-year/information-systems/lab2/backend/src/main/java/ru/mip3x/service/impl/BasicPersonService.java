@@ -64,7 +64,7 @@ public class BasicPersonService implements PersonService {
         }
         person.setLocation(location);
 
-        ensureUniqueConstraints(person, null);
+        ensureUniqueConstraints(person);
 
         return personRepository.save(person);
     }
@@ -174,6 +174,10 @@ public class BasicPersonService implements PersonService {
                 throw new IllegalArgumentException("Coordinates are already used by another person");
             }
         }
+    }
+
+    private void ensureUniqueConstraints(Person person) {
+        ensureUniqueConstraints(person, null);
     }
 
     private void mergePerson(Person target, Person incoming) {
