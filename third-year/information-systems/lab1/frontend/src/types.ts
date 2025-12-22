@@ -55,16 +55,3 @@ export type PersonFormErrors = Partial<Record<keyof PersonFormValues, string>>;
 export type CmpOp = ">" | "<" | ">=" | "<=" | "=";
 
 export type SortKey = keyof PersonDto | "coordXY" | "locXY" | "";
-
-export type ImportOperationDto = {
-    id: number;
-    status: "IN_PROGRESS" | "SUCCESS" | "FAILED";
-    addedCount?: number | null;
-    errorMessage?: string | null;
-    createdAt: string;
-};
-
-export type PageResponse<T> = {
-    content: T[];
-    totalPages: number;
-};

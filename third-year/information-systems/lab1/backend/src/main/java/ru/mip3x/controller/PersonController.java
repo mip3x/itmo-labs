@@ -6,7 +6,6 @@ import java.time.format.DateTimeParseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,10 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
@@ -29,8 +26,6 @@ import ru.mip3x.dto.PersonResponse;
 import ru.mip3x.mapper.PersonMapper;
 import ru.mip3x.model.Person;
 import ru.mip3x.service.PersonService;
-import ru.mip3x.service.ImportService;
-import ru.mip3x.dto.imports.ImportOperationDto;
 
 @CrossOrigin
 @RestController
@@ -39,7 +34,6 @@ import ru.mip3x.dto.imports.ImportOperationDto;
 public class PersonController {
 
     private final PersonService personService;
-    private final ImportService importService;
 
     @GetMapping("/paged")
     public Page<PersonResponse> findAllPersonsPaged(Pageable pageable,
@@ -103,16 +97,5 @@ public class PersonController {
     @GetMapping("/stats/eye/share")
     public double eyeShare(@RequestParam("color") Color color) {
         return personService.eyeColorShare(color);
-    }
-
-    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ImportOperationDto> importPeople(@RequestPart("file") MultipartFile file) {
-        ImportOperationDto response = importService.importFromFile(file);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
-    }
-
-    @GetMapping("/import/history")
-    public Page<ImportOperationDto> importHistory(Pageable pageable) {
-        return importService.history(pageable);
     }
 }

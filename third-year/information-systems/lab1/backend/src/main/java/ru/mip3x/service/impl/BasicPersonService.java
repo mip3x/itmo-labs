@@ -64,8 +64,6 @@ public class BasicPersonService implements PersonService {
         }
         person.setLocation(location);
 
-        ensureUniqueConstraints(person, null);
-
         return personRepository.save(person);
     }
 
@@ -75,14 +73,11 @@ public class BasicPersonService implements PersonService {
     }
 
     @Override
-    @Transactional
     public Person updatePerson(int id, Person incomingPerson) {
         Person existingPerson = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person " + id + " not found"));
 
         mergePerson(existingPerson, incomingPerson);
-
-        ensureUniqueConstraints(existingPerson, id);
 
         return personRepository.save(existingPerson);
     }
@@ -153,27 +148,6 @@ public class BasicPersonService implements PersonService {
         if (total == 0) return 0.0;
         long matched = countFn.getAsLong();
         return (matched * 100.0) / total;
-    }
-
-    private void ensureUniqueConstraints(Person person, Integer selfId) {
-        if (person.getName() != null && person.getBirthday() != null) {
-            boolean duplicates = selfId == null
-                    ? personRepository.existsByNameAndBirthday(person.getName(), person.getBirthday())
-                    : personRepository.existsByNameAndBirthdayAndIdNot(person.getName(), person.getBirthday(), selfId);
-            if (duplicates) {
-                throw new IllegalArgumentException("Person with the same name and birthday already exists");
-            }
-        }
-
-        Coordinates coords = person.getCoordinates();
-        if (coords != null && coords.getY() != null) {
-            boolean coordsTaken = selfId == null
-                    ? personRepository.existsByCoordinatesXAndCoordinatesY(coords.getX(), coords.getY())
-                    : personRepository.existsByCoordinatesXAndCoordinatesYAndIdNot(coords.getX(), coords.getY(), selfId);
-            if (coordsTaken) {
-                throw new IllegalArgumentException("Coordinates are already used by another person");
-            }
-        }
     }
 
     private void mergePerson(Person target, Person incoming) {

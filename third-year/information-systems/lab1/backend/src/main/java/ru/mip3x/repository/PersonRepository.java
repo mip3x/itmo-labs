@@ -31,14 +31,6 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     @EntityGraph(attributePaths = {"coordinates", "location"})
     Page<Person> findByBirthdayBefore(ZonedDateTime date, Pageable pageable);
 
-    boolean existsByNameAndBirthday(String name, ZonedDateTime birthday);
-
-    boolean existsByNameAndBirthdayAndIdNot(String name, ZonedDateTime birthday, Integer id);
-
-    boolean existsByCoordinatesXAndCoordinatesY(double x, Float y);
-
-    boolean existsByCoordinatesXAndCoordinatesYAndIdNot(double x, Float y, Integer id);
-
     long countByHairColor(Color hairColor);
 
     long countByEyeColor(Color eyeColor);
