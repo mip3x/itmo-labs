@@ -6,11 +6,14 @@ type Props = {
     loading: boolean;
     error: string | null;
     onRefresh: () => void;
+    page: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
     onClose: () => void;
 };
 
 export default function ImportHistoryModal(props: Props) {
-    const { items, loading, error, onRefresh, onClose } = props;
+    const { items, loading, error, onRefresh, onClose, page, totalPages, onPageChange } = props;
 
     return (
         <div
@@ -41,11 +44,11 @@ export default function ImportHistoryModal(props: Props) {
                 }}
                 onClick={e => e.stopPropagation()}
             >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <h3 style={{ margin: 0 }}>Import history</h3>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <button type="button" onClick={onRefresh} disabled={loading}>
-                            {loading ? "Refreshing..." : "Refresh"}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <h3 style={{ margin: 0 }}>Import history</h3>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <button type="button" onClick={onRefresh} disabled={loading}>
+                                {loading ? "Refreshing..." : "Refresh"}
                         </button>
                         <button type="button" onClick={onClose}>×</button>
                     </div>
@@ -89,6 +92,38 @@ export default function ImportHistoryModal(props: Props) {
                             </tbody>
                         </table>
                     )}
+                </div>
+
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 10 }}>
+                    <button
+                        type="button"
+                        onClick={() => onPageChange(0)}
+                        disabled={page <= 0 || loading}
+                    >
+                        «
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onPageChange(Math.max(0, page - 1))}
+                        disabled={page <= 0 || loading}
+                    >
+                        ‹
+                    </button>
+                    <span>Page {page + 1} / {Math.max(1, totalPages)}</span>
+                    <button
+                        type="button"
+                        onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
+                        disabled={page >= totalPages - 1 || loading}
+                    >
+                        ›
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onPageChange(totalPages - 1)}
+                        disabled={page >= totalPages - 1 || loading}
+                    >
+                        »
+                    </button>
                 </div>
             </div>
         </div>
