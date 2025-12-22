@@ -62,6 +62,9 @@ export default function App() {
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyError, setHistoryError] = useState<string | null>(null);
     const [showImportHistory, setShowImportHistory] = useState(false);
+    const [historyPage, setHistoryPage] = useState(0);
+    const [historyTotalPages, setHistoryTotalPages] = useState(1);
+    const historyPageSize = 10;
     const [useServerPaging, setUseServerPaging] = useState(true);
     const [serverTotalPages, setServerTotalPages] = useState(1);
 
@@ -150,19 +153,21 @@ export default function App() {
         setPerson(data.content ?? []);
     }
 
-    async function fetchImportHistory() {
+    async function fetchImportHistory(page = historyPage) {
         setHistoryLoading(true);
         setHistoryError(null);
         try {
             const params = new URLSearchParams();
-            params.set("page", "0");
-            params.set("size", "20");
+            params.set("page", String(Math.max(0, page)));
+            params.set("size", String(historyPageSize));
             params.set("sort", "id,desc");
             params.set("_ts", Date.now().toString());
             const res = await fetch(`${API_BASE}/import/history?${params.toString()}`, { cache: "no-store" });
             if (!res.ok) throw new Error(res.statusText);
             const data: PageResponse<ImportOperationDto> = await res.json();
             setImportHistory(data.content ?? []);
+            setHistoryTotalPages(data.totalPages ?? 1);
+            setHistoryPage(Math.max(0, Math.min(page, (data.totalPages ?? 1) - 1)));
         } catch (err: any) {
             setHistoryError(err.message ?? "Failed to load import history");
         } finally {
@@ -186,7 +191,7 @@ export default function App() {
         const next = !showImportHistory;
         setShowImportHistory(next);
         if (next) {
-            fetchImportHistory();
+            fetchImportHistory(0);
         }
     }
 
@@ -773,10 +778,13 @@ export default function App() {
         {showImportHistory && (
             <ImportHistoryModal
                 onClose={() => setShowImportHistory(false)}
-                onRefresh={fetchImportHistory}
+                onRefresh={() => fetchImportHistory(historyPage)}
                 loading={historyLoading}
                 error={historyError}
                 items={importHistory}
+                page={historyPage}
+                totalPages={historyTotalPages}
+                onPageChange={(p) => fetchImportHistory(p)}
             />
         )}
 
