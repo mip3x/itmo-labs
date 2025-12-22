@@ -1,6 +1,7 @@
 package ru.mip3x.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -91,7 +92,7 @@ class ImportServiceTest {
         // Then
         verify(personService, org.mockito.Mockito.times(2)).savePerson(any());
         verify(operationService).markSuccess(op.getId(), 2);
-        org.assertj.core.api.Assertions.assertThat(response.getStatus().name()).isEqualTo("SUCCESS");
+        assertThat(response.getStatus().name()).isEqualTo("SUCCESS");
     }
 
     @Test
