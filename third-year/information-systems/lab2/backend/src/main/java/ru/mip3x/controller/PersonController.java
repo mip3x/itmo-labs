@@ -113,6 +113,6 @@ public class PersonController {
 
     @GetMapping("/import/history")
     public Page<ImportOperationDto> importHistory(Pageable pageable) {
-        return importService.history(pageable);
+        return importService.getOperations(pageable);
     }
 }

@@ -73,7 +73,7 @@ public class ImportService {
         }
     }
 
-    public Page<ImportOperationDto> history(Pageable pageable) {
+    public Page<ImportOperationDto> getOperations(Pageable pageable) {
         return operationService.findAll(pageable)
                 .map(this::toDto);
     }
