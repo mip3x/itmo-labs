@@ -4,6 +4,7 @@ import "./App.css";
 import Th from "./components/Th";
 import PersonModal from "./components/PersonModal";
 import SpecialOpsModal from "./components/SpecialOpsModal";
+import ImportHistoryModal from "./components/ImportHistoryModal";
 
 import {
     comparePersons,
@@ -21,7 +22,9 @@ import type {
     Location,
     PersonDto,
     PersonFormValues,
-    SortKey
+    SortKey,
+    ImportOperationDto,
+    PageResponse
 } from "./types";
 
 import { COLOR_VALUES } from "./types";
@@ -52,6 +55,13 @@ export default function App() {
     const [persons, setPerson] = useState<PersonDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [importLoading, setImportLoading] = useState(false);
+    const [importError, setImportError] = useState<string | null>(null);
+    const [importFile, setImportFile] = useState<File | null>(null);
+    const [importHistory, setImportHistory] = useState<ImportOperationDto[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyError, setHistoryError] = useState<string | null>(null);
+    const [showImportHistory, setShowImportHistory] = useState(false);
     const [useServerPaging, setUseServerPaging] = useState(true);
     const [serverTotalPages, setServerTotalPages] = useState(1);
 
@@ -138,6 +148,75 @@ export default function App() {
         if (!result.ok) throw new Error(result.statusText);
         const data = await result.json();
         setPerson(data.content ?? []);
+    }
+
+    async function fetchImportHistory() {
+        setHistoryLoading(true);
+        setHistoryError(null);
+        try {
+            const params = new URLSearchParams();
+            params.set("page", "0");
+            params.set("size", "20");
+            params.set("sort", "id,desc");
+            params.set("_ts", Date.now().toString());
+            const res = await fetch(`${API_BASE}/import/history?${params.toString()}`, { cache: "no-store" });
+            if (!res.ok) throw new Error(res.statusText);
+            const data: PageResponse<ImportOperationDto> = await res.json();
+            setImportHistory(data.content ?? []);
+        } catch (err: any) {
+            setHistoryError(err.message ?? "Failed to load import history");
+        } finally {
+            setHistoryLoading(false);
+        }
+    }
+
+    async function readError(res: Response): Promise<string> {
+        try {
+            const data = await res.json();
+            if (data?.message) return String(data.message);
+            if (data?.error) return String(data.error);
+            return JSON.stringify(data);
+        } catch {
+            const text = await res.text();
+            return text || res.statusText || "Request failed";
+        }
+    }
+
+    function toggleHistory() {
+        const next = !showImportHistory;
+        setShowImportHistory(next);
+        if (next) {
+            fetchImportHistory();
+        }
+    }
+
+    async function handleImportSubmit() {
+        if (!importFile) {
+            setImportError("Choose a YAML file to import");
+            return;
+        }
+        setImportLoading(true);
+        setImportError(null);
+        try {
+            const fd = new FormData();
+            fd.append("file", importFile);
+            const res = await fetch(`${API_BASE}/import`, {
+                method: "POST",
+                body: fd,
+            });
+            if (!res.ok) {
+                const msg = await readError(res);
+                throw new Error(msg);
+            }
+            await fetchImportHistory();
+            await load(); // refresh list after import
+            setImportFile(null);
+        } catch (err: any) {
+            setImportError("Import failed");
+            await fetchImportHistory();
+        } finally {
+            setImportLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -619,6 +698,24 @@ export default function App() {
             </button>
         </div>
 
+        <div style={{ marginTop: 10, padding: 10, border: "1px solid #ccc", borderRadius: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <strong>YAML Import:</strong>
+                <input
+                    type="file"
+                    accept=".yaml,.yml,application/x-yaml,text/yaml"
+                    onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+                />
+                <button onClick={handleImportSubmit} disabled={importLoading}>
+                    {importLoading ? "Importing..." : "Upload & Import"}
+                </button>
+                <button onClick={toggleHistory}>
+                    {showImportHistory ? "Hide history" : "Show history"}
+                </button>
+                {importError && <span style={{ color: "red" }}>{importError}</span>}
+            </div>
+        </div>
+
         {showHelp && (
             <div
                 style={{
@@ -670,6 +767,16 @@ export default function App() {
                 setEyeColor={setEyeColorShareColor}
                 eyeShare={eyeShare}
                 onEyeShare={runEyeShare}
+            />
+        )}
+
+        {showImportHistory && (
+            <ImportHistoryModal
+                onClose={() => setShowImportHistory(false)}
+                onRefresh={fetchImportHistory}
+                loading={historyLoading}
+                error={historyError}
+                items={importHistory}
             />
         )}
 
