@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +37,31 @@ class PersonServiceImplUnitTest {
 
     @InjectMocks
     BasicPersonService service;
+
+    private Person prototype;
+
+    @BeforeEach
+    void setUp() {
+        Coordinates coordinates = new Coordinates();
+        coordinates.setX(10.5);
+        coordinates.setY(200f);
+
+        Location location = new Location();
+        location.setX(15.2f);
+        location.setY(42);
+        location.setName("SPb");
+
+        prototype = new Person();
+        prototype.setName("Alex");
+        prototype.setCoordinates(coordinates);
+        prototype.setLocation(location);
+        prototype.setEyeColor(Color.BLUE);
+        prototype.setHairColor(Color.BLACK);
+        prototype.setBirthday(ZonedDateTime.parse("1973-11-29T21:33:09Z"));
+        prototype.setWeight(70);
+        prototype.setNationality(Country.RUSSIA);
+        prototype.setHeight(180L);
+    }
 
     @Test
     void deletePerson_whenNotExists_shouldThrow404() {
@@ -105,7 +131,7 @@ class PersonServiceImplUnitTest {
 
     @Test
     void savePerson_whenNameAndBirthdayNotUnique_shouldThrow() {
-        Person person = newValidPerson();
+        Person person = copyPrototype();
 
         when(coordinatesRepository.save(any())).thenAnswer(inv -> {
             person.getCoordinates().setId(10L);
@@ -125,7 +151,7 @@ class PersonServiceImplUnitTest {
 
     @Test
     void savePerson_whenCoordinatesNotUnique_shouldThrow() {
-        Person person = newValidPerson();
+        Person person = copyPrototype();
 
         when(coordinatesRepository.save(any())).thenAnswer(inv -> {
             person.getCoordinates().setId(10L);
@@ -146,26 +172,26 @@ class PersonServiceImplUnitTest {
                 .hasMessageContaining("Coordinates");
     }
 
-    private Person newValidPerson() {
+    private Person copyPrototype() {
         Coordinates coordinates = new Coordinates();
-        coordinates.setX(10.5);
-        coordinates.setY(200f);
+        coordinates.setX(prototype.getCoordinates().getX());
+        coordinates.setY(prototype.getCoordinates().getY());
 
         Location location = new Location();
-        location.setX(15.2f);
-        location.setY(42);
-        location.setName("SPb");
+        location.setX(prototype.getLocation().getX());
+        location.setY(prototype.getLocation().getY());
+        location.setName(prototype.getLocation().getName());
 
-        Person person = new Person();
-        person.setName("Alex");
-        person.setCoordinates(coordinates);
-        person.setLocation(location);
-        person.setEyeColor(Color.BLUE);
-        person.setHairColor(Color.BLACK);
-        person.setBirthday(ZonedDateTime.parse("1973-11-29T21:33:09Z"));
-        person.setWeight(70);
-        person.setNationality(Country.RUSSIA);
-        person.setHeight(180L);
-        return person;
+        Person copy = new Person();
+        copy.setName(prototype.getName());
+        copy.setCoordinates(coordinates);
+        copy.setLocation(location);
+        copy.setEyeColor(prototype.getEyeColor());
+        copy.setHairColor(prototype.getHairColor());
+        copy.setBirthday(prototype.getBirthday());
+        copy.setWeight(prototype.getWeight());
+        copy.setNationality(prototype.getNationality());
+        copy.setHeight(prototype.getHeight());
+        return copy;
     }
 }
