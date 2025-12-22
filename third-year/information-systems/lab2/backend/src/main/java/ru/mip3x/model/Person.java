@@ -20,6 +20,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,6 +31,7 @@ import lombok.Setter;
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer id;
 
     @NotBlank
@@ -46,6 +48,7 @@ public class Person {
     private Coordinates coordinates;
 
     @Column(nullable = false, updatable = false, name = "creation_date")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private java.time.LocalDateTime creationDate;
 
     @NotNull

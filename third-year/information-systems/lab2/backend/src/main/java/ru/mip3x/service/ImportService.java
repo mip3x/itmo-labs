@@ -58,7 +58,6 @@ public class ImportService {
             int created = transactionTemplate.execute(status -> {
                 List<Person> persons = request.getPersons();
                 for (Person person : persons) {
-                    sanitize(person);
                     personService.savePerson(person);
                 }
                 return persons.size();
@@ -91,17 +90,6 @@ public class ImportService {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-    }
-
-    private void sanitize(Person person) {
-        person.setId(null);
-        if (person.getCoordinates() != null) {
-            person.getCoordinates().setId(null);
-        }
-        if (person.getLocation() != null) {
-            person.getLocation().setId(null);
-        }
-        person.setCreationDate(null);
     }
 
     private ImportOperationDto toDto(ImportOperation op) {
