@@ -10,6 +10,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -81,7 +83,7 @@ public class ImportService {
         try {
             return yamlMapper.readValue(file.getInputStream(), ImportRequest.class);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to parse YAML file", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to parse YAML file", e);
         }
     }
 
