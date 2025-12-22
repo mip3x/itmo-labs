@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -25,6 +26,7 @@ import jakarta.validation.Validator;
 import ru.mip3x.dto.imports.ImportOperationDto;
 import ru.mip3x.model.ImportOperation;
 
+@ExtendWith(MockitoExtension.class)
 class ImportServiceTest {
 
     @Mock
@@ -33,13 +35,12 @@ class ImportServiceTest {
     @Mock
     private ImportOperationService operationService;
 
-    private ImportService importService;
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private ImportService underTest;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        importService = new ImportService(personService, operationService, validator, new NoOpTxManager());
+        underTest = new ImportService(personService, operationService, validator, new NoOpTxManager());
     }
 
     @Test
@@ -85,7 +86,7 @@ class ImportServiceTest {
         when(personService.savePerson(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // When
-        ImportOperationDto response = importService.importFromFile(file);
+        ImportOperationDto response = underTest.importFromFile(file);
 
         // Then
         verify(personService, org.mockito.Mockito.times(2)).savePerson(any());
@@ -114,7 +115,7 @@ class ImportServiceTest {
         MockMultipartFile file = new MockMultipartFile("file", "invalid.yaml", "application/x-yaml", yaml.getBytes(StandardCharsets.UTF_8));
 
         // When // Then
-        assertThatThrownBy(() -> importService.importFromFile(file))
+        assertThatThrownBy(() -> underTest.importFromFile(file))
                 .isInstanceOf(Exception.class);
 
         verify(operationService, never()).start();
@@ -149,7 +150,7 @@ class ImportServiceTest {
         when(personService.savePerson(any())).thenThrow(new IllegalArgumentException("boom"));
 
         // When // Then
-        assertThatThrownBy(() -> importService.importFromFile(file))
+        assertThatThrownBy(() -> underTest.importFromFile(file))
                 .isInstanceOf(IllegalArgumentException.class);
 
         verify(operationService).markFailed(eq(op.getId()), any());
