@@ -55,13 +55,11 @@ public class ImportService {
         try {
             int created = transactionTemplate.execute(status -> {
                 List<Person> persons = request.getPersons();
-                int counter = 0;
                 for (Person person : persons) {
                     sanitize(person);
                     personService.savePerson(person);
-                    counter++;
                 }
-                return counter;
+                return persons.size();
             });
 
             operationService.markSuccess(operation.getId(), created);
