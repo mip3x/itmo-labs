@@ -29,7 +29,7 @@ import type {
 
 import { COLOR_VALUES } from "./types";
 
-const API_BASE = "http://localhost:8080/api/v1/people";
+const API_BASE = `${import.meta.env.VITE_API_BASE}/v1/people`;
 const MAX_INT = 2147483647;
 
 const EMPTY_PERSON_FORM: PersonFormValues = {
