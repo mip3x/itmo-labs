@@ -1,11 +1,11 @@
-import type { PersonDto, SortKey } from "../types";
+import type { SortKey } from "../types";
 
 export default function Th(props: {
-        k: keyof PersonDto;
+        k: SortKey;
         title: string;
         sortKey: SortKey;
         sortDir: "asc" | "desc";
-        onSort: (k: keyof PersonDto) => void;
+        onSort: (k: SortKey) => void;
     }) {
         const { k, title, sortKey, sortDir, onSort } = props;
         const isActive = sortKey === k;

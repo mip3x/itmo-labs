@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +37,31 @@ class PersonServiceImplUnitTest {
 
     @InjectMocks
     BasicPersonService service;
+
+    private Person prototype;
+
+    @BeforeEach
+    void setUp() {
+        Coordinates coordinates = new Coordinates();
+        coordinates.setX(10.5);
+        coordinates.setY(200f);
+
+        Location location = new Location();
+        location.setX(15.2f);
+        location.setY(42);
+        location.setName("SPb");
+
+        prototype = new Person();
+        prototype.setName("Alex");
+        prototype.setCoordinates(coordinates);
+        prototype.setLocation(location);
+        prototype.setEyeColor(Color.BLUE);
+        prototype.setHairColor(Color.BLACK);
+        prototype.setBirthday(ZonedDateTime.parse("1973-11-29T21:33:09Z"));
+        prototype.setWeight(70);
+        prototype.setNationality(Country.RUSSIA);
+        prototype.setHeight(180L);
+    }
 
     @Test
     void deletePerson_whenNotExists_shouldThrow404() {
@@ -101,5 +127,71 @@ class PersonServiceImplUnitTest {
         assertThat(saved.getId()).isEqualTo(100);
         assertThat(saved.getCoordinates().getId()).isEqualTo(1L);
         assertThat(saved.getLocation().getId()).isEqualTo(2L);
+    }
+
+    @Test
+    void savePerson_whenNameAndBirthdayNotUnique_shouldThrow() {
+        Person person = copyPrototype();
+
+        when(coordinatesRepository.save(any())).thenAnswer(inv -> {
+            person.getCoordinates().setId(10L);
+            return person.getCoordinates();
+        });
+        when(locationRepository.save(any())).thenAnswer(inv -> {
+            person.getLocation().setId(20L);
+            return person.getLocation();
+        });
+        when(personRepository.existsByNameAndBirthday(person.getName(), person.getBirthday()))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> service.savePerson(person))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("name and birthday");
+    }
+
+    @Test
+    void savePerson_whenCoordinatesNotUnique_shouldThrow() {
+        Person person = copyPrototype();
+
+        when(coordinatesRepository.save(any())).thenAnswer(inv -> {
+            person.getCoordinates().setId(10L);
+            return person.getCoordinates();
+        });
+        when(locationRepository.save(any())).thenAnswer(inv -> {
+            person.getLocation().setId(20L);
+            return person.getLocation();
+        });
+        when(personRepository.existsByNameAndBirthday(person.getName(), person.getBirthday()))
+                .thenReturn(false);
+        when(personRepository.existsByCoordinatesXAndCoordinatesY(person.getCoordinates().getX(),
+                                                                  person.getCoordinates().getY()))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> service.savePerson(person))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Coordinates");
+    }
+
+    private Person copyPrototype() {
+        Coordinates coordinates = new Coordinates();
+        coordinates.setX(prototype.getCoordinates().getX());
+        coordinates.setY(prototype.getCoordinates().getY());
+
+        Location location = new Location();
+        location.setX(prototype.getLocation().getX());
+        location.setY(prototype.getLocation().getY());
+        location.setName(prototype.getLocation().getName());
+
+        Person copy = new Person();
+        copy.setName(prototype.getName());
+        copy.setCoordinates(coordinates);
+        copy.setLocation(location);
+        copy.setEyeColor(prototype.getEyeColor());
+        copy.setHairColor(prototype.getHairColor());
+        copy.setBirthday(prototype.getBirthday());
+        copy.setWeight(prototype.getWeight());
+        copy.setNationality(prototype.getNationality());
+        copy.setHeight(prototype.getHeight());
+        return copy;
     }
 }

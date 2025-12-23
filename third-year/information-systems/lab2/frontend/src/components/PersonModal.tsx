@@ -12,7 +12,6 @@ import {
 } from "../types";
 
 const MAX_INT = 2147483647;
-const MIN_INT = -2147483648;
 const MAX_LONG = Number.MAX_SAFE_INTEGER;
 const MIN_LONG = -Number.MAX_SAFE_INTEGER;
 
