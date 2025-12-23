@@ -1,9 +1,9 @@
-name: Tests
+name: IS-Deploy
 
 on:
   push:
     branches:
-      - "feature/information-system-lab-*"
+      - "feature/information-system-lab-2-diff"
   pull_request:
 
 jobs:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: third-year/information-systems/lab1/backend
+        working-directory: third-year/information-systems/lab2/backend
 
     steps:
       - name: Checkout
@@ -31,10 +31,9 @@ jobs:
 
       - name: Mark as success
         if: ${{ success() }}
-        run: |
-          echo "[Tests passed]" >> $GITHUB_STEP_SUMMARY
+        run: echo "[Tests passed]" >> $GITHUB_STEP_SUMMARY
 
       - name: Mark as failed
         if: ${{ failure() }}
-        run: |
-          echo "[Tests failed]" >> $GITHUB_STEP_SUMMARY
+        run: echo "[Tests failed]" >> $GITHUB_STEP_SUMMARY
+
