@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/islab1_db}
+    username: ${DB_USERNAME:islab1_user}
+    password: ${DB_PASSWORD:pass}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    properties:
+      jakarta:
+        persistence:
+          schema-generation:
+            database:
+              action: update
+    open-in-view: false
+
+logging:
+  level:
+    ru.mip3x: DEBUG
