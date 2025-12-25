@@ -23,6 +23,12 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// https://mvnrepository.com/artifact/com.alibaba/druid
+	implementation "com.alibaba:druid:1.2.27"
+
+	// https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
+	implementation("com.alibaba:druid-spring-boot-starter:1.2.27")
+
 	// https://mvnrepository.com/artifact/org.projectlombok/lombok
 	implementation 'org.projectlombok:lombok:1.18.42'
 	annotationProcessor 'org.projectlombok:lombok:1.18.42'
