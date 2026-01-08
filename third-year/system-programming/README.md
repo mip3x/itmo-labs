@@ -5,3 +5,6 @@
 ### Задания:
 
 - [Курс 'Основы программирования для Linux'](./linux-programming-basics)
+- [Курс 'Основы операционных системы'](./os-basics)
+- [Курс 'Основы Linux'](./linux-fundamentals)
+
