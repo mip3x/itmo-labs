@@ -4,10 +4,13 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.LongSupplier;
 
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +32,26 @@ public class BasicPersonService implements PersonService {
     private final PersonRepository personRepository;
     private final CoordinatesRepository coordinatesRepository;
     private final LocationRepository locationRepository;
+    private final EntityManager entityManager;
 
     @Override
     @LogL2CacheStats
+    @Transactional
     public Page<Person> findAllPersons(Pageable pageable) {
-        return personRepository.findAll(pageable);
+        Page<Integer> idPage = personRepository.findPersonIds(pageable);
+        List<Person> persons = idPage.getContent().stream()
+                .map(id -> entityManager.find(Person.class, id))
+                .filter(person -> person != null)
+                .toList();
+
+        // initialize lazy relations inside the transaction
+        // to avoid LIE (LazyInitializationException) when mapping
+        persons.forEach(person -> {
+            Hibernate.initialize(person.getCoordinates());
+            Hibernate.initialize(person.getLocation());
+        });
+
+        return new PageImpl<>(persons, pageable, idPage.getTotalElements());
     }
 
     @Override
@@ -79,6 +97,7 @@ public class BasicPersonService implements PersonService {
 
     @Override
     @Transactional
+    @LogL2CacheStats
     public Person updatePerson(int id, Person incomingPerson) {
         Person existingPerson = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person " + id + " not found"));
