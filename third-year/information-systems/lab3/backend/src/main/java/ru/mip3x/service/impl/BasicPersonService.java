@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.mip3x.cache.LogL2CacheStats;
 import ru.mip3x.exception.ResourceNotFoundException;
 import ru.mip3x.model.Color;
 import ru.mip3x.model.Coordinates;
@@ -30,6 +31,7 @@ public class BasicPersonService implements PersonService {
     private final LocationRepository locationRepository;
 
     @Override
+    @LogL2CacheStats
     public Page<Person> findAllPersons(Pageable pageable) {
         return personRepository.findAll(pageable);
     }
@@ -70,6 +72,7 @@ public class BasicPersonService implements PersonService {
     }
 
     @Override
+    @LogL2CacheStats
     public Person findById(int id) {
         return personRepository.findPersonById(id);
     }
@@ -88,6 +91,7 @@ public class BasicPersonService implements PersonService {
     }
 
     @Override
+    @LogL2CacheStats
     public void deletePerson(int id) {
         if (!personRepository.existsById(id))
             throw new ResourceNotFoundException("Person " + id + " not found");
