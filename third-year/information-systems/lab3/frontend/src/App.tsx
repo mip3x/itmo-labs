@@ -787,6 +787,7 @@ export default function App() {
                 page={historyPage}
                 totalPages={historyTotalPages}
                 onPageChange={(p) => fetchImportHistory(p)}
+                getDownloadUrl={(id) => `${API_BASE}/import/history/${id}/file`}
             />
         )}
 

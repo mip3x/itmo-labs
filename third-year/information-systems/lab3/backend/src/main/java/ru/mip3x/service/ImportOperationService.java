@@ -2,11 +2,11 @@ package ru.mip3x.service;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import lombok.RequiredArgsConstructor;
 import ru.mip3x.model.ImportOperation;
@@ -41,6 +41,26 @@ public class ImportOperationService {
             op.setAddedCount(null);
             op.setErrorMessage(errorMessage);
         });
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void attachFile(Long id,
+                           String bucket,
+                           String objectKey,
+                           String originalName,
+                           String contentType,
+                           long size) {
+        updateOperation(id, op -> {
+            op.setFileBucket(bucket);
+            op.setFileObjectKey(objectKey);
+            op.setFileOriginalName(originalName);
+            op.setFileContentType(contentType);
+            op.setFileSize(size);
+        });
+    }
+
+    public Optional<ImportOperation> findById(Long id) {
+        return repository.findById(id);
     }
 
     public Page<ImportOperation> findAll(Pageable pageable) {

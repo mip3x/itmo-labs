@@ -3,34 +3,39 @@ package ru.mip3x.controller;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import ru.mip3x.model.Color;
 import ru.mip3x.dto.PersonResponse;
-import ru.mip3x.mapper.PersonMapper;
-import ru.mip3x.model.Person;
-import ru.mip3x.service.PersonService;
-import ru.mip3x.service.ImportService;
 import ru.mip3x.dto.imports.ImportOperationDto;
+import ru.mip3x.mapper.PersonMapper;
+import ru.mip3x.model.Color;
+import ru.mip3x.model.ImportOperation;
+import ru.mip3x.model.Person;
+import ru.mip3x.service.ImportService;
+import ru.mip3x.service.PersonService;
+import ru.mip3x.storage.FileStorageService;
 
 @CrossOrigin
 @RestController
@@ -40,6 +45,7 @@ public class PersonController {
 
     private final PersonService personService;
     private final ImportService importService;
+    private final FileStorageService storage;
 
     @GetMapping("/paged")
     public Page<PersonResponse> findAllPersonsPaged(Pageable pageable,
@@ -114,5 +120,27 @@ public class PersonController {
     @GetMapping("/import/history")
     public Page<ImportOperationDto> importHistory(Pageable pageable) {
         return importService.getOperations(pageable);
+    }
+
+    @GetMapping("/import/history/{id}/file")
+    public ResponseEntity<Resource> downloadImportFile(@PathVariable("id") Long id) {
+        ImportOperation op = importService.getOperationOrThrow(id);
+
+        if (op.getFileObjectKey() == null || op.getFileBucket() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No file attached for this import operation");
+        }
+
+        var stream = storage.get(op.getFileObjectKey());
+
+        InputStreamResource resource = new InputStreamResource(stream);
+
+        String filename = (op.getFileOriginalName() != null && !op.getFileOriginalName().isBlank())
+                ? op.getFileOriginalName()
+                : ("import_" + id + ".yaml");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 }

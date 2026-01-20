@@ -1,16 +1,19 @@
 package ru.mip3x.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,9 +26,10 @@ import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import ru.mip3x.dto.imports.ImportOperationDto;
 import ru.mip3x.dto.imports.ImportRequest;
-import ru.mip3x.model.Person;
 import ru.mip3x.model.ImportOperation;
 import ru.mip3x.model.ImportStatus;
+import ru.mip3x.model.Person;
+import ru.mip3x.storage.FileStorageService;
 
 @Slf4j
 @Service
@@ -36,15 +40,21 @@ public class ImportService {
     private final TransactionTemplate transactionTemplate;
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory())
             .registerModule(new JavaTimeModule());
+    private final FileStorageService storage;
+    private final String minioBucket;
 
     public ImportService(PersonService personService,
                          ImportOperationService operationService,
                          Validator validator,
-                         PlatformTransactionManager transactionManager) {
+                         PlatformTransactionManager transactionManager,
+                         FileStorageService storage,
+                         @Value("${minio.bucket}") String minioBucket) {
         this.personService = personService;
         this.operationService = operationService;
         this.validator = validator;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.storage = storage;
+        this.minioBucket = minioBucket;
     }
 
     public ImportOperationDto importFromFile(MultipartFile file) {
@@ -52,10 +62,47 @@ public class ImportService {
             throw new IllegalArgumentException("File for import must be provided");
         }
 
-        ImportRequest request = parseYaml(file);
+        ImportOperation operation = operationService.start();
+
+        byte[] bytes;
+        try {
+            bytes = file.getBytes();
+        } catch (IOException e) {
+            operationService.markFailed(operation.getId(), "Unable to read uploaded file");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to read uploaded file", e);
+        }
+
+        String objectKey = buildObjectKey(operation.getId(), file.getOriginalFilename());
+
+        try {
+            storage.put(objectKey,
+                    new ByteArrayInputStream(bytes),
+                    bytes.length,
+                    file.getContentType());
+
+            operationService.attachFile(
+                    operation.getId(),
+                    minioBucket,
+                    objectKey,
+                    file.getOriginalFilename(),
+                    file.getContentType(),
+                    bytes.length
+            );
+        } catch (RuntimeException e) {
+            operationService.markFailed(operation.getId(), "MinIO upload failed: " + e.getMessage());
+            throw e;
+        }
+
+        ImportRequest request;
+        try {
+            request = yamlMapper.readValue(bytes, ImportRequest.class);
+        } catch (IOException e) {
+            operationService.markFailed(operation.getId(), "Unable to parse YAML file");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to parse YAML file", e);
+        }
+
         validate(request);
 
-        ImportOperation operation = operationService.start();
         try {
             int created = transactionTemplate.execute(status -> {
                 List<Person> persons = request.getPersons();
@@ -73,6 +120,15 @@ public class ImportService {
             throw e;
         }
     }
+
+    private String buildObjectKey(Long operationId, String originalFilename) {
+        String safe = (originalFilename == null || originalFilename.isBlank())
+                ? "import.yaml"
+                : originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_");
+
+        return "imports/" + operationId + "/" + UUID.randomUUID() + "_" + safe;
+    }
+
 
     public Page<ImportOperationDto> getOperations(Pageable pageable) {
         return operationService.findAll(pageable)
@@ -107,5 +163,10 @@ public class ImportService {
                 .errorMessage(errorMessage)
                 .createdAt(createdAt)
                 .build();
+    }
+
+    public ImportOperation getOperationOrThrow(Long id) {
+        return operationService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Import operation not found"));
     }
 }

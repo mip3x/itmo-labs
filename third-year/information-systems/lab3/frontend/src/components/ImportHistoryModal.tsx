@@ -10,10 +10,11 @@ type Props = {
     totalPages: number;
     onPageChange: (page: number) => void;
     onClose: () => void;
+    getDownloadUrl: (id: number) => string;
 };
 
 export default function ImportHistoryModal(props: Props) {
-    const { items, loading, error, onRefresh, onClose, page, totalPages, onPageChange } = props;
+    const { items, loading, error, onRefresh, onClose, page, totalPages, onPageChange, getDownloadUrl } = props;
 
     return (
         <div
@@ -72,6 +73,7 @@ export default function ImportHistoryModal(props: Props) {
                                     <th>Added</th>
                                     <th>Error</th>
                                     <th>Created</th>
+                                    <th>File</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -82,11 +84,16 @@ export default function ImportHistoryModal(props: Props) {
                                         <td>{op.status === "SUCCESS" ? op.addedCount ?? 0 : "—"}</td>
                                     <td>{op.errorMessage ?? "—"}</td>
                                         <td>{formatDateISO(op.createdAt)}</td>
+                                        <td>
+                                        <a href={getDownloadUrl(op.id)} target="_blank" rel="noreferrer">
+                                            Download
+                                        </a>
+                                        </td>
                                     </tr>
                                 ))}
                                 {items.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} style={{ textAlign: "center" }}>No imports yet</td>
+                                        <td colSpan={6} style={{ textAlign: "center" }}>No imports yet</td>
                                     </tr>
                                 )}
                             </tbody>
