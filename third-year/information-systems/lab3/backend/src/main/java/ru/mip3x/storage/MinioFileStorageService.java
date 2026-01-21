@@ -5,6 +5,8 @@ import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import io.minio.CopyObjectArgs;
+import io.minio.CopySource;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -68,4 +70,25 @@ public class MinioFileStorageService implements FileStorageService {
         throw new RuntimeException("Failed to delete from MinIO: " + objectKey, e);
         }
     }
+
+    @Override
+    public void copy(String sourceObjectKey, String destObjectKey) {
+        try {
+            minio.copyObject(
+                CopyObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(destObjectKey)
+                    .source(
+                        CopySource.builder()
+                            .bucket(bucket)
+                            .object(sourceObjectKey)
+                            .build()
+                    )
+                    .build()
+            );
+        } catch (Exception exception) {
+            throw new RuntimeException("MinIO copy failed: " + sourceObjectKey + " -> " + destObjectKey, exception);
+        }
+    }
+
 }

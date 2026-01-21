@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -72,27 +74,6 @@ public class ImportService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to read uploaded file", e);
         }
 
-        String objectKey = buildObjectKey(operation.getId(), file.getOriginalFilename());
-
-        try {
-            storage.put(objectKey,
-                    new ByteArrayInputStream(bytes),
-                    bytes.length,
-                    file.getContentType());
-
-            operationService.attachFile(
-                    operation.getId(),
-                    minioBucket,
-                    objectKey,
-                    file.getOriginalFilename(),
-                    file.getContentType(),
-                    bytes.length
-            );
-        } catch (RuntimeException e) {
-            operationService.markFailed(operation.getId(), "MinIO upload failed: " + e.getMessage());
-            throw e;
-        }
-
         ImportRequest request;
         try {
             request = yamlMapper.readValue(bytes, ImportRequest.class);
@@ -100,35 +81,87 @@ public class ImportService {
             operationService.markFailed(operation.getId(), "Unable to parse YAML file");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to parse YAML file", e);
         }
-
         validate(request);
 
+        String tmpKey = buildTmpObjectKey(operation.getId());
+        String finalKey = buildFinalObjectKey(operation.getId(), file.getOriginalFilename());
+
         try {
-            int created = transactionTemplate.execute(status -> {
+            log.info("2PC PREPARE: uploading tmp object {}", tmpKey);
+            storage.put(tmpKey, new ByteArrayInputStream(bytes), bytes.length, file.getContentType());
+        } catch (RuntimeException e) {
+            operationService.markFailed(operation.getId(), "MinIO upload failed: " + e.getMessage());
+            throw e;
+        }
+
+        try {
+            Integer created = transactionTemplate.execute(status -> {
+                // inside DB transaction
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        log.info("2PC COMMIT: finalize {} -> {}", tmpKey, finalKey);
+
+                        // finalize file: tmp -> final, remove tmp, write final key to DB log
+                        storage.copy(tmpKey, finalKey);
+                        storage.delete(tmpKey);
+
+                        // write FINAL key into import log (REQUIRES_NEW)
+                        operationService.attachFile(
+                                operation.getId(),
+                                minioBucket,
+                                finalKey,
+                                file.getOriginalFilename(),
+                                file.getContentType(),
+                                bytes.length
+                        );
+
+                        log.info("2PC COMMIT: finalize done; tmp deleted; final stored {}", finalKey);
+                    }
+
+                    @Override
+                    public void afterCompletion(int completionStatus) {
+                        if (completionStatus != TransactionSynchronization.STATUS_COMMITTED) {
+                            // DB rolled back -> cleanup tmp
+                            log.info("2PC ROLLBACK: deleting tmp object {} (DB rolled back)", tmpKey);
+                            try {
+                                storage.delete(tmpKey);
+                            } catch (RuntimeException ignored) {
+                            }
+                            log.info("2PC ROLLBACK: tmp deleted {}", tmpKey);
+                        }
+                    }
+                });
+
+                // actual DB import
                 List<Person> persons = request.getPersons();
-                for (Person person : persons) {
-                    personService.savePerson(person);
+                for (Person p : persons) {
+                    personService.savePerson(p);
                 }
                 return persons.size();
             });
 
-            operationService.markSuccess(operation.getId(), created);
+            operationService.markSuccess(operation.getId(), created != null ? created : 0);
             return toDto(operation.getId(), created, null, ImportStatus.SUCCESS, operation.getCreatedAt());
+
         } catch (RuntimeException e) {
-            log.warn("Import operation {} failed", operation.getId(), e);
+            // If exception happened, transaction will roll back 
+            // => afterCompletion deletes tmp
             operationService.markFailed(operation.getId(), e.getMessage());
             throw e;
         }
     }
 
-    private String buildObjectKey(Long operationId, String originalFilename) {
+    private String buildTmpObjectKey(Long operationId) {
+        return "tmp/imports/" + operationId + "/" + UUID.randomUUID() + ".yaml";
+    }
+
+    private String buildFinalObjectKey(Long operationId, String originalFilename) {
         String safe = (originalFilename == null || originalFilename.isBlank())
                 ? "import.yaml"
                 : originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_");
-
         return "imports/" + operationId + "/" + UUID.randomUUID() + "_" + safe;
     }
-
 
     public Page<ImportOperationDto> getOperations(Pageable pageable) {
         return operationService.findAll(pageable)
