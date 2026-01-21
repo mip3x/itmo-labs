@@ -1,0 +1,201 @@
+persons:
+  - name: "JM_0001"
+    eyeColor: "BLUE"
+    hairColor: "BLACK"
+    nationality: "RUSSIA"
+    weight: 70
+    height: 175
+    birthday: "2000-01-01T00:00:00Z"
+    coordinates: { x: 10, y: 20 }
+    location: { x: 30, y: 40, name: "Dubai" }
+
+  - name: "JM_0002"
+    eyeColor: "YELLOW"
+    hairColor: "ORANGE"
+    nationality: "SPAIN"
+    weight: 68
+    height: 172
+    birthday: "1999-02-02T00:00:00Z"
+    coordinates: { x: 11, y: 21 }
+    location: { x: 31, y: 41, name: "Madrid" }
+
+  - name: "JM_0003"
+    eyeColor: "WHITE"
+    hairColor: "BLUE"
+    nationality: "THAILAND"
+    weight: 75
+    height: 180
+    birthday: "1998-03-03T00:00:00Z"
+    coordinates: { x: 12, y: 22 }
+    location: { x: 32, y: 42, name: "Bangkok" }
+
+  - name: "JM_0004"
+    eyeColor: "BLACK"
+    hairColor: "YELLOW"
+    nationality: "RUSSIA"
+    weight: 82
+    height: 186
+    birthday: "1997-04-04T00:00:00Z"
+    coordinates: { x: 13, y: 23 }
+    location: { x: 33, y: 43, name: "SPb" }
+
+  - name: "JM_0005"
+    eyeColor: "ORANGE"
+    hairColor: "WHITE"
+    nationality: "SPAIN"
+    weight: 60
+    height: 165
+    birthday: "2001-05-05T00:00:00Z"
+    coordinates: { x: 14, y: 24 }
+    location: { x: 34, y: 44, name: "Valencia" }
+
+  - name: "JM_0006"
+    eyeColor: "BLUE"
+    hairColor: "BLACK"
+    nationality: "THAILAND"
+    weight: 90
+    height: 190
+    birthday: "1996-06-06T00:00:00Z"
+    coordinates: { x: 15, y: 25 }
+    location: { x: 35, y: 45, name: "Phuket" }
+
+  - name: "JM_0007"
+    eyeColor: "YELLOW"
+    hairColor: "ORANGE"
+    nationality: "RUSSIA"
+    weight: 77
+    height: 178
+    birthday: "1995-07-07T00:00:00Z"
+    coordinates: { x: 16, y: 26 }
+    location: { x: 36, y: 46, name: "Kazan" }
+
+  - name: "JM_0008"
+    eyeColor: "WHITE"
+    hairColor: "BLUE"
+    nationality: "SPAIN"
+    weight: 66
+    height: 170
+    birthday: "2002-08-08T00:00:00Z"
+    coordinates: { x: 17, y: 27 }
+    location: { x: 37, y: 47, name: "Sevilla" }
+
+  - name: "JM_0009"
+    eyeColor: "BLACK"
+    hairColor: "YELLOW"
+    nationality: "THAILAND"
+    weight: 72
+    height: 176
+    birthday: "2003-09-09T00:00:00Z"
+    coordinates: { x: 18, y: 28 }
+    location: { x: 38, y: 48, name: "Chiang Mai" }
+
+  - name: "JM_0010"
+    eyeColor: "ORANGE"
+    hairColor: "WHITE"
+    nationality: "RUSSIA"
+    weight: 80
+    height: 182
+    birthday: "1994-10-10T00:00:00Z"
+    coordinates: { x: 19, y: 29 }
+    location: { x: 39, y: 49, name: "Sochi" }
+
+  - name: "JM_0011"
+    eyeColor: "BLUE"
+    hairColor: "BLACK"
+    nationality: "SPAIN"
+    weight: 74
+    height: 179
+    birthday: "1993-11-11T00:00:00Z"
+    coordinates: { x: 20, y: 30 }
+    location: { x: 40, y: 50, name: "Barcelona" }
+
+  - name: "JM_0012"
+    eyeColor: "YELLOW"
+    hairColor: "ORANGE"
+    nationality: "THAILAND"
+    weight: 62
+    height: 168
+    birthday: "2004-12-12T00:00:00Z"
+    coordinates: { x: 21, y: 31 }
+    location: { x: 41, y: 51, name: "Pattaya" }
+
+  - name: "JM_0013"
+    eyeColor: "WHITE"
+    hairColor: "BLUE"
+    nationality: "RUSSIA"
+    weight: 88
+    height: 188
+    birthday: "1992-01-13T00:00:00Z"
+    coordinates: { x: 22, y: 32 }
+    location: { x: 42, y: 52, name: "Moscow" }
+
+  - name: "JM_0014"
+    eyeColor: "BLACK"
+    hairColor: "YELLOW"
+    nationality: "SPAIN"
+    weight: 69
+    height: 173
+    birthday: "1991-02-14T00:00:00Z"
+    coordinates: { x: 23, y: 33 }
+    location: { x: 43, y: 53, name: "Bilbao" }
+
+  - name: "JM_0015"
+    eyeColor: "ORANGE"
+    hairColor: "WHITE"
+    nationality: "THAILAND"
+    weight: 95
+    height: 192
+    birthday: "1990-03-15T00:00:00Z"
+    coordinates: { x: 24, y: 34 }
+    location: { x: 44, y: 54, name: "Krabi" }
+
+  - name: "JM_0016"
+    eyeColor: "BLUE"
+    hairColor: "BLACK"
+    nationality: "RUSSIA"
+    weight: 71
+    height: 174
+    birthday: "2005-04-16T00:00:00Z"
+    coordinates: { x: 25, y: 35 }
+    location: { x: 45, y: 55, name: "Perm" }
+
+  - name: "JM_0017"
+    eyeColor: "YELLOW"
+    hairColor: "ORANGE"
+    nationality: "SPAIN"
+    weight: 64
+    height: 169
+    birthday: "2006-05-17T00:00:00Z"
+    coordinates: { x: 26, y: 36 }
+    location: { x: 46, y: 56, name: "Granada" }
+
+  - name: "JM_0018"
+    eyeColor: "WHITE"
+    hairColor: "BLUE"
+    nationality: "THAILAND"
+    weight: 78
+    height: 181
+    birthday: "1989-06-18T00:00:00Z"
+    coordinates: { x: 27, y: 37 }
+    location: { x: 47, y: 57, name: "Ayutthaya" }
+
+  - name: "JM_0019"
+    eyeColor: "BLACK"
+    hairColor: "YELLOW"
+    nationality: "RUSSIA"
+    weight: 83
+    height: 185
+    birthday: "1988-07-19T00:00:00Z"
+    coordinates: { x: 28, y: 38 }
+    location: { x: 48, y: 58, name: "Ufa" }
+
+  - name: "JM_0020"
+    eyeColor: "ORANGE"
+    hairColor: "WHITE"
+    nationality: "SPAIN"
+    weight: 58
+    height: 162
+    birthday: "2007-08-20T00:00:00Z"
+    coordinates: { x: 29, y: 39 }
+    location: { x: 49, y: 59, name: "Malaga" }
+

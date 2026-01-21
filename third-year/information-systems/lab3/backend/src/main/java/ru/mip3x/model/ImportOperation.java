@@ -27,6 +27,21 @@ public class ImportOperation {
     @Column(nullable = false)
     private ImportStatus status;
 
+    @Column(name = "file_bucket")
+    private String fileBucket;
+
+    @Column(name = "file_object_key", length = 512)
+    private String fileObjectKey;
+
+    @Column(name = "file_original_name")
+    private String fileOriginalName;
+
+    @Column(name = "file_content_type")
+    private String fileContentType;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
     private Integer addedCount;
 
     private String errorMessage;

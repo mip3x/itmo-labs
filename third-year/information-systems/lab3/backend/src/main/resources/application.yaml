@@ -1,9 +1,29 @@
 spring:
   datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
     url: ${DB_URL:jdbc:postgresql://localhost:5432/islab1_db}
     username: ${DB_USERNAME:islab1_user}
     password: ${DB_PASSWORD:pass}
     driver-class-name: org.postgresql.Driver
+
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 30
+      max-wait: 60000
+
+      validation-query: SELECT 1
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      max-evictable-idle-time-millis: 900000
+
+      remove-abandoned: true
+      remove-abandoned-timeout: 180
+      log-abandoned: true
   jpa:
     show-sql: true
     properties:
@@ -12,8 +32,31 @@ spring:
           schema-generation:
             database:
               action: update
+      hibernate:
+        generate_statistics: true
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+        javax:
+          cache:
+            provider: org.ehcache.jsr107.EhcacheCachingProvider
+            uri: classpath:ehcache.xml
     open-in-view: false
+
+app:
+  cache:
+    stats-logging-enabled: true
+
+minio:
+  url: http://minio:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket: imports
 
 logging:
   level:
-    ru.mip3x: DEBUG
+    ru.mip3x: INFO
+    org.hibernate.stat: DEBUG
+    org.hibernate.cache: DEBUG

@@ -29,7 +29,9 @@ import type {
 
 import { COLOR_VALUES } from "./types";
 
-const API_BASE = `${import.meta.env.VITE_API_BASE}/v1/people`;
+const apiBaseEnv = import.meta.env.VITE_API_BASE?.trim();
+const apiBase = apiBaseEnv && apiBaseEnv !== "" ? apiBaseEnv : "/api";
+const API_BASE = `${apiBase.replace(/\/$/, "")}/v1/people`;
 const MAX_INT = 2147483647;
 
 const EMPTY_PERSON_FORM: PersonFormValues = {
@@ -785,6 +787,7 @@ export default function App() {
                 page={historyPage}
                 totalPages={historyTotalPages}
                 onPageChange={(p) => fetchImportHistory(p)}
+                getDownloadUrl={(id) => `${API_BASE}/import/history/${id}/file`}
             />
         )}
 

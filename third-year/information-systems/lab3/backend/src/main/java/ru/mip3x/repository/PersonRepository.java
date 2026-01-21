@@ -17,6 +17,9 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     @EntityGraph(attributePaths = {"coordinates", "location"})
     Page<Person> findAll(Pageable pageable);
 
+    @Query("select p.id from Person p")
+    Page<Integer> findPersonIds(Pageable pageable);
+
     @EntityGraph(attributePaths = {"coordinates", "location"})
     Person findPersonById(int id);
 

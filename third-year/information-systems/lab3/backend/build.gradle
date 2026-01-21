@@ -23,6 +23,27 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// https://mvnrepository.com/artifact/io.minio/minio/
+	implementation "io.minio:minio:8.6.0"
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+	implementation "org.springframework.boot:spring-boot-starter-aop"
+
+	// https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-jcache
+	implementation "org.hibernate.orm:hibernate-jcache"
+	
+	// https://mvnrepository.com/artifact/org.ehcache/ehcache
+    implementation "org.ehcache:ehcache:3.10.8"
+
+	// https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
+	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.7'
+
+	// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
+	// https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
+	implementation("com.alibaba:druid-spring-boot-starter:1.2.27")
+
 	// https://mvnrepository.com/artifact/org.projectlombok/lombok
 	implementation 'org.projectlombok:lombok:1.18.42'
 	annotationProcessor 'org.projectlombok:lombok:1.18.42'
