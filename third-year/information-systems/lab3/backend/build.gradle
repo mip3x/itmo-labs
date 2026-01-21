@@ -1,0 +1,64 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.6'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'ru.mip3x'
+version = '0.0.1-SNAPSHOT'
+description = 'IS lab #1'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// https://mvnrepository.com/artifact/io.minio/minio/
+	implementation "io.minio:minio:8.6.0"
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+	implementation "org.springframework.boot:spring-boot-starter-aop"
+
+	// https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-jcache
+	implementation "org.hibernate.orm:hibernate-jcache"
+	
+	// https://mvnrepository.com/artifact/org.ehcache/ehcache
+    implementation "org.ehcache:ehcache:3.10.8"
+
+	// https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
+	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.7'
+
+	// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
+	// https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter
+	implementation("com.alibaba:druid-spring-boot-starter:1.2.27")
+
+	// https://mvnrepository.com/artifact/org.projectlombok/lombok
+	implementation 'org.projectlombok:lombok:1.18.42'
+	annotationProcessor 'org.projectlombok:lombok:1.18.42'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// https://mvnrepository.com/artifact/org.postgresql/postgresql
+	runtimeOnly 'org.postgresql:postgresql'
+
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

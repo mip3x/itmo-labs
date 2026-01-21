@@ -5,3 +5,4 @@
 - [СПО (Системное программное обеспечение)](./system-programming)
 - [ФП (Функциональное программирование)](./functional-programming)
 - [ВСС (Встроенные системы)](./embedded-systems)
+- [ИС (Информационные системы)](./information-systems)
