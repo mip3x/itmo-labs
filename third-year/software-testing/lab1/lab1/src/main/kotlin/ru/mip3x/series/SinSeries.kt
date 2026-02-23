@@ -1,4 +1,10 @@
-package ru.mip3x.series.sin
+package ru.mip3x.series
+
+data class SinSeriesResults(
+    val value: Double,
+    val lastTermAbs: Double,
+    val terms: Int
+)
 
 object SinSeries {
     fun summarize(x: Double, y: Double) : Double {
@@ -40,23 +46,26 @@ object SinSeries {
         return -x
     }
 
-    fun sinTaylor(x: Double, eps: Double) : Double {
+    fun sinTaylor(x: Double, eps: Double) : SinSeriesResults {
         require(eps > 0)
 
         var sum = x
+        var terms = 1
 
         var degree = 3
-        var next: Double
+        var term: Double
         var func : (Double, Double) -> Double = ::substract
 
         do {
-            next = pow(x, degree) / factorial(degree)
-            sum = apply(sum, next, func)
+            term = pow(x, degree) / factorial(degree)
+            terms++
+
+            sum = apply(sum, term, func)
             
             func = if (func == ::substract) ::summarize else ::substract
             degree += 2
-        } while (abs(next) > eps)
+        } while (abs(term) > eps)
 
-        return sum;
+        return SinSeriesResults(sum, abs(term), terms)
     }
 }
