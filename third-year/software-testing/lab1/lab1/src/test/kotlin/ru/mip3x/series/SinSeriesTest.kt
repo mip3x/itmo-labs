@@ -56,13 +56,18 @@ class SinSeriesTest {
     }
 
     @Test
-    fun xNearPIOverTwo() {
+    fun xNearPIOver2() {
         assertCloseToStd(PI / 2, 1e-12, 1e-10)
     }
 
     @Test
     fun xNearPI() {
         assertCloseToStd(PI, 1e-12, 1e-10)
+    }
+
+    @Test
+    fun xNear3PIOver2() {
+        assertCloseToStd((3 * PI) / 2, 1e-12, 1e-10)
     }
 
     @Test 
