@@ -22,6 +22,7 @@ void putchar(char ch);
 long getchar();
 void print_newline();
 void puts(const char *string);
+void *memset(void *buf, char c, size_t n);
 
 #define NL_CHAR '\n'
 
@@ -36,10 +37,3 @@ void puts(const char *string);
 
 #define BASE_EXTENSION 0x10
 #define F_SBI_GET_IMPL_VERSION 0x2
-
-#define READ_CSR(reg)                                                          \
-    ({                                                                         \
-        unsigned long __tmp;                                                   \
-        __asm__ __volatile__("csrr %0, " #reg : "=r"(__tmp));                  \
-        __tmp;                                                                 \
-    })
