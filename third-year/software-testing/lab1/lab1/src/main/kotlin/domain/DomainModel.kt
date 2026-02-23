@@ -1,0 +1,1 @@
+package ru.mip3x.domain.model
