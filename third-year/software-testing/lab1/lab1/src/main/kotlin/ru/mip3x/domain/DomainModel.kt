@@ -114,9 +114,9 @@ data class CharacterActivity(
 
 object DomainModelFactory {
     fun createHitchhikerScene() : SceneState {
-        val spaceShip = SpaceShip("Золотое сердце")
+        val goldenHeartSpaceShip = SpaceShip("Золотое сердце")
         val horseHeadNebula = CelestialObject("Туманность Конской Головы")
-        spaceShip.flyAwayFrom(horseHeadNebula, 420)
+        goldenHeartSpaceShip.flyAwayFrom(horseHeadNebula, 420)
 
         var characters: MutableList<Character> = mutableListOf<Character>()
 
@@ -154,7 +154,7 @@ object DomainModelFactory {
         arthur.read(guideBook)
 
         return SceneState(
-            spaceShip,
+            goldenHeartSpaceShip,
             characters
         )
     }
