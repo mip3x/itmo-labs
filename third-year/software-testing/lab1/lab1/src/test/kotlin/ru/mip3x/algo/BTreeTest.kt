@@ -82,4 +82,72 @@ class BTreeTest {
 
         assertEquals(values, tree.inOrder())
     }
+
+    @Test
+    fun removeFromLeaf() {
+        val tree = BTree()
+        val values = listOf(10, 20, 30, 40)
+        for (v in values) {
+            tree.insert(v)
+        }
+
+        assertTrue(tree.remove(30))
+        assertFalse(tree.contains(30))
+
+        assertEquals(listOf(10, 20, 40), tree.inOrder())
+    }
+
+    @Test
+    fun removeMissingKeyReturnsFalse() {
+        val tree = BTree()
+        val values = listOf(10, 20, 30, 40)
+        for (v in values) {
+            tree.insert(v)
+        }
+
+        assertFalse(tree.remove(999))
+
+        assertEquals(values, tree.inOrder())
+    }
+
+    @Test
+    fun removeWithMergesAndInternalNodeCases() {
+        val tree = BTree()
+        val values = (1..30).toList()
+        for (v in values) {
+            tree.insert(v)
+        }
+
+        val toRemove = listOf(15, 1, 30, 12, 20, 8, 9, 10, 11, 13, 14)
+        for (v in toRemove) {
+            assertTrue(tree.remove(v))
+            assertFalse(tree.contains(v))
+        }
+
+        val expected = values.filterNot { it in toRemove }
+
+        assertEquals(expected, tree.inOrder())
+    }
+
+    @Test
+    fun removeDeletesOneDuplicateAtATime() {
+        val tree = BTree()
+        tree.insert(10)
+        tree.insert(10)
+        tree.insert(10)
+        tree.insert(5)
+        tree.insert(15)
+
+        assertEquals(listOf(5, 10, 10, 10, 15), tree.inOrder())
+
+        assertTrue(tree.remove(10))
+        assertEquals(listOf(5, 10, 10, 15), tree.inOrder())
+
+        assertTrue(tree.remove(10))
+        assertEquals(listOf(5, 10, 15), tree.inOrder())
+
+        assertTrue(tree.remove(10))
+        assertEquals(listOf(5, 15), tree.inOrder())
+        assertFalse(tree.contains(10))
+    }
 }
