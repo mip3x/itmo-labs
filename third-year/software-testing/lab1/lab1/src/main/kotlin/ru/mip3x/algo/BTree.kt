@@ -9,7 +9,7 @@ class BTree {
     }
 
     private var root: Node = Node(isLeaf = true)
-    private val maxKeys: Int = 5
+    private val maxKeys: Int = 4
 
     fun contains(key: Int) : Boolean {
         return contains(root, key)
@@ -33,25 +33,23 @@ class BTree {
     }
 
     fun insert(key: Int) : Boolean {
-        if (contains(root, key))
-            return false
-        
-        if (root.keys.size == maxKeys) {
-            var newRoot = Node(isLeaf = false)
+        insertNonFull(root, key)
+
+        if (root.keys.size > maxKeys) {
+            val newRoot = Node(isLeaf = false)
             newRoot.children.add(root)
             splitChild(newRoot, 0)
             root = newRoot
         }
 
-        insertNonFull(root, key)
-        return true;
+        return true
     }
 
     private fun splitChild(parent: Node, childIndex: Int) {
         val fullChild = parent.children[childIndex]
         val rightChild = Node(isLeaf = fullChild.isLeaf)
 
-        val mid = maxKeys / 2
+        val mid = fullChild.keys.size / 2
         val median = fullChild.keys[mid] // key that will be up in parent
 
         // right keys
@@ -78,31 +76,32 @@ class BTree {
     }
 
     private fun insertNonFull(node: Node, key: Int) {
-        var i = node.keys.size - 1
-
         if (node.isLeaf) {
-            node.keys.add(key)
-            while (i >= 0 && key < node.keys[i]) {
-                node.keys[i + 1] = node.keys[i]
-                i--
-            }
-            node.keys[i + 1] = key
+            insertIntoLeaf(node, key)
             return
         }
 
+        var i = node.keys.size - 1
         while (i >= 0 && key < node.keys[i]) {
             i--
         }
         i++
 
-        if (node.children[i].keys.size == maxKeys) {
-            splitChild(node, i)
-            if (key > node.keys[i]) {
-                i++
-            }
-        }
-
         insertNonFull(node.children[i], key)
+
+        if (node.children[i].keys.size > maxKeys) {
+            splitChild(node, i)
+        }
+    }
+
+    private fun insertIntoLeaf(node: Node, key: Int) {
+        node.keys.add(key)
+        var i = node.keys.size - 2
+        while (i >= 0 && key < node.keys[i]) {
+            node.keys[i + 1] = node.keys[i]
+            i--
+        }
+        node.keys[i + 1] = key
     }
 
     fun inOrder(): List<Int> {

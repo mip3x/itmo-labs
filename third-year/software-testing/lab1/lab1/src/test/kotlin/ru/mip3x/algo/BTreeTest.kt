@@ -26,13 +26,15 @@ class BTreeTest {
     }
 
     @Test
-    fun duplicateInsertRejected() {
+    fun duplicateInsertAllowed() {
         val tree = BTree()
 
         assertTrue(tree.insert(10))
-        assertFalse(tree.insert(10))
+        assertTrue(tree.insert(10))
+        assertTrue(tree.insert(10))
 
-        assertEquals(listOf(10), tree.inOrder())
+        assertTrue(tree.contains(10))
+        assertEquals(listOf(10, 10, 10), tree.inOrder())
     }
 
     @Test

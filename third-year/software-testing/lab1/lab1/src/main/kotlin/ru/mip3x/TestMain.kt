@@ -16,7 +16,7 @@ fun main() {
 
     val tree = BTree()
 
-    val values = listOf(10, 80, 100, 25, 20, 55, 35, 70, 30, 40, 13, 12, 50, 26, 60, 22, 61)
+    val values = listOf(10, 80, 100, 10, 25, 10, 20, 55, 35, 70, 30, 40, 13, 12, 50, 26, 60, 22, 61)
     for (v in values) {
         tree.insert(v)
         println("insert $v -> ${tree.inOrder()}")
