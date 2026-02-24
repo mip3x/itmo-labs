@@ -1,0 +1,93 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' ===== Stereotypes =====
+' <<entity>>       -> Kotlin class (с поведением/состоянием)
+' <<value object>> -> Kotlin data class
+' <<enum>>         -> Kotlin enum class
+' <<service>>      -> фабрика/сервис
+
+class SpaceShip <<entity>> {
+  +name: String
+  -distances: Map<CelestialObject, Long>
+  +flightActivity: FlightActivity
+  +setDistance(target: CelestialObject, distance: Long)
+  +getDistanceTo(target: CelestialObject): Long
+  +flyAwayFrom(target: CelestialObject, distance: Long)
+}
+
+class Character <<entity>> {
+  +name: String
+  +activity: CharacterActivity
+  +spaceShipLocation: SpaceShipLocation?
+  +moveTo(location: SpaceShipLocation)
+  +read(book: Book)
+  +discuss(topic: String, withCharacters: List<Character>)
+  +drink(drinkName: String, portions: Int)
+}
+
+class SceneState <<value object>> {
+  +spaceShip: SpaceShip
+  +horseHeadNebula: CelestialObject
+  +guideBook: Book
+  +characters: List<Character>
+}
+
+class CelestialObject <<value object>> {
+  +name: String
+}
+
+class Book <<value object>> {
+  +title: String
+  +owner: Character
+}
+
+class FlightActivity <<value object>> {
+  +type: FlightActivityType
+  +details: String
+}
+
+class CharacterActivity <<value object>> {
+  +type: CharacterActivityType
+  +details: String
+}
+
+enum SpaceShipLocation <<enum>> {
+  BRIDGE_UNDER_PALM
+  BRIDGE_CORNER
+  CABIN
+}
+
+enum FlightActivityType <<enum>> {
+  FLYING
+  STAYING
+}
+
+enum CharacterActivityType <<enum>> {
+  READING
+  DISCUSSING
+  RESTING
+  DRINKING
+}
+
+class DomainModelFactory <<service>> {
+  +createHitchhikerScene(): SceneState
+}
+
+SceneState *-- SpaceShip
+SceneState *-- CelestialObject
+SceneState *-- Book
+SceneState *-- "0..*" Character
+
+SpaceShip --> FlightActivity
+SpaceShip --> "0..*" CelestialObject : distance to
+
+Character --> CharacterActivity
+Character --> SpaceShipLocation
+Character --> Book : reads
+Book --> Character : owner
+
+DomainModelFactory ..> SceneState : creates
+@enduml
+
