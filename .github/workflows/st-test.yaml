@@ -3,7 +3,7 @@ name: Software Testing Test
 on:
   push:
     branches:
-      - ""
+      - "software-testing"
 
 jobs:
   test:
