@@ -448,6 +448,69 @@ Checkpoint - момент, когда СУБД сбрасывает грязны
 
 100 мкс почти не увеличивают задержку одной транзакции, но дают шанс на группировку коммитов при высокой параллельности
 
+### Этап 3. Дополнительные табличные пространства и наполнение базы
+
+Создадим новое табличное пространство для индексов:
+
+```sh
+$ mkdir -p "$HOME/grj79"
+$ psql -p 9066 -d postgres
+```
+
+```sql
+# CREATE TABLESPACE grj79 LOCATION '/var/db/postgres1/grj79';
+```
+
+Создадим базу данных:
+
+```sql
+# CREATE DATABASE uglygraylaw TEMPLATE template1;
+```
+
+Создадим новую роль и выдадим права:
+
+```sql
+# CREATE ROLE data_user LOGIN PASSWORD '***';
+# GRANT CONNECT ON DATABASE uglygraylaw TO data_user;
+# GRANT CONNECT ON DATABASE template1 TO data_user;
+# GRANT CREATE ON TABLESPACE grj79 TO data_user;
+# \c uglygraylaw
+# GRANT CREATE ON SCHEMA public TO data_user;
+```
+
+Подключимся к базе `uglygraylaw` и наполним тестовыми данными:
+
+```sql
+# CREATE TABLE test_data (
+    id bigserial PRIMARY KEY,
+    payload text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+# CREATE INDEX test_data_created_at_idx ON test_data (created_at) TABLESPACE grj79;
+# INSERT INTO test_data(payload) SELECT 'row_' || g FROM generate_series(1, 100000) AS g;
+```
+
+Выведем существующие `tablespace`:
+
+```sql
+# SELECT spcname, pg_tablespace_location(oid) FROM pg_tablespace;
+  spcname   | pg_tablespace_location
+------------+-------------------------
+ pg_default |
+ pg_global  |
+ grj79      | /var/db/postgres1/grj79
+(3 строки)
+# \c uglygraylaw
+# SELECT t.spcname, c.relname
+FROM pg_class c
+JOIN pg_tablespace t ON c.reltablespace = t.oid
+WHERE c.relkind IN ('r','i');
+```
+
+## Вывод
+
+В ходе лабораторной работы был успешно создан и настроен кластер `PostgreSQL`.
+
 ## Вопросы для подготовки к защите
 
 - Способы запуска и остановки сервера PosgreSQL, их отличия.
@@ -458,5 +521,7 @@ Checkpoint - момент, когда СУБД сбрасывает грязны
 
 ## Использованные ресурсы
 
+- [Документация](https://repo.postgrespro.ru/doc/pgsql/16.11/ru/postgres-A4.pdf)
+- [PostgreSQL Internal](https://www.interdb.jp/pg/index.html)
 - [Настройка параметра `checkpoint`](https://medium.com/@jramcloud1/04-postgresql-17-performance-tuning-checkpoints-explained-4972e78f4e56)
 - [Настройка параметра `temp_buffers`](https://medium.com/@jramcloud1/07-postgresql-17-performance-tuning-understanding-vacuum-in-detail-4914a06073fe)
