@@ -493,12 +493,12 @@ $ psql -p 9066 -d postgres
 Выведем существующие `tablespace`:
 
 ```sql
-# SELECT spcname, pg_tablespace_location(oid) FROM pg_tablespace;
-  spcname   | pg_tablespace_location
-------------+-------------------------
- pg_default |
- pg_global  |
- grj79      | /var/db/postgres1/grj79
+# SELECT * FROM pg_tablespace;
+  oid  |  spcname   | spcowner |                    spcacl                     | spcoptions
+-------+------------+----------+-----------------------------------------------+------------
+  1663 | pg_default |       10 |                                               |
+  1664 | pg_global  |       10 |                                               |
+ 16388 | grj79      |       10 | {postgres1=C/postgres1,data_user=C/postgres1} |
 (3 строки)
 # \c uglygraylaw
 # SELECT t.spcname, c.relname
