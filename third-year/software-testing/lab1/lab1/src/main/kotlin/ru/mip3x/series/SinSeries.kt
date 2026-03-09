@@ -1,8 +1,9 @@
 package ru.mip3x.series
 
+import kotlin.math.PI
+
 data class SinSeriesResults(
     val value: Double,
-    val lastTermAbs: Double,
     val terms: Int
 )
 
@@ -46,8 +47,14 @@ object SinSeries {
         return -x
     }
 
-    fun sinTaylor(x: Double, eps: Double) : SinSeriesResults {
+    fun sinTaylor(xInput: Double, eps: Double) : SinSeriesResults {
         require(eps > 0)
+
+        var x = xInput % (2 * PI)
+        if (x > PI)
+            x -= 2 * PI
+        if (x < -PI)
+            x += 2 * PI
 
         var sum = x
         var terms = 1
@@ -66,6 +73,6 @@ object SinSeries {
             degree += 2
         } while (abs(term) > eps)
 
-        return SinSeriesResults(sum, abs(term), terms)
+        return SinSeriesResults(sum, terms)
     }
 }
