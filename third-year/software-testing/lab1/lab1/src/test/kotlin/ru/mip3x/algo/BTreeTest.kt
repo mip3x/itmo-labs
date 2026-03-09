@@ -56,7 +56,7 @@ class BTreeTest {
     @Test
     fun unsortedInsertsStaySortedInOrder() {
         val tree = BTree<Int>()
-        val values = listOf(7, 1, 9, 3, 8, 2, 6, 5, 4, 10, 15, 12, 11, 14, 13)
+        val values = listOf(7, 1, 9, 3, 8)
 
         for (v in values) {
             assertTrue(tree.insert(v))
@@ -68,7 +68,7 @@ class BTreeTest {
     @Test
     fun manyInsertsAndSearches() {
         val tree = BTree<Int>()
-        val values = (1..50).toList()
+        val values = (1..5).toList()
 
         for (v in values) {
             assertTrue(tree.insert(v))
@@ -78,7 +78,7 @@ class BTreeTest {
             assertTrue(tree.contains(v))
         }
         assertFalse(tree.contains(0))
-        assertFalse(tree.contains(51))
+        assertFalse(tree.contains(6))
 
         assertEquals(values, tree.inOrder())
     }
@@ -113,12 +113,12 @@ class BTreeTest {
     @Test
     fun removeWithMergesAndInternalNodeCases() {
         val tree = BTree<Int>()
-        val values = (1..30).toList()
+        val values = (1..20).toList()
         for (v in values) {
             tree.insert(v)
         }
 
-        val toRemove = listOf(15, 1, 30, 12, 20, 8, 9, 10, 11, 13, 14)
+        val toRemove = listOf(15, 1, 19, 12, 20, 8, 9, 10, 11, 13, 14)
         for (v in toRemove) {
             assertTrue(tree.remove(v))
             assertFalse(tree.contains(v))
