@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.random.Random
 
 class BTreeTest {
     @Test
@@ -149,5 +150,21 @@ class BTreeTest {
         assertTrue(tree.remove(10))
         assertEquals(listOf(5, 15), tree.inOrder())
         assertFalse(tree.contains(10))
+    }
+
+    @Test
+    fun removeInternalNodeUsesPredecessor() {
+        val tree = BTree<Int>()
+
+        val values = (1..60).toList()
+        val insertionOrder = values.shuffled(kotlin.random.Random(42))
+        insertionOrder.forEach { tree.insert(it) }
+
+        val keyToRemove = 16
+        val expected = values.filterNot { it == keyToRemove }
+
+        assertTrue(tree.remove(keyToRemove))
+        assertFalse(tree.contains(keyToRemove))
+        assertEquals(expected, tree.inOrder())
     }
 }
