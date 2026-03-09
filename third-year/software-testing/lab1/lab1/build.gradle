@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'org.jetbrains.kotlin.jvm' version '1.9.24'
+    id 'jacoco'
 }
 
 group = 'org.example'
@@ -31,5 +32,18 @@ test {
     testLogging {
         events "passed", "failed", "skipped"
         showStandardStreams = true
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
     }
 }
