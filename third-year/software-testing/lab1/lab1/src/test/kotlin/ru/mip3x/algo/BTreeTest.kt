@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 class BTreeTest {
     @Test
     fun emptyTree() {
-        val tree = BTree()
+        val tree = BTree<Int>()
 
         assertFalse(tree.contains(42))
 
@@ -17,7 +17,7 @@ class BTreeTest {
 
     @Test
     fun singleInsert() {
-        val tree = BTree()
+        val tree = BTree<Int>()
 
         assertTrue(tree.insert(10))
         assertTrue(tree.contains(10))
@@ -27,7 +27,7 @@ class BTreeTest {
 
     @Test
     fun duplicateInsertAllowed() {
-        val tree = BTree()
+        val tree = BTree<Int>()
 
         assertTrue(tree.insert(10))
         assertTrue(tree.insert(10))
@@ -39,7 +39,7 @@ class BTreeTest {
 
     @Test
     fun rootSplitOnSixthInsert() {
-        val tree = BTree()
+        val tree = BTree<Int>()
 
         val values = listOf(10, 20, 30, 40, 50, 60)
         for (v in values) {
@@ -55,7 +55,7 @@ class BTreeTest {
 
     @Test
     fun unsortedInsertsStaySortedInOrder() {
-        val tree = BTree()
+        val tree = BTree<Int>()
         val values = listOf(7, 1, 9, 3, 8, 2, 6, 5, 4, 10, 15, 12, 11, 14, 13)
 
         for (v in values) {
@@ -67,7 +67,7 @@ class BTreeTest {
 
     @Test
     fun manyInsertsAndSearches() {
-        val tree = BTree()
+        val tree = BTree<Int>()
         val values = (1..50).toList()
 
         for (v in values) {
@@ -85,7 +85,7 @@ class BTreeTest {
 
     @Test
     fun removeFromLeaf() {
-        val tree = BTree()
+        val tree = BTree<Int>()
         val values = listOf(10, 20, 30, 40)
         for (v in values) {
             tree.insert(v)
@@ -99,7 +99,7 @@ class BTreeTest {
 
     @Test
     fun removeMissingKeyReturnsFalse() {
-        val tree = BTree()
+        val tree = BTree<Int>()
         val values = listOf(10, 20, 30, 40)
         for (v in values) {
             tree.insert(v)
@@ -112,7 +112,7 @@ class BTreeTest {
 
     @Test
     fun removeWithMergesAndInternalNodeCases() {
-        val tree = BTree()
+        val tree = BTree<Int>()
         val values = (1..30).toList()
         for (v in values) {
             tree.insert(v)
@@ -131,7 +131,7 @@ class BTreeTest {
 
     @Test
     fun removeDeletesOneDuplicateAtATime() {
-        val tree = BTree()
+        val tree = BTree<Int>()
         tree.insert(10)
         tree.insert(10)
         tree.insert(10)

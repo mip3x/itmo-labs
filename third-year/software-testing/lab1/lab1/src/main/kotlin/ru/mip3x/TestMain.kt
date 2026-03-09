@@ -14,7 +14,7 @@ fun main() {
     // println("real   = $real")
     // println("diff   = ${kotlin.math.abs(approx - real)}")
 
-    val tree = BTree()
+    val tree = BTree<Int>()
 
     val values = listOf(10, 80, 100, 10, 25, 10, 20, 55, 35, 70, 30, 40, 13, 12, 50, 26, 60, 22, 61)
     for (v in values) {
