@@ -21,16 +21,23 @@ class Character <<entity>> {
   +name: String
   +activity: CharacterActivity
   +spaceShipLocation: SpaceShipLocation?
+  +bodyState: BodyState
+  +currentBook: Book?
+  +lastDrink: Drink?
   +moveTo(location: SpaceShipLocation)
   +read(book: Book)
-  +discuss(topic: String, withCharacters: List<Character>)
-  +drink(drinkName: String, portions: Int)
+  +drink(drink: Drink, portions: Int)
+}
+
+class Discussion <<entity>> {
+  +topic: String
+  +participants: Set<Character>
+  +join(character: Character)
+  +leave(character: Character)
 }
 
 class SceneState <<value object>> {
   +spaceShip: SpaceShip
-  +horseHeadNebula: CelestialObject
-  +guideBook: Book
   +characters: List<Character>
 }
 
@@ -45,12 +52,15 @@ class Book <<value object>> {
 
 class FlightActivity <<value object>> {
   +type: FlightActivityType
-  +details: String
 }
 
 class CharacterActivity <<value object>> {
   +type: CharacterActivityType
-  +details: String
+}
+
+class Drink <<value object>> {
+  +name: String
+  +type: DrinkType
 }
 
 enum SpaceShipLocation <<enum>> {
@@ -66,9 +76,22 @@ enum FlightActivityType <<enum>> {
 
 enum CharacterActivityType <<enum>> {
   READING
-  DISCUSSING
   RESTING
   DRINKING
+}
+
+enum DrinkType <<enum>> {
+  PAN_GALACTIC_GARGLE_BLASTER
+  TEA
+  WATER
+  COFFEE
+}
+
+enum BodyState <<enum>> {
+  NORMAL
+  RELAXED
+  ENERGIZED
+  DRUNK
 }
 
 class DomainModelFactory <<service>> {
@@ -76,8 +99,6 @@ class DomainModelFactory <<service>> {
 }
 
 SceneState *-- SpaceShip
-SceneState *-- CelestialObject
-SceneState *-- Book
 SceneState *-- "0..*" Character
 
 SpaceShip --> FlightActivity
@@ -86,8 +107,17 @@ SpaceShip --> "0..*" CelestialObject : distance to
 Character --> CharacterActivity
 Character --> SpaceShipLocation
 Character --> Book : reads
+Character --> Drink : drinks
+Character --> BodyState
+
+Discussion --> "2..*" Character : participants
+Discussion --> Character : join/leave
+
+Drink --> DrinkType
 Book --> Character : owner
 
 DomainModelFactory ..> SceneState : creates
+DomainModelFactory ..> Discussion : creates
+DomainModelFactory ..> Book : creates
+DomainModelFactory ..> Drink : creates
 @enduml
-
