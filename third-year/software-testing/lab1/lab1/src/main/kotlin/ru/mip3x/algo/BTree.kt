@@ -1,7 +1,7 @@
 package ru.mip3x.algo
 
 class BTree<T: Comparable<T>> {
-    private inner class Node(var isLeaf: Boolean) {
+    private inner class Node(val isLeaf: Boolean) {
         val keys = mutableListOf<T>()
         val children = mutableListOf<Node>()
     }

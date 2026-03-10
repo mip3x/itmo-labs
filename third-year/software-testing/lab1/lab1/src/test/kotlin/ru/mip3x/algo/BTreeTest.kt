@@ -2,6 +2,7 @@ package ru.mip3x.algo
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
@@ -166,5 +167,166 @@ class BTreeTest {
         assertTrue(tree.remove(keyToRemove))
         assertFalse(tree.contains(keyToRemove))
         assertEquals(expected, tree.inOrder())
+    }
+
+    @Test
+    fun fillChildBorrowsFromNextOnLeafChild() {
+        val tree = BTree<Int>()
+        (1..120).shuffled(Random(7)).forEach { tree.insert(it) }
+
+        val root = requireNotNull(getField(tree, "root"))
+        val (parent, idx) = requireNotNull(findBorrowNextCase(root, requireInternalChild = false))
+
+        val childBeforeKeys = keysOf(childAt(parent, idx)).size
+        val parentKeyBefore = keysOf(parent)[idx]
+
+        invokePrivate(tree, "fillChild", parent, idx)
+
+        val childAfterKeys = keysOf(childAt(parent, idx)).size
+        val parentKeyAfter = keysOf(parent)[idx]
+
+        assertEquals(childBeforeKeys + 1, childAfterKeys)
+        assertNotEquals(parentKeyBefore, parentKeyAfter)
+    }
+
+    @Test
+    fun fillChildBorrowsFromNextOnInternalChild() {
+        val tree = BTree<Int>()
+        (1..220).shuffled(Random(42)).forEach { tree.insert(it) }
+
+        val root = requireNotNull(getField(tree, "root"))
+        val (parent, idx) = requireNotNull(findBorrowNextCase(root, requireInternalChild = true))
+
+        val childBeforeKeys = keysOf(childAt(parent, idx)).size
+        val childBeforeChildren = childrenOf(childAt(parent, idx)).size
+
+        invokePrivate(tree, "fillChild", parent, idx)
+
+        val childAfterKeys = keysOf(childAt(parent, idx)).size
+        val childAfterChildren = childrenOf(childAt(parent, idx)).size
+
+        assertEquals(childBeforeKeys + 1, childAfterKeys)
+        assertEquals(childBeforeChildren + 1, childAfterChildren)
+    }
+
+    @Test
+    fun borrowFromPreviousOnInternalChildMovesChildPointer() {
+        val tree = BTree<Int>()
+        (1..220).shuffled(Random(99)).forEach { tree.insert(it) }
+
+        val root = requireNotNull(getField(tree, "root"))
+        val (parent, idx) = requireNotNull(findBorrowPreviousInternalCase(root))
+
+        val childBeforeKeys = keysOf(childAt(parent, idx)).size
+        val childBeforeChildren = childrenOf(childAt(parent, idx)).size
+
+        invokePrivate(tree, "borrowFromPrevious", parent, idx)
+
+        val childAfterKeys = keysOf(childAt(parent, idx)).size
+        val childAfterChildren = childrenOf(childAt(parent, idx)).size
+
+        assertEquals(childBeforeKeys + 1, childAfterKeys)
+        assertEquals(childBeforeChildren + 1, childAfterChildren)
+    }
+
+    @Test
+    fun getSuccessorDescendsThroughInternalNodes() {
+        val tree = BTree<Int>()
+        (1..220).shuffled(Random(123)).forEach { tree.insert(it) }
+
+        val root = requireNotNull(getField(tree, "root"))
+        val internalNode = requireNotNull(findNonLeafNode(root))
+
+        val successor = invokePrivate(tree, "getSuccessor", internalNode) as Int
+        val expected = minKeyInSubtree(internalNode)
+
+        assertEquals(expected, successor)
+        assertTrue(tree.contains(successor))
+    }
+
+    private fun invokePrivate(target: Any, methodName: String, vararg args: Any): Any? {
+        val method = target.javaClass.declaredMethods.first {
+            it.name == methodName && it.parameterCount == args.size
+        }
+        method.isAccessible = true
+        return method.invoke(target, *args)
+    }
+
+    private fun getField(target: Any, name: String): Any? {
+        val field = target.javaClass.getDeclaredField(name)
+        field.isAccessible = true
+        return field.get(target)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun keysOf(node: Any): MutableList<Int> = getField(node, "keys") as MutableList<Int>
+
+    @Suppress("UNCHECKED_CAST")
+    private fun childrenOf(node: Any): MutableList<Any> = getField(node, "children") as MutableList<Any>
+
+    private fun isLeaf(node: Any): Boolean = getField(node, "isLeaf") as Boolean
+
+    private fun childAt(parent: Any, idx: Int): Any = childrenOf(parent)[idx]
+
+    private fun findBorrowNextCase(node: Any, requireInternalChild: Boolean): Pair<Any, Int>? {
+        if (isLeaf(node)) return null
+
+        val keys = keysOf(node)
+        val children = childrenOf(node)
+
+        for (i in 0 until keys.size) {
+            val child = children[i]
+            val right = children[i + 1]
+
+            val childOk = if (requireInternalChild) !isLeaf(child) else isLeaf(child)
+            val rightOk = if (requireInternalChild) !isLeaf(right) else isLeaf(right)
+
+            if (childOk && rightOk && keysOf(child).size == 2 && keysOf(right).size > 2) {
+                return node to i
+            }
+        }
+
+        for (c in children) {
+            val found = findBorrowNextCase(c, requireInternalChild)
+            if (found != null) return found
+        }
+
+        return null
+    }
+
+    private fun findBorrowPreviousInternalCase(node: Any): Pair<Any, Int>? {
+        if (isLeaf(node)) return null
+
+        val keys = keysOf(node)
+        val children = childrenOf(node)
+
+        for (i in 1..keys.size) {
+            val child = children[i]
+            val left = children[i - 1]
+
+            if (!isLeaf(child) && !isLeaf(left) && keysOf(child).size == 2 && keysOf(left).size > 2) {
+                return node to i
+            }
+        }
+
+        for (c in children) {
+            val found = findBorrowPreviousInternalCase(c)
+            if (found != null) return found
+        }
+
+        return null
+    }
+
+    private fun findNonLeafNode(node: Any): Any? {
+        if (!isLeaf(node)) return node
+        return null
+    }
+
+    private fun minKeyInSubtree(node: Any): Int {
+        var current = node
+        while (!isLeaf(current)) {
+            current = childrenOf(current).first()
+        }
+        return keysOf(current).first()
     }
 }
