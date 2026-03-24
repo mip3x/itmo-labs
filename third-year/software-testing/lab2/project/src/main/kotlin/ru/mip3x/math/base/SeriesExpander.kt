@@ -1,11 +1,12 @@
 package ru.mip3x.math.base;
 
+import ru.mip3x.math.Function
 import kotlin.math.abs
 
 abstract class SeriesExpander(
     private val maxIterations: Int = 10_000
-) {
-    fun calculate(x: Double, eps: Double) : Double {
+) : Function {
+    override fun calculate(x: Double, eps: Double) : Double {
         require(x.isFinite()) { "x must be finite" }
         require(eps.isFinite() && eps > 0.0) { "eps must be > 0 and finite" }
         require(isDefinedAt(x)) 
