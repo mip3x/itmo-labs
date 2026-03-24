@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: third-year/software-testing/lab1/lab1
+        working-directory: third-year/software-testing/lab2/project
 
     steps:
       - name: Checkout
