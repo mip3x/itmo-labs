@@ -126,16 +126,15 @@ _Требования к отчёту_
 - Основной: `postgres1@129`
 - Резервный: `postgres0@135`
 
+\
+=== Этап 1. Резервное копирование
+
 На резервном узле создадим директории:
 
 ```sh
 mkdir -p "$HOME/backup_lab2/base"
 mkdir -p "$HOME/backup_lab2/wal"
-mkdir -p "$HOME/backup_lab2/restore"
 ```
-
-\
-=== Этап 1. Резервное копирование
 
 \
 *Настройка `SSH`-ключей*
@@ -477,7 +476,130 @@ $
 Выбранная схема резервного копирования является более рациональной, чем хранение только полных копий или только логических дампов
 
 \
-=== Этап 2
+=== Этап 2. Потеря основного узла
+
+Остановим кластер №1:
+
+```sh
+[postgres1@pg129 ~]$ pg_ctl -D "$PGDATA" stop
+ожидание завершения работы сервера.... готово
+сервер остановлен
+[postgres1@pg129 ~]$ pg_ctl -D "$PGDATA" status
+pg_ctl: сервер не работает
+```
+
+На резервном узле создадим директорию для восстановления:
+
+```sh
+mkdir -p "$HOME/backup_lab2/restore"
+```
+
+Выберем последнюю копию и распакуем в `restore`:
+
+```sh
+[postgres0@pg135 ~]$ cd backup_lab2/
+[postgres0@pg135 ~/backup_lab2]$ ls -l base
+total 19086
+-rw-r--r--  1 postgres0 postgres 5554435 27 марта 09:05 base-2026-03-27-09-05-10.tar.gz
+-rw-r--r--  1 postgres0 postgres 5560291 27 марта 09:13 base-2026-03-27-09-13-42.tar.gz
+-rw-r--r--  1 postgres0 postgres 5555837 27 марта 09:19 base-2026-03-27-09-19-00.tar.gz
+-rw-r--r--  1 postgres0 postgres 5548802 27 марта 09:20 base-2026-03-27-09-20-00.tar.gz
+[postgres0@pg135 ~/backup_lab2]$ cd restore/
+[postgres0@pg135 ~/backup_lab2/restore]$ ls
+[postgres0@pg135 ~/backup_lab2/restore]$ tar -xzf ../base/base-2026-03-27-09-20-00.tar.gz
+[postgres0@pg135 ~/backup_lab2/restore]$ ls -la
+total 10
+drwxr-xr-x   4 postgres0 postgres  4 27 марта 10:15 .
+drwxr-xr-x   5 postgres0 postgres  5 27 марта 08:15 ..
+drwx------  20 postgres0 postgres 29 27 марта 09:20 base
+drwxr-xr-x   3 postgres0 postgres  3 27 марта 09:20 ts
+```
+
+Назначим `PGDATA` и проверим корректность симлинка дополнительного табличного пространства:
+
+```sh
+[postgres0@pg135 ~/backup_lab2/restore]$ export PGDATA="$HOME/backup_lab2/restore/base"
+[postgres0@pg135 ~/backup_lab2/restore]$ ls -l $PGDATA/pg_tblspc/
+total 1
+lrwx------  1 postgres0 postgres 42 27 марта 09:20 16388 -> /var/db/postgres1/backup_lab2/tmp/ts/grj79
+```
+
+Симлинк указывает на табличное пространство по пути пользователя с `primary`-узла. Исправим это:
+
+```sh
+[postgres0@pg135 ~/backup_lab2/restore]$ rm $PGDATA/pg_tblspc/16388
+[postgres0@pg135 ~/backup_lab2/restore]$ ln -s "$HOME/backup_lab2/restore/ts/grj79" "$PGDATA/pg_tblspc/16388"
+[postgres0@pg135 ~/backup_lab2/restore]$ ls -l $PGDATA/pg_tblspc/
+total 1
+lrwxr-xr-x  1 postgres0 postgres 46 27 марта 10:27 16388 -> /var/db/postgres0/backup_lab2/restore/ts/grj79
+```
+
+Создадим файл, переводящий `PostgreSQL` в режим восстановления:
+
+```sh
+[postgres0@pg135 ~/backup_lab2/restore]$ touch "$PGDATA/recovery.signal"
+```
+
+Настроим `restore_command`:
+
+```sh
+[postgres0@pg135 ~/backup_lab2/restore]$ vi "$PGDATA/postgresql.conf"
+[postgres0@pg135 ~/backup_lab2/restore]$ cat $PGDATA/postgresql.conf |grep -A 3 restore_command
+restore_command = 'cp /var/db/postgres0/backup_lab2/wal/%f %p'
+                                # command to use to restore an archived WAL file
+                                # placeholders: %p = path of file to restore
+                                #               %f = file name only
+```
+
+Настроим `pg_hba.conf`:
+
+```sh
+[postgres0@pg135 ~/backup_lab2/restore]$ vi $PGDATA/pg_hba.conf
+[postgres0@pg135 ~/backup_lab2/restore]$ tail -n 15 $PGDATA/pg_hba.conf | head -n 3
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+```
+
+Запускаем сервер:
+
+```sh
+[postgres0@pg135 ~/backup_lab2/restore]$ pg_ctl -D "$PGDATA" -l "$PGDATA/server_recovery.log" start
+ожидание запуска сервера.... готово
+сервер запущен
+[postgres0@pg135 ~/backup_lab2/restore]$ pg_ctl -D "$PGDATA" status
+pg_ctl: сервер работает (PID: 33314)
+/usr/local/bin/postgres "-D" "/var/db/postgres0/backup_lab2/restore/base"
+```
+
+Проверим работоспособность:
+
+```sh
+[postgres0@pg135 ~/backup_lab2/restore]$ psql -p 9066 -d postgres -U postgres1
+psql (16.4)
+Введите "help", чтобы получить справку.
+
+postgres=# \l
+                                                             Список баз данных
+     Имя     | Владелец  | Кодировка | Провайдер локали |  LC_COLLATE  |   LC_CTYPE   | локаль ICU | Правила ICU |      Права доступа
+-------------+-----------+-----------+------------------+--------------+--------------+------------+-------------+-------------------------
+ postgres    | postgres1 | WIN1251   | libc             | ru_RU.CP1251 | ru_RU.CP1251 |            |             | =Tc/postgres1          +
+             |           |           |                  |              |              |            |             | postgres1=CTc/postgres1+
+             |           |           |                  |              |              |            |             | data_user=c/postgres1
+ template0   | postgres1 | WIN1251   | libc             | ru_RU.CP1251 | ru_RU.CP1251 |            |             | =c/postgres1           +
+             |           |           |                  |              |              |            |             | postgres1=CTc/postgres1
+ template1   | postgres1 | WIN1251   | libc             | ru_RU.CP1251 | ru_RU.CP1251 |            |             | =c/postgres1           +
+             |           |           |                  |              |              |            |             | postgres1=CTc/postgres1
+ uglygraylaw | postgres1 | WIN1251   | libc             | ru_RU.CP1251 | ru_RU.CP1251 |            |             | =Tc/postgres1          +
+             |           |           |                  |              |              |            |             | postgres1=CTc/postgres1+
+             |           |           |                  |              |              |            |             | data_user=c/postgres1
+(4 строки)
+
+postgres=# select pg_is_in_recovery();
+ pg_is_in_recovery
+-------------------
+ f
+(1 строка)
+```
 
 \
 === Этап 3
@@ -488,7 +610,6 @@ $
 \
 == Вывод
 
-В ходе лабораторной работы был успешно создан и настроен кластер `PostgreSQL`.
 
 \
 == Вопросы для подготовки к защите
@@ -503,3 +624,4 @@ $
 
 - #link("https://repo.postgrespro.ru/doc/pgsql/16.11/ru/postgres-A4.pdf")[Документация]
 - #link("https://www.interdb.jp/pg/index.html")[PostgreSQL Internal]
+- #link("https://www.postgresql.org/docs/current/continuous-archiving.html#BACKUP-PITR-RECOVERY")[Непрерывное архивирование и восстановление на момент времени (Point-in-Time Recovery, PITR)]
