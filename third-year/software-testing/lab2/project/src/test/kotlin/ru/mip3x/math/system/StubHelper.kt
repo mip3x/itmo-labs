@@ -19,4 +19,8 @@ object StubHelper {
 
         return stub
     }
+
+    fun functionStub(resourcePath: String, valueColumn: String): Function {
+        return functionStub(TestDataHelper.loadColumnAsMap(resourcePath, valueColumn))
+    }
 }

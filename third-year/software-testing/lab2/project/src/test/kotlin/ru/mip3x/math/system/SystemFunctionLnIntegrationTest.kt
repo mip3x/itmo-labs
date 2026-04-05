@@ -2,50 +2,45 @@ package ru.mip3x.math.system
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.CsvFileSource
 import ru.mip3x.math.base.Ln
 
 class SystemFunctionLnIntegrationTest {
-    private val eps = 1e-6
+    private val trigResource = "/test-data/system/trig_values.csv"
+    private val logResource = "/test-data/system/log_values.csv"
 
-    private val sin = StubHelper.functionStub(StubValues.sinValues)
-    private val cos = StubHelper.functionStub(StubValues.cosValues)
-    private val tan = StubHelper.functionStub(StubValues.tanValues)
-    private val cot = StubHelper.functionStub(StubValues.cotValues)
-    private val sec = StubHelper.functionStub(StubValues.secValues)
-    private val csc = StubHelper.functionStub(StubValues.cscValues)
+    private val sin = StubHelper.functionStub(trigResource, "sin")
+    private val cos = StubHelper.functionStub(trigResource, "cos")
+    private val tan = StubHelper.functionStub(trigResource, "tan")
+    private val cot = StubHelper.functionStub(trigResource, "cot")
+    private val sec = StubHelper.functionStub(trigResource, "sec")
+    private val csc = StubHelper.functionStub(trigResource, "csc")
     private val ln = Ln()
-    private val log2 = StubHelper.functionStub(StubValues.log2Values)
-    private val log3 = StubHelper.functionStub(StubValues.log3Values)
-    private val log10 = StubHelper.functionStub(StubValues.log10Values)
+    private val log2 = StubHelper.functionStub(logResource, "log2")
+    private val log3 = StubHelper.functionStub(logResource, "log3")
+    private val log10 = StubHelper.functionStub(logResource, "log10")
 
     private val system = SystemFunction(
         sin, cos, tan, cot, sec, csc,
         ln, log2, log3, log10
     )
 
-    @ParameterizedTest(name = "real ln, stubs for others, x={0}")
-    @CsvSource(
-        "1.0, 3.0, 4.0, 5.0",
-        "2.0, 4.0, 5.0, 6.0"
+    @ParameterizedTest
+    @CsvFileSource(
+        resources = ["/test-data/system/log_values.csv"],
+        numLinesToSkip = 1
     )
     fun logBranchRealLnTest(
         x: Double,
+        expectedLn: Double,
         log2X: Double,
         log3X: Double,
-        log10X: Double
+        log10X: Double,
+        expected: Double,
+        resultEpsilon: Double,
+        convergenceEpsilon: Double
     ) {
-        val actual = system.calculate(x, eps)
-
-        val lnX = ln.calculate(x, eps)
-
-        val product = log10X * log3X
-        val product3 = product * product * product
-        val sum = product3 + log2X
-        val sum3 = sum * sum * sum
-
-        val expected = sum3 * lnX
-
-        assertEquals(expected, actual, 1e-9)
+        val actual = system.calculate(x, convergenceEpsilon)
+        assertEquals(expected, actual, resultEpsilon)
     }
 }
