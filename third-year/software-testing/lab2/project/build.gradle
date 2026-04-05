@@ -27,6 +27,10 @@ kotlin {
     jvmToolchain(21)
 }
 
+application {
+    mainClass = 'ru.mip3x.app.MainKt'
+}
+
 test {
     useJUnitPlatform()
     jvmArgs += "-XX:+EnableDynamicAgentLoading"
