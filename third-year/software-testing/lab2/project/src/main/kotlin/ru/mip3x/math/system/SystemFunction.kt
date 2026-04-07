@@ -31,8 +31,8 @@ class SystemFunction(
         val cscX = csc.calculate(x, eps)
 
         val leftPart =
-            ((((((((cosX - secX) * cotX) - cotX) * cotX) - tanX) / cosX) - cscX) -
-                (((cosX - sinX) + (secX - cotX)) / cscX)) -
+            (((((((((cosX - secX) * cotX) - cotX) * cotX) - tanX) / cosX) - cscX) -
+                ((cosX - sinX) + (secX - cotX))) / cscX) -
                 ((pow(tanX, 3) + tanX) / tanX)
 
         val rightPart =
