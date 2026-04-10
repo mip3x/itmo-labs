@@ -299,185 +299,42 @@ ARP-таблица формируется после обмена кадрами
 \
 == Этап 3. Многосегментная локальная сеть (Сеть 3)
 
-==== Построение сети
+=== Построение сети
 
-==== Настройка сети
+#figure(
+  image("stage3_scheme.png"),
+  caption: [Схема многосегментной сети]
+)
 
-На интерфейсах
-=== Этап 2. 3 устройства
+На третьем этапе была построена многосегментная сеть, объединяющая несколько локальных сегментов в пределах одной подсети `216.18.17.0/24`. Передача данных между узлами выполняется на канальном уровне, а связь между сегментами обеспечивается концентраторами и коммутаторами.
 
-==== Построение сети
+=== Таблица коммутации
 
+#figure(
+  image("stage3_mac_table.png"),
+  caption: [Таблица коммутации коммутатора]
+)
 
-==== Выполнение
+Таблица коммутации содержит соответствие `MAC`-адресов и портов коммутатора. После получения первых кадров коммутатор запоминает, за каким портом находится каждое устройство, и далее направляет кадры адресно только на нужный интерфейс.
 
-Подключим аналогично `R3` и подключим его к `GE0/1` роутера `R2`. Настроим `R2`:
+=== Передача UDP-пакета
 
-```
-Router#configure terminal 
-Router(config)#interface GigabitEthernet 0/1
-Router(config-if)#ip address 216.18.17.15 255.255.255.0
-% 216.18.17.0 overlaps with GigabitEthernet0/0
-```
+При передаче UDP-пакета отправитель сначала определяет `MAC`-адрес получателя с помощью `ARP`, после чего формирует Ethernet-кадр и отправляет его в сеть. В сегментах с коммутатором кадр передаётся на нужный порт по таблице коммутации, а в сегменте с концентратором сигнал повторяется на все порты.
 
-Нужно назначить на другой интерфейс:
+Таким образом, в данной сети `UDP`-пакет передаётся в пределах одной подсети без использования шлюза, а доставка обеспечивается механизмами `ARP`, таблицей коммутации и ретрансляцией сигнала концентратором.
 
-```
-Router#configure terminal 
-Router(config)#interface GigabitEthernet 0/1
-Router(config-if)#ip address 216.18.18.1 255.255.255.0
-Router(config-if)#no shutdown 
-Router(config-if)#end
-```
+=== Анализ вариантов соединения
 
-Теперь для `R3`:
+Наиболее удобным и работоспособным вариантом является последовательное соединение сегментов без образования петель. В этом случае таблицы коммутации формируются корректно, а трафик передаётся без зацикливания.
 
-```
-Router#configure terminal 
-Router(config)#interface GigabitEthernet 0/0
-Router(config-if)#ip address 216.18.18.2 255.255.255.0
-Router(config-if)#no shutdown 
-Router(config-if)#end
-```
+Кольцевое соединение коммутаторов без специальной настройки является нежелательным, так как приводит к петлям и широковещательным штормам. Замена концентратора на коммутатор не устраняет саму проблему кольца, а замена коммутатора на концентратор дополнительно увеличивает объём лишнего трафика в сети.
 
-На `R1`:
-```
-Router#ping 216.18.18.1
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.18.1, timeout is 2 seconds:
-.....
-Success rate is 0 percent (0/5)
-```
-
-Ничего не получилось
-
-Потому что теперь нужна маршрутизация. На `R1`:
-
-```
-Router#configure terminal 
-Enter configuration commands, one per line.  End with CNTL/Z.
-Router(config)#ip route 216.18.18.0 255.255.255.0 216.18.17.14
-Router(config)#end
-Router#
-%SYS-5-CONFIG_I: Configured from console by console
-
-Router#
-Router#show ip route
-Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
-       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
-       * - candidate default, U - per-user static route, o - ODR
-       P - periodic downloaded static route
-
-Gateway of last resort is not set
-
-     216.18.17.0/24 is variably subnetted, 2 subnets, 2 masks
-C       216.18.17.0/24 is directly connected, GigabitEthernet0/0
-L       216.18.17.13/32 is directly connected, GigabitEthernet0/0
-S    216.18.18.0/24 [1/0] via 216.18.17.14
-```
-
-Буква `S` означает статическую маршрутизацию
-
-На `R2` маршрутизация не нужна. На `R3`:
-
-```
-Router#configure terminal 
-Enter configuration commands, one per line.  End with CNTL/Z.
-Router(config)#ip route 216.18.17.0 255.255.255.0 216.18.18.1
-Router(config)#end
-Router#
-%SYS-5-CONFIG_I: Configured from console by console
-
-Router#
-Router#ping 216.18.17.14
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.17.14, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
-
-Router#ping 216.18.17.13
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.17.13, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
-
-Router#
-```
-
-Теперь попробуем с `R1`:
-
-```
-Router#ping 216.18.18.1
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.18.1, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
-
-Router#ping 216.18.18.2
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.18.2, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
-```
-
-==== Тестирование передачи UDP
-
-
-=== Этап 3. 3 устройства в полносвязной сети
-
-==== Построение сети
-
-
-==== Конфигурация сети
-
-Объединим `R1` и `R3` в сеть `216.18.19.0`
-
-Теперь `R1` и `R3` могут пинговать друг друга. Нужно настроить ещё таблицу маршрутизации для `R2`:
-
-```
-Router#configure terminal 
-Enter configuration commands, one per line.  End with CNTL/Z.
-Router(config)#ip route 216.18.19.0 255.255.255.0 216.18.17.13
-Router(config)#ip route 216.18.19.0 255.255.255.0 216.18.18.2
-Router(config)#end
-```
-
-Теперь маршрутизация работает и для `R2`:
-
-```
-Router#ping 216.18.19.2
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.19.2, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
-
-Router#ping 216.18.19.1
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.19.1, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
-
-Router#ping 216.18.19.2
-
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 216.18.19.2, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
-
-Router#
-```
-
-==== Тестирование передачи UDP
-
+Протокол `STP` позволяет избежать конфликтов при подключении коммутаторов в петлю.
 
 == Вывод
+
+В ходе выполнения лабораторной работы были исследованы сети с концентратором, с коммутатором и многосегментная сеть. Было установлено, что концентратор передаёт кадры на все порты, тогда как коммутатор использует таблицу коммутации и пересылает трафик адресно.
+
+Также были рассмотрены таблицы маршрутизации, `ARP`-таблицы и передача `UDP`-пакетов. Наиболее эффективной является сеть, в которой основная передача выполняется через коммутаторы, так как это уменьшает объём лишнего трафика по сравнению с использованием концентратора.
+
+Важно, что коммутатор запоминает `MAC`-адрес устройства по полю источника (`SRC`) в пакете, так как в данном случае гарантирована надёжность адресата.
