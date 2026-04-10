@@ -604,6 +604,145 @@ postgres=# select pg_is_in_recovery();
 \
 === Этап 3. Повреждение файлов БД
 
+Условие предлагает произвести симуляцию сбоя за счёт удаление `WAL`-директории. Сделаем это и попробуем запустить кластер (на основном узле):
+
+```sh
+[postgres1@pg129 ~]$ rm -r $PGDATA/pg_wal/*
+[postgres1@pg129 ~]$ pg_ctl -D "$PGDATA" start
+ожидание запуска сервера....2026-04-10 08:30:06.030 MSK [51639] СООБЩЕНИЕ:  передача вывода в протокол процессу сбора протоколов
+2026-04-10 08:30:06.030 MSK [51639] ПОДСКАЗКА:  В дальнейшем протоколы будут выводиться в каталог "log".
+ прекращение ожидания
+pg_ctl: не удалось запустить сервер
+Изучите протокол выполнения.
+```
+
+Удостоверимся, что причина именно в отсутствии `WAL`-директории:
+
+```sh
+[postgres1@pg129 ~]$ tail -50 "$(ls -t "$PGDATA"/log/* | head -1)"
+...
+2026-04-10 08:30:06.057 MSK,,,51643,,69d88ade.c9bb,2,,2026-04-10 08:30:06 MSK,,0,СООБЩЕНИЕ,00000,"создаётся отсутствующий каталог WAL ""pg_wal/archive_status""",,,,,,,,,"","startup",,0
+2026-04-10 08:30:06.057 MSK,,,51643,,69d88ade.c9bb,3,,2026-04-10 08:30:06 MSK,,0,СООБЩЕНИЕ,00000,"неверная запись контрольной точки",,,,,,,,,"","startup",,0
+2026-04-10 08:30:06.057 MSK,,,51643,,69d88ade.c9bb,4,,2026-04-10 08:30:06 MSK,,0,ПАНИКА,XX000,"не удалось считать правильную запись контрольной точки",,,,,,,,,"","startup",,0
+2026-04-10 08:30:06.746 MSK,,,51639,,69d88add.c9b7,6,,2026-04-10 08:30:05 MSK,,0,СООБЩЕНИЕ,00000,"стартовый процесс (PID 51643) был завершён по сигналу 6: Abort trap",,,,,,,,,"","postmaster",,0
+2026-04-10 08:30:06.746 MSK,,,51639,,69d88add.c9b7,7,,2026-04-10 08:30:05 MSK,,0,СООБЩЕНИЕ,00000,"прерывание запуска из-за ошибки в стартовом процессе",,,,,,,,,"","postmaster",,0
+...
+```
+
+Создадим директорию `restore`:
+
+```sh
+[postgres1@pg129 ~]$ mkdir restore
+```
+
+Перенесём последний бэкап и `WAL`-директорию с резервного узла на основной:
+
+```sh
+[postgres1@pg129 ~]$ scp postgres0@pg135:~/backup_lab2/base/$(ssh postgres0@pg135 "ls -t ~/backup_lab2/base | head -1") ~/restore/
+base-2026-03-27-09-20-00.tar.gz                                                                              100% 5419KB  43.7MB/s   00:00
+[postgres1@pg129 ~/restore]$ scp -r backup-node:/var/db/postgres0/backup_lab2/wal ~/restore/
+00000001000000000000000E.00000028.backup                                                                     100%  338    33.4KB/s   00:00
+000000010000000000000005                                                                                     100%   16MB 125.8MB/s   00:00
+000000010000000000000002                                                                                     100%   16MB  96.2MB/s   00:00
+000000010000000000000008                                                                                     100%   16MB 131.7MB/s   00:00
+000000010000000000000011                                                                                     100%   16MB 150.4MB/s   00:00
+00000001000000000000000D                                                                                     100%   16MB 115.7MB/s   00:00
+000000010000000000000006                                                                                     100%   16MB 132.3MB/s   00:00
+00000001000000000000000C                                                                                     100%   16MB 129.1MB/s   00:00
+00000001000000000000000A                                                                                     100%   16MB 115.6MB/s   00:00
+000000010000000000000010                                                                                     100%   16MB 118.8MB/s   00:00
+000000010000000000000009                                                                                     100%   16MB 126.5MB/s   00:00
+000000010000000000000003                                                                                     100%   16MB 120.6MB/s   00:00
+000000010000000000000004                                                                                     100%   16MB 112.0MB/s   00:00
+00000001000000000000000F                                                                                     100%   16MB 111.3MB/s   00:00
+00000001000000000000000A.00000028.backup                                                                     100%  338    17.3KB/s   00:00
+00000001000000000000000B                                                                                     100%   16MB 114.5MB/s   00:00
+000000010000000000000008.00000028.backup                                                                     100%  338    28.3KB/s   00:00
+000000010000000000000007                                                                                     100%   16MB 149.0MB/s   00:00
+00000001000000000000000C.00000028.backup                                                                     100%  338    43.9KB/s   00:00
+000000010000000000000006.00000028.backup                                                                     100%  338    14.9KB/s   00:00
+00000001000000000000000E                                                                                     100%   16MB 144.7MB/s   00:00
+```
+
+Распакуем в ту же директорию `restore`:
+
+```sh
+[postgres1@pg129 ~]$ tar -xzf ~/restore/base-*.tar.gz -C ~/restore
+[postgres1@pg129 ~]$ cd restore/
+[postgres1@pg129 ~/restore]$ rm base-2026-03-27-09-20-00.tar.gz
+[postgres1@pg129 ~/restore]$ ls
+base    ts      wal
+```
+
+Добавим сигнал восстановления:
+
+```sh
+[postgres1@pg129 ~/restore]$ touch ~/restore/base/recovery.signal
+```
+
+Добавим в восстановление перенос `WAL`-архивов из `WAL`-директории:
+
+```sh
+[postgres1@pg129 ~/restore]$ vi base/postgresql.conf
+[postgres1@pg129 ~/restore]$ cat base/postgresql.conf | grep restore_command -A 5
+restore_command = 'cp /var/db/postgres1/restore/wal/%f %p'              # command to use to restore an archived WAL file
+                                # placeholders: %p = path of file to restore
+                                #               %f = file name only
+                                # e.g. 'cp /mnt/server/archivedir/%f %p'
+#archive_cleanup_command = ''   # command to execute at every restartpoint
+#recovery_end_command = ''      # command to execute at completion of recovery
+```
+
+Перепишем переменную окружения и заменим симлинки дополнительных табличных пространств:
+
+```sh
+[postgres1@pg129 ~/restore]$ export PGDATA=~/restore/base
+[postgres1@pg129 ~/restore/base]$ ls -l $PGDATA/pg_tblspc/
+total 1
+lrwx------  1 postgres1 postgres 42 27 марта 09:20 16388 -> /var/db/postgres1/backup_lab2/tmp/ts/grj79
+```
+
+Путь существует, но указывает в старый путь табличного пространства. Это надо изменить:
+
+```sh
+[postgres1@pg129 ~/restore/base/pg_tblspc]$ ln -s /var/db/postgres1/restore/ts/grj79 ~/restore/base/pg_tblspc/16388
+[postgres1@pg129 ~/restore/base/pg_tblspc]$ ls -l 16388
+lrwxr-xr-x  1 postgres1 postgres 34 10 апр.  09:32 16388 -> /var/db/postgres1/restore/ts/grj79
+```
+
+Попытаемся запустить кластер
+
+```sh
+[postgres1@pg129 ~/restore]$ pg_ctl -D "$PGDATA" start
+ожидание запуска сервера....2026-04-10 09:20:12.081 MSK [55892] СООБЩЕНИЕ:  передача вывода в протокол процессу сбора протоколов
+2026-04-10 09:20:12.081 MSK [55892] ПОДСКАЗКА:  В дальнейшем протоколы будут выводиться в каталог "log".
+ готово
+сервер запущен
+```
+
+Проверим то, что данные восстановлены:
+
+```sh
+uglygraylaw=# \c uglygraylaw
+Вы подключены к базе данных "uglygraylaw" как пользователь "postgres1".
+uglygraylaw=# \db+
+                                            Список табличных пространств
+    Имя     | Владелец  |            Расположение            |     Права доступа     | Параметры | Размер | Описание
+------------+-----------+------------------------------------+-----------------------+-----------+--------+----------
+ grj79      | postgres1 | /var/db/postgres1/restore/ts/grj79 | postgres1=C/postgres1+|           | 648 kB |
+            |           |                                    | data_user=C/postgres1 |           |        |
+ pg_default | postgres1 |                                    |                       |           | 37 MB  |
+ pg_global  | postgres1 |                                    |                       |           | 589 kB |
+(3 строки)
+
+uglygraylaw=# \dt
+             Список отношений
+ Схема  |    Имя    |   Тип   | Владелец
+--------+-----------+---------+-----------
+ public | test_data | таблица | data_user
+(1 строка)
+```
+
 \
 === Этап 4
 
