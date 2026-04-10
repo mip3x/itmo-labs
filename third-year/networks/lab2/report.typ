@@ -34,7 +34,7 @@
   #faculty
   #v(25mm)
 
-  #text(weight: "bold", size: 16pt)[Отчёт по лабораторной работе №1]
+  #text(weight: "bold", size: 16pt)[Отчёт по лабораторной работе №2]
   #v(6mm)
   #text(weight: "bold")[#work_title]
   #v(2mm)
@@ -69,10 +69,10 @@
 N1 = 3, N2 = 3, N3 = 4, класс C
 ```
 
+\
 == Этап 1. Локальная сеть с концентратором (Сеть 1)
 
-=== Условие
-
+\
 === Выполнение
 
 В среде `Cisco Packet Tracer` была построена простейшая модель сети, состоящая из трёх маршрутизаторов и хаба
@@ -82,43 +82,16 @@ N1 = 3, N2 = 3, N3 = 4, класс C
   caption: [Схема сети]
 )
 
-== Этап 2. Локальная сеть с коммутатором (Сеть 2)
-
-== Этап 3. Многосегментная локальная сеть (Сеть 3)
-
-==== Построение сети
-
-#figure(
-  image("scheme_stage1.png"),
-  caption: [Схема сети]
-)
-
-==== Настройка сети
-
-На интерфейсах маршрутизаторов были назначены IP-адреса:
+На интерфейсах маршрутизаторов были назначены IP-адреса одной подсети:
 
 - `R1`: `216.18.17.13/24`
 - `R2`: `216.18.17.14/24`
+- `R3`: `216.18.17.15/24`
 
-Интерфейсы (`14` в рассматриваемом примере) были активированы следующей последовательностью команд:
+После назначения адресов и активации интерфейсов была проверена связность между всеми узлами сети. Так как все маршрутизаторы подключены к одному концентратору и находятся в одной подсети, обмен ICMP-пакетами выполняется напрямую
 
-```
-Router#enable
-Router#configure terminal
-Enter configuration commands, one per line.  End with CNTL/Z.
-Router(config)#interface GigabitEthernet 0/0
-Router(config)#interface GigabitEthernet 0/0
-Router(config-if)#ip address 216.18.17.14 255.255.255.0
-Router(config-if)#no shutdown 
-Router(config-if)#end
-```
+Проверка с `R1`:
 
-==== Проверка связи
-
-Для проверки работоспособности сети была выполнена передача пакетов с использованием команды `ping`. Результаты показали успешную доставку
-пакетов между узлами сети
-
-#block[
 ```text
 Router#ping 216.18.17.14
 
@@ -126,74 +99,164 @@ Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 216.18.17.14, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
+
+Router#ping 216.18.17.15
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 216.18.17.15, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
 ```
-]
 
-==== Анализ таблицы маршрутизации
+Проверка с `R2`:
 
-#block[
 ```text
-Router>show ip route
-Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
-D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
-N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
-i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
-* - candidate default, U - per-user static route, o - ODR
-P - periodic downloaded static route
+Router#ping 216.18.17.13
 
-Gateway of last resort is not set
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 216.18.17.13, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
 
-216.18.17.0/24 is variably subnetted, 2 subnets, 2 masks
-C 216.18.17.0/24 is directly connected, GigabitEthernet0/0
-L 216.18.17.13/32 is directly connected, GigabitEthernet0/0
+Router#ping 216.18.17.15
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 216.18.17.15, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
 ```
-]
 
-Анализ таблицы маршрутизации показал наличие записи о непосредственно
-подключённой сети:
+Проверка с `R3`:
 
-- C 216.18.17.0/24: непосредственно подключённая сеть  
-- L 216.18.17.14/32: локальный адрес интерфейса  
-
-Это означает, что передача пакетов осуществляется напрямую через подключённый интерфейс без использования дополнительных маршрутов.
-
-==== Анализ ARP-таблицы
-
-#block[
 ```text
-Router>show ip arp
-Protocol Address Age (min) Hardware Addr Type Interface
-Internet 216.18.17.13 - 00D0.D3CC.D701 ARPA GigabitEthernet0/0
-Internet 216.18.17.14 12 0000.0CD2.A101 ARPA GigabitEthernet0/0
+Router#ping 216.18.17.13
 
-Анализ ARP-таблицы показал наличие динамических записей, содержащих соответствие IP-адресов и MAC-адресов узлов сети. Записи формируются
-автоматически в процессе обмена пакетами
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 216.18.17.13, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
+
+Router#ping 216.18.17.14
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 216.18.17.14, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
 ```
-]
 
-==== Тестирование передачи UDP
+=== Анализ таблиц маршрутизации
 
-Передача данных была протестирована в режиме Simulation среды Cisco Packet Tracer с использованием Complex PDU. Был отправлен UDP-пакет от
-маршрутизатора R1 к маршрутизатору R2
+Так как все три маршрутизатора находятся в одной подсети `216.18.17.0/24` и подключены к общему концентратору, в таблицах маршрутизации присутствуют только записи о непосредственно подключённой сети и локальном адресе интерфейса. Дополнительные маршруты не требуются.
 
-Анализ показал, что пакет успешно достиг узла назначения, что подтверждается наличием заголовка UDP на транспортном уровне и корректной доставкой кадра на интерфейс GigabitEthernet0/0
+Таблица маршрутизации `R1` (`216.18.17.13`):
 
-Ответный пакет от R2 не формировался, поскольку протокол UDP не требует обязательного подтверждения доставки, а на принимающем узле отсутствует приложение, использующее указанный порт
+```text
+Routing Table for 216.18.17.13
+
+Type  Network          Port               Next Hop IP  Metric
+C     216.18.17.0/24   GigabitEthernet0/0 ---          0/0
+L     216.18.17.13/32  GigabitEthernet0/0 ---          0/0
+```
+
+Запись `C` означает, что сеть `216.18.17.0/24` подключена непосредственно к интерфейсу `GigabitEthernet0/0`. Запись `L` указывает на собственный адрес маршрутизатора `216.18.17.13/32`, назначенный на тот же интерфейс.
+
+Таблица маршрутизации `R2` (`216.18.17.14`):
+
+```text
+Routing Table for 216.18.17.14
+
+Type  Network          Port               Next Hop IP  Metric
+C     216.18.17.0/24   GigabitEthernet0/0 ---          0/0
+L     216.18.17.14/32  GigabitEthernet0/0 ---          0/0
+```
+
+Для `R2` таблица имеет ту же структуру. Это показывает, что маршрутизатор видит только локальный сегмент и собственный адрес, а поле `Next Hop IP` остаётся пустым, так как пересылка в пределах данной сети происходит без промежуточного узла.
+
+Таблица маршрутизации `R3` (`216.18.17.15`):
+
+```text
+Routing Table for 216.18.17.15
+
+Type  Network          Port               Next Hop IP  Metric
+C     216.18.17.0/24   GigabitEthernet0/0 ---          0/0
+L     216.18.17.15/32  GigabitEthernet0/0 ---          0/0
+```
+
+Аналогично, `R3` содержит только маршрут к общей сети и маршрут к собственному интерфейсу
+
+=== Анализ ARP-таблицы
+
+Содержимое ARP-таблиц на маршрутизаторах после обмена пакетами показано ниже.
+
+ARP-таблица `R1` (`216.18.17.13`):
+
+```text
+ARP Table for 216.18.17.13
+
+IP Address    Hardware Address  Interface
+216.18.17.13  00E0.A311.B301    GigabitEthernet0/0
+216.18.17.14  0001.966D.5201    GigabitEthernet0/0
+```
+
+В таблице `R1` присутствует запись для собственного интерфейса `216.18.17.13`, связанная с MAC-адресом `00E0.A311.B301`.
+
+ARP-таблица `R2` (`216.18.17.14`):
+
+```text
+ARP Table for 216.18.17.14
+
+IP Address    Hardware Address  Interface
+216.18.17.14  0001.966D.5201    GigabitEthernet0/0
+216.18.17.15  0001.96C4.1901    GigabitEthernet0/0
+```
+
+В таблице `R2` содержатся записи для собственного адреса и для узла `R3`, что подтверждает разрешение MAC-адресов в пределах локального сегмента.
+
+ARP-таблица `R3` (`216.18.17.15`):
+
+```text
+ARP Table for 216.18.17.15
+
+IP Address    Hardware Address  Interface
+216.18.17.14  0001.966D.5201    GigabitEthernet0/0
+216.18.17.15  0001.96C4.1901    GigabitEthernet0/0
+```
+
+Аналогично, на `R3` имеются записи для собственного интерфейса и для адреса `R2`. Наличие ARP-записей показывает, что устройства успешно определяют MAC-адреса соседей при обмене кадрами внутри одной локальной сети.
+
+=== Тестирование передачи UDP
+
+Для дополнительной проверки в режиме `Simulation` был отправлен UDP-пакет с помощью `Complex PDU`. Пакет был успешно передан внутри локальной сети через концентратор и достиг узла назначения.
 
 #figure(
-  image("stage1_udp.png"),
-  caption: [Передача UDP-пакета]
+  image("stage1_complex_pdu.png"),
+  caption: [Передача UDP-пакета в режиме Simulation]
 )
 
+#figure(
+  image("stage1_udp_osi.png"),
+  caption: [Стек протоколов UDP-пакета]
+)
+
+На транспортном уровне в составе PDU присутствует заголовок `UDP`, а на канальном уровне пакет инкапсулируется в Ethernet-кадр и передаётся всем устройствам сегмента. Концентратор не выполняет маршрутизацию или фильтрацию, поэтому кадр ретранслируется на все порты, а обрабатывается только устройством с нужным IP-адресом.
+
+
+
+\
+== Этап 2. Локальная сеть с коммутатором (Сеть 2)
+
+\
+== Этап 3. Многосегментная локальная сеть (Сеть 3)
+
+==== Построение сети
+
+==== Настройка сети
+
+На интерфейсах
 === Этап 2. 3 устройства
 
 ==== Построение сети
 
-#figure(
-  image("scheme_stage1.png"),
-  caption: [Схема сети]
-)
 
 ==== Выполнение
 
@@ -316,19 +379,11 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
 
 ==== Тестирование передачи UDP
 
-#figure(
-  image("stage2_udp.png"),
-  caption: [Передача UDP-пакета]
-)
 
 === Этап 3. 3 устройства в полносвязной сети
 
 ==== Построение сети
 
-#figure(
-  image("scheme_stage3.png"),
-  caption: [Схема сети]
-)
 
 ==== Конфигурация сети
 
@@ -373,10 +428,5 @@ Router#
 
 ==== Тестирование передачи UDP
 
-#figure(
-  image("stage3_udp.png"),
-  caption: [Передача UDP-пакета]
-)
 
 == Вывод
-
