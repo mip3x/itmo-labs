@@ -722,7 +722,7 @@ lrwxr-xr-x  1 postgres1 postgres 34 10 апр.  09:32 16388 -> /var/db/postgres1
 
 Проверим то, что данные восстановлены:
 
-```sh
+```sql
 uglygraylaw=# \c uglygraylaw
 Вы подключены к базе данных "uglygraylaw" как пользователь "postgres1".
 uglygraylaw=# \db+
@@ -744,10 +744,232 @@ uglygraylaw=# \dt
 ```
 
 \
-=== Этап 4
+=== Этап 4. Логическое повреждение данных
+
+На основном узле существует БД `uglygraylaw` с таблицей `test_data`, в которой 10000 строк:
+
+```sql
+postgres=# \c uglygraylaw
+Вы подключены к базе данных "uglygraylaw" как пользователь "postgres1".
+uglygraylaw=# \dt
+             Список отношений
+ Схема  |    Имя    |   Тип   | Владелец
+--------+-----------+---------+-----------
+ public | test_data | таблица | data_user
+(1 строка)
+
+uglygraylaw=# select count(*) from test_data;
+ count
+--------
+ 100000
+(1 строка)
+```
+
+Добавим 3 строки и зафиксируем время:
+
+```sql
+uglygraylaw=# INSERT INTO public.test_data (id, payload, created_at) VALUES
+(100001, 'row_100001', now()),
+(100002, 'row_100002', now()),
+(100003, 'row_100003', now());
+INSERT 0 3
+
+uglygraylaw=# select count(*) from test_data;
+ count
+--------
+ 100003
+(1 строка)
+
+uglygraylaw=# SELECT now();
+              now
+-------------------------------
+ 2026-04-10 10:21:04.464271+03
+(1 строка)
+```
+
+Симулируем ошибку, удалив половину строк:
+
+```sql
+uglygraylaw=# DELETE FROM public.test_data
+WHERE ctid IN (
+  SELECT ctid
+  FROM (
+    SELECT ctid, row_number() OVER (ORDER BY id) AS rn
+    FROM public.test_data
+  ) s
+  WHERE rn % 2 = 0
+);
+DELETE 50001
+uglygraylaw=# select count(*) from test_data;
+ count
+-------
+ 50002
+(1 строка)
+```
+
+Сбросим `WAL`: архивирование включено, поэтому этот `WAL` будет передан на резервный узел. Он нужен для того, чтобы восстановить дамп по `PITR`:
+
+```sql
+uglygraylaw=# SELECT pg_switch_wal();
+ pg_switch_wal
+---------------
+ 0/13D0E1D8
+(1 строка)
+```
+
+На резервном узле попытаемся восстановиться по записанному `PITR`, остановив старый кластер:
+
+```sh
+[postgres0@pg135 ~]$ pg_ctl -D "$PGDATA" stop
+ожидание завершения работы сервера.... готово
+сервер остановлен
+[postgres0@pg135 ~]$ mkdir -p ~/pitr_restore
+[postgres0@pg135 ~]$ cp ~/backup_lab2/base/$(ls -t ~/backup_lab2/base | head -1) ~/pitr_restore/
+cd ~/pitr_restore
+tar -xzf base-*.tar.gz
+rm base-*.tar.gz
+[postgres0@pg135 ~]$ touch ~/pitr_restore/base/recovery.signal
+[postgres0@pg135 ~/pitr_restore]$ vi ~/pitr_restore/base/postgresql.conf
+...
+restore_command = 'cp /var/db/postgres0/backup_lab2/wal/%f %p'          # command to use to restore an archived WAL file
+                                # placeholders: %p = path of file to restore
+                                #               %f = file name only
+                                # e.g. 'cp /mnt/server/archivedir/%f %p'
+...
+recovery_target_time = '2026-04-10 10:21:04.464271+03'  # the time stamp up to which recovery will proceed
+                                # (change requires restart)
+recovery_target_inclusive = on # Specifies whether to stop:
+                                # just after the specified recovery target (on)
+                                # just before the recovery target (off)
+                                # (change requires restart)
+...
+[postgres0@pg135 ~/pitr_restore/base/pg_tblspc]$ ls -l $PGDATA/pg_tblspc/
+total 1
+lrwx------  1 postgres0 postgres 42 27 марта 09:20 16388 -> /var/db/postgres1/backup_lab2/tmp/ts/grj79
+[postgres0@pg135 ~/pitr_restore/base/pg_tblspc]$ rm $PGDATA/pg_tblspc/16388
+[postgres0@pg135 ~/pitr_restore/base/pg_tblspc]$ ls ~/pitr_restore/ts/
+grj79
+[postgres0@pg135 ~/pitr_restore/base/pg_tblspc]$ ln -s ~/pitr_restore/ts/grj79 ~/pitr_restore/base/pg_tblspc/16388
+[postgres0@pg135 ~/pitr_restore/base/pg_tblspc]$ ls -l
+total 1
+lrwxr-xr-x  1 postgres0 postgres 39 10 апр.  10:54 16388 -> /var/db/postgres0/pitr_restore/ts/grj79
+```
+
+Подключимся и посмотрим, действительно ли есть эти строки:
+
+```sh
+[postgres0@pg135 ~]$ psql -p 9066 -d uglygraylaw -U postgres1
+psql (16.4)
+Введите "help", чтобы получить справку.
+
+uglygraylaw=# \dt
+             Список отношений
+ Схема  |    Имя    |   Тип   | Владелец
+--------+-----------+---------+-----------
+ public | test_data | таблица | data_user
+(1 строка)
+
+uglygraylaw=# select count(*) from test_data;
+ count
+--------
+ 100003
+(1 строка)
+```
+
+Да, они есть. Состояние до ошибки. Делаем дамп:
+
+```sh
+[postgres0@pg135 ~]$ pg_dump -p 9066 -d uglygraylaw -U postgres1 -t public.test_data -f ~/test_data_dump.sql
+```
+
+Перенесём дамп на основной узел:
+
+```sh
+[postgres1@pg129 ~]$ scp backup-node:~/test_data_dump.sql ~/
+test_data_dump.sql
+```
+
+Очистим таблицу на основном узле:
+
+```sql
+test_data_dump.sql^C
+uglygraylaw=# TRUNCATE TABLE public.test_data;
+TRUNCATE TABLE
+uglygraylaw=# \dt
+             Список отношений
+ Схема  |    Имя    |   Тип   | Владелец
+--------+-----------+---------+-----------
+ public | test_data | таблица | data_user
+(1 строка)
+
+uglygraylaw=# select count(*) from test_data;
+ count
+-------
+     0
+(1 строка)
+```
+
+Применим дамп на основном узле:
+
+```sh
+[postgres1@pg129 ~]$ psql -p 9066 -d uglygraylaw -U postgres1 -f ~/test_data_dump.sql
+SET
+SET
+SET
+SET
+SET
+ set_config
+------------
+
+(1 строка)
+
+SET
+SET
+SET
+SET
+SET
+SET
+psql:/var/db/postgres1/test_data_dump.sql:31: ������:  ��������� "test_data" ��� ����������
+ALTER TABLE
+psql:/var/db/postgres1/test_data_dump.sql:45: ������:  ��������� "test_data_id_seq" ��� ����������
+ALTER SEQUENCE
+ALTER SEQUENCE
+ALTER TABLE
+COPY 100003
+ setval
+--------
+ 100000
+(1 строка)
+
+psql:/var/db/postgres1/test_data_dump.sql:100087: ������:  ������� "test_data" �� ����� ����� ��������� ��������� ������
+SET
+psql:/var/db/postgres1/test_data_dump.sql:100096: ������:  ��������� "test_data_created_at_idx" ��� ����������
+```
+
+Проверим корректность применения:
+
+```sql
+uglygraylaw=# SELECT count(*) FROM public.test_data;
+ count
+--------
+ 100003
+(1 строка)
+
+uglygraylaw=# SELECT * FROM public.test_data WHERE id IN (100001,100002,100003);
+   id   |  payload   |          created_at
+--------+------------+-------------------------------
+ 100001 | row_100001 | 2026-04-10 10:17:35.962485+03
+ 100002 | row_100002 | 2026-04-10 10:17:35.962485+03
+ 100003 | row_100003 | 2026-04-10 10:17:35.962485+03
+(3 строки)
+```
+
+Данные на месте
 
 \
 == Вывод
+
+В ходе лабораторной работы были изучены и применены основные механизмы обеспечения отказоустойчивости `PostgreSQL`: физическое резервное копирование, архивирование `WAL` и восстановление данных. Было смоделировано как физическое повреждение (утрата `WAL`), так и логическая ошибка (удаление данных), после чего выполнено восстановление с использованием базового бэкапа, архивов `WAL` (`PITR`) и логического дампа. В результате показано, что различные методы резервирования позволяют восстанавливать систему как до консистентного состояния, так и до конкретного момента времени, минимизируя потери данных.
 
 
 \
