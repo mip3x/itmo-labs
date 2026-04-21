@@ -1,0 +1,126 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName JetBrains Mono
+skinparam ArrowColor #8b6f47
+skinparam ClassBorderColor #6f6254
+skinparam ClassBackgroundColor #fffef8
+skinparam PackageBorderColor #6f6254
+skinparam PackageBackgroundColor #fcfbf7
+
+top to bottom direction
+
+interface Function {
+  +calculate(x: Double, eps: Double): Double
+}
+
+package "Base" {
+  abstract class SeriesExpander {
+    +calculate(x: Double, eps: Double): Double
+    #prepareX(x: Double): Double
+    #isDefinedAt(x: Double): Boolean
+    #calculateTerm(x: Double, n: Int): Double
+  }
+  class Sin {
+    #prepareX(x: Double): Double
+    #isDefinedAt(x: Double): Boolean
+    #calculateTerm(x: Double, n: Int): Double
+  }
+  class Ln {
+    #isDefinedAt(x: Double): Boolean
+    #calculateTerm(x: Double, n: Int): Double
+  }
+}
+
+package "Trigonometric" {
+  class Cos {
+    +calculate(x: Double, eps: Double): Double
+  }
+  class Csc {
+    +calculate(x: Double, eps: Double): Double
+  }
+  class Sec {
+    +calculate(x: Double, eps: Double): Double
+  }
+  class Tan {
+    +calculate(x: Double, eps: Double): Double
+  }
+  class Cot {
+    +calculate(x: Double, eps: Double): Double
+  }
+}
+
+package "Logarithmic" {
+  class Log {
+    +calculate(x: Double, eps: Double): Double
+  }
+}
+
+package "System" {
+  class SystemFunction {
+    +calculate(x: Double, eps: Double): Double
+    -calculateTrigonometricBranch(x: Double, eps: Double): Double
+    -calculateLogarithmicBranch(x: Double, eps: Double): Double
+    -pow(value: Double, power: Int): Double
+  }
+}
+
+package "Application and Export" {
+  class FunctionRegistry {
+    +get(name: String): Function
+  }
+  class CsvExporter {
+    +export(function: Function, outputPath: Path, startX: Double, endX: Double, step: Double, eps: Double)
+    -stepTolerance(step: Double): Double
+  }
+  class Main {
+    +main(args: Array<String>)
+    -printUsage()
+  }
+}
+
+Sin -[hidden]-> Ln
+Cos -[hidden]-> Csc
+Csc -[hidden]-> Sec
+Sec -[hidden]-> Tan
+Tan -[hidden]-> Cot
+Cot -[hidden]-> Log
+
+Sin ..> SeriesExpander
+Ln ..> SeriesExpander
+
+Cos --> Sin
+Csc --> Sin
+Sec --> Cos
+Tan --> Sin
+Tan --> Cos
+Cot --> Sin
+Cot --> Cos
+Log --> Ln
+
+SystemFunction --> Sin
+SystemFunction --> Cos
+SystemFunction --> Tan
+SystemFunction --> Cot
+SystemFunction --> Sec
+SystemFunction --> Csc
+SystemFunction --> Ln
+SystemFunction --> Log
+
+FunctionRegistry --> Sin
+FunctionRegistry --> Cos
+FunctionRegistry --> Tan
+FunctionRegistry --> Cot
+FunctionRegistry --> Sec
+FunctionRegistry --> Csc
+FunctionRegistry --> Ln
+FunctionRegistry --> Log
+FunctionRegistry --> SystemFunction
+
+CsvExporter --> Function
+Main --> FunctionRegistry
+Main --> CsvExporter
+
+@enduml

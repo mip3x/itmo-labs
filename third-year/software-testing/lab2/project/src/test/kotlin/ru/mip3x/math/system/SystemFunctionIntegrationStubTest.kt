@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
 
-class SystemFunctionStubTest {
+class SystemFunctionIntegrationStubTest {
     private val trigResource = "/test-data/system/trig_values.csv"
     private val logResource = "/test-data/system/log_values.csv"
 

@@ -3,18 +3,22 @@ package ru.mip3x.math.system
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
-import ru.mip3x.math.base.Sin
+import ru.mip3x.math.trig.Cos
+import ru.mip3x.math.trig.Cot
+import ru.mip3x.math.trig.Csc
+import ru.mip3x.math.trig.Sec
+import ru.mip3x.math.trig.Tan
 
-class SystemFunctionSinIntegrationTest {
+class SystemFunctionTanCotSecCosCscIntegrationTest {
     private val trigResource = "/test-data/system/trig_values.csv"
     private val logResource = "/test-data/system/log_values.csv"
 
-    private val sin = Sin()
-    private val cos = StubHelper.functionStub(trigResource, "cos")
-    private val tan = StubHelper.functionStub(trigResource, "tan")
-    private val cot = StubHelper.functionStub(trigResource, "cot")
-    private val sec = StubHelper.functionStub(trigResource, "sec")
-    private val csc = StubHelper.functionStub(trigResource, "csc")
+    private val sin = StubHelper.functionStub(TestDataHelper.loadSinAndShiftedCosAsMap(trigResource))
+    private val cos = Cos(sin)
+    private val tan = Tan(sin, cos)
+    private val cot = Cot(sin, cos)
+    private val sec = Sec(cos)
+    private val csc = Csc(sin)
     private val ln = StubHelper.functionStub(logResource, "ln")
     private val log2 = StubHelper.functionStub(logResource, "log2")
     private val log3 = StubHelper.functionStub(logResource, "log3")
@@ -30,9 +34,9 @@ class SystemFunctionSinIntegrationTest {
         resources = ["/test-data/system/trig_values.csv"],
         numLinesToSkip = 1
     )
-    fun trigBranchRealSinTest(
+    fun trigBranchRealTanCotSecCosCscTest(
         x: Double,
-        expectedSin: Double,
+        sinX: Double,
         cosX: Double,
         tanX: Double,
         cotX: Double,
