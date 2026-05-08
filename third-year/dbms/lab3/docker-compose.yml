@@ -12,8 +12,13 @@ services:
       - PGLOCALE=en_US.UTF8
       - PGUSERNAME=postgres
       - POSTGRES_PASSWORD=postgres
-    volumes:
-      - ./primary/data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data:size=512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
     networks:
       - pg_net
 
@@ -25,15 +30,16 @@ services:
     ports:
       - "5433:5432"
     depends_on:
-      - primary
+      primary:
+        condition: service_healthy
     environment:
       - PGDATA=/var/lib/postgresql/data
       - PGENCODING=UTF8
       - PGLOCALE=en_US.UTF8
       - PGUSERNAME=postgres
       - POSTGRES_PASSWORD=postgres
-    volumes:
-      - ./standby/data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data:size=512m
     networks:
       - pg_net
 

@@ -135,8 +135,13 @@ services:
       - PGLOCALE=en_US.UTF8
       - PGUSERNAME=postgres
       - POSTGRES_PASSWORD=postgres
-    volumes:
-      - ./primary/data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data:size=512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
     networks:
       - pg_net
 
@@ -148,15 +153,16 @@ services:
     ports:
       - "5433:5432"
     depends_on:
-      - primary
+      primary:
+        condition: service_healthy
     environment:
       - PGDATA=/var/lib/postgresql/data
       - PGENCODING=UTF8
       - PGLOCALE=en_US.UTF8
       - PGUSERNAME=postgres
       - POSTGRES_PASSWORD=postgres
-    volumes:
-      - ./standby/data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data:size=512m
     networks:
       - pg_net
 
@@ -210,10 +216,10 @@ FROM postgres:latest
 
 COPY conf/* /etc/postgresql/
 COPY scripts/* /home/scripts/
-COPY init/init-primary.sh /home/init/init-primary.sh
+COPY init/init-primary.sh /docker-entrypoint-initdb.d/init-primary.sh
 RUN chmod +x /home/scripts/read_client.sh
 RUN chmod +x /home/scripts/write_client.sh
-RUN chmod +x /home/init/init-primary.sh
+RUN chmod +x /docker-entrypoint-initdb.d/init-primary.sh
 ```
 
 По варианту должен использоваться режим трансляции логов. Это значит, что основной сервер будет постоянно асинхронно передавать резервному серверу журныла изменений `WAL`. Из документации:
@@ -386,28 +392,6 @@ primary  | 2026-05-08 06:55:33.240 UTC [69] LOG:  database system was shut down 
 primary  | 2026-05-08 06:55:33.245 UTC [1] LOG:  database system is ready to accept connections
 ```
 
-Запустим скрипт инициализации:
-
-```sh
-❯ docker exec -it primary bash
-root@2aa47f30d1ad:/# ./home/init/init-primary.sh
-CREATE ROLE
-CREATE DATABASE
-You are now connected to database "test" as user "postgres".
-CREATE TABLE
-CREATE TABLE
-INSERT 0 2
-INSERT 0 2
-Configuration files copied!
-```
-
-Перезапустим кластер (этого требуют изменённые параметры):
-
-```sh
-❯ docker restart primary
-primary
-```
-
 \
 *standby*
 
@@ -551,6 +535,14 @@ docker exec -it standby bash /home/scripts/read_client.sh
   image("img/reads_writes.png"),
   caption: [Демонстрация в режиме чтение/запись (слева - основной, справа - резерв)]
 )
+
+\
+=== Этап 2.2. Сбой
+
+Создадим один большой "мусорный" файл
+
+```sh
+```
 
 \
 = Вывод
