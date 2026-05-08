@@ -507,13 +507,59 @@ ERROR:  cannot execute INSERT in a read-only transaction
 == Этап 2. Симуляция и обработка сбоя
 
 \
+=== Этап 2.1. Подготовка
+
+Скрипт для симуляции чтения (для обоих хостов):
+
+```sh
+#!/bin/bash
+
+while true; do
+    psql -U postgres -d test -c "SELECT * FROM users;"
+    psql -U postgres -d test -c "SELECT * FROM orders;"
+    sleep 2
+done
+```
+
+Скрипт для симуляции записи (только для основного узла):
+
+```sh
+#!/bin/bash
+
+while true; do
+    psql -U postgres -d test -c "INSERT INTO users (name) VALUES ('User_$(date +%s)');"
+
+    items=("TV" "Mouse" "Keyboard" "HDMI cable")
+    random_item=${items[$RANDOM % ${#items[@]}]}
+    last_user_id=$(psql -U postgres -d test -t -c "SELECT id FROM users ORDER BY id DESC LIMIT 1;")
+    psql -U postgres -d test -c "INSERT INTO orders (user_id, product) VALUES ($last_user_id, '$random_item');"
+    sleep 2
+done
+```
+
+Запустим скрипты:
+
+```sh
+docker exec -it primary bash /home/scripts/read_client.sh
+docker exec -it primary bash /home/scripts/write_client.sh
+docker exec -it standby bash /home/scripts/read_client.sh
+```
+
+Ожидается, что на `standby` новые данные с `primary` будут показываться автоматически
+
+#figure(
+  image("img/reads_writes.png"),
+  caption: [Демонстрация в режиме чтение/запись (слева - основной, справа - резерв)]
+)
+
+\
 = Вывод
 
 В ходе лабораторной работы были изучены и применены основные механизмы обеспечения отказоустойчивости `PostgreSQL`: физическое резервное копирование, архивирование `WAL` и восстановление данных. Было смоделировано как физическое повреждение (утрата `WAL`), так и логическая ошибка (удаление данных), после чего выполнено восстановление с использованием базового бэкапа, архивов `WAL` (`PITR`) и логического дампа. В результате показано, что различные методы резервирования позволяют восстанавливать систему как до консистентного состояния, так и до конкретного момента времени, минимизируя потери данных.
 
-
 \
 = Вопросы для подготовки к защите
+
 - Синхронная и асинхронная репликация: отличия, ограничения и область применения.
 - Кластер в режиме Active-Active и Active-Standby: отличия, ограничения и область применения.
 - Балансировка нагрузки: описание и область применения.
