@@ -197,7 +197,6 @@ networks:
     ├── init
     │   └── init-standby.sh
     └── scripts
-        ├── auto_promote.sh
         └── read_client.sh
 ```
 
@@ -294,7 +293,6 @@ COPY scripts/* /home/scripts/
 COPY init/init-standby.sh /docker-entrypoint-initdb.d/init-standby.sh
 RUN chmod +x /home/scripts/read_client.sh
 RUN chmod +x /docker-entrypoint-initdb.d/init-standby.sh
-RUN chmod +x /home/scripts/auto_promote.sh
 ```
 
 \
@@ -539,10 +537,92 @@ docker exec -it standby bash /home/scripts/read_client.sh
 \
 === Этап 2.2. Сбой
 
-Создадим один большой "мусорный" файл
+На основном узле всего `512 Мб`:
 
 ```sh
+❯ docker exec -it primary bash
+root@bc662b6c3b54:/# df -h "$PGDATA"
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           512M   79M  434M  16% /var/lib/postgresql/data
 ```
+
+Создадим один большой "мусорный" файл:
+
+```sh
+root@bc662b6c3b54:/# dd if=/dev/zero of=$PGDATA/fill_disk bs=10M status=progress
+dd: error writing '/var/lib/postgresql/data/fill_disk': No space left on device
+44+0 records in
+43+0 records out
+454356992 bytes (454 MB, 433 MiB) copied, 0.336227 s, 1.4 GB/s
+root@bc662b6c3b54:/# df -h "$PGDATA"
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           512M  512M     0 100% /var/lib/postgresql/data
+```
+
+\
+=== Этап 2.3. Обработка
+
+Лог основного узла:
+
+```sh
+ERROR: could not extend file "base/16385/16415": No space left on device
+...
+PANIC: could not write to file "pg_logical/replorigin_checkpoint.tmp": No space left on device
+LOG: checkpointer process (PID 75) was terminated by signal 6: Aborted
+LOG: terminating any other active server processes
+LOG: all server processes terminated; reinitializing
+FATAL: the database system is in recovery mode
+```
+
+Лог резервного узла:
+
+```sh
+2026-05-08 08:42:05.351 GMT [91] FATAL:  could not receive data from WAL stream: server closed the connection unexpectedly
+                This probably means the server terminated abnormally
+                before or while processing the request.
+2026-05-08 08:42:05.368 GMT [173] FATAL:  streaming replication receiver "walreceiver" could not connect to the primary server: connection to server at "primary" (172.19.0.2), port 5432 failed: FATAL:  the database system is in recovery mode
+2026-05-08 08:42:05.368 GMT [90] LOG:  waiting for WAL to become available at 0/306C4F0
+2026-05-08 08:42:10.368 GMT [174] LOG:  started streaming WAL from primary at 0/3000000 on timeline 1
+```
+
+Совершим `failover` на резервный узел:
+
+```sh
+❯ docker exec -it -u postgres standby /usr/lib/postgresql/18/bin/pg_ctl promote -D /var/lib/postgresql/data
+waiting for server to promote.... done
+server promoted
+```
+
+И выполним проверки:
+
+```sh
+❯ docker exec -it standby bash
+root@93aa96ef4f1e:/# psql -U postgres -d test -c "SELECT pg_is_in_recovery();"
+ pg_is_in_recovery
+-------------------
+ f
+(1 row)
+root@eb81e5227275:/# psql -U postgres -d test
+psql (18.3 (Debian 18.3-1.pgdg13+1))
+Type "help" for help.
+
+test=# insert into users (name) values ('Charlie');
+INSERT 0 1
+test=# select * from users;
+ id |      name
+----+-----------------
+  1 | Alice
+  2 | Bob
+  3 | Brad
+  4 | User_1778231559
+  5 | User_1778231561
+  6 | User_1778231563
+  7 | User_1778231565
+ 36 | Charlie
+(8 rows)
+```
+
+Чтение и запись работают
 
 \
 = Вывод
