@@ -625,6 +625,63 @@ test=# select * from users;
 Чтение и запись работают
 
 \
+== Этап 3. Восстановление
+
+Удалим "мусорный" файл:
+
+```sh
+root@a097e6d07e04:/# cd $PGDATA
+root@a097e6d07e04:/var/lib/postgresql/data# rm -f fill_disk
+root@a097e6d07e04:/var/lib/postgresql/data# df -h /var/lib/postgresql/data
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           512M   79M  434M  16% /var/lib/postgresql/data
+```
+
+Перенесём бэкап со `standby`:
+
+```sh
+❯ docker exec -it primary bash
+root@a097e6d07e04:/# su postgres
+postgres@a097e6d07e04:/$ pg_basebackup -P -X stream -c fast -h standby -U replicator -D ~/backup
+Password:
+31505/31505 kB (100%), 1/1 tablespace
+postgres@985c770e9298:~$ cp -a backup/. ~/data/
+```
+
+Выйдем из контейнера `primary`, войдём в `standby`:
+
+Выйдем из `standby` и пересоздадим контейнер:
+
+```sh
+❯ docker compose stop standby
+[+] stop 1/1
+ ✔ Container standby Stopped
+❯ docker compose up -d standby --build
+❯ docker exec -it standby bash
+root@f917b1776964:/# psql -U postgres -d test
+psql (18.3 (Debian 18.3-1.pgdg13+1))
+Type "help" for help.
+
+test=# select * from users;
+ id |      name
+----+-----------------
+  1 | Alice
+  2 | Bob
+  3 | User_1778233969
+  4 | User_1778233971
+  5 | User_1778233973
+ 36 | Charlie
+(6 rows)
+```
+
+Да, данные были взяты с `primary`. Выполним проверки записи/чтения
+
+#figure(
+  image("img/reads_writes2.png"),
+  caption: [Повторная демонстрация в режиме чтение/запись (слева - основной, справа - резерв)]
+)
+
+\
 = Вывод
 
 В ходе лабораторной работы были изучены и применены основные механизмы обеспечения отказоустойчивости `PostgreSQL`: физическое резервное копирование, архивирование `WAL` и восстановление данных. Было смоделировано как физическое повреждение (утрата `WAL`), так и логическая ошибка (удаление данных), после чего выполнено восстановление с использованием базового бэкапа, архивов `WAL` (`PITR`) и логического дампа. В результате показано, что различные методы резервирования позволяют восстанавливать систему как до консистентного состояния, так и до конкретного момента времени, минимизируя потери данных.
