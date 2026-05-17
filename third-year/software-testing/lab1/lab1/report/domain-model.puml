@@ -1,0 +1,123 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' ===== Stereotypes =====
+' <<entity>>       -> Kotlin class (с поведением/состоянием)
+' <<value object>> -> Kotlin data class
+' <<enum>>         -> Kotlin enum class
+' <<service>>      -> фабрика/сервис
+
+class SpaceShip <<entity>> {
+  +name: String
+  -distances: Map<CelestialObject, Long>
+  +flightActivity: FlightActivity
+  +setDistance(target: CelestialObject, distance: Long)
+  +getDistanceTo(target: CelestialObject): Long
+  +flyAwayFrom(target: CelestialObject, distance: Long)
+}
+
+class Character <<entity>> {
+  +name: String
+  +activity: CharacterActivity
+  +spaceShipLocation: SpaceShipLocation?
+  +bodyState: BodyState
+  +currentBook: Book?
+  +lastDrink: Drink?
+  +moveTo(location: SpaceShipLocation)
+  +read(book: Book)
+  +drink(drink: Drink, portions: Int)
+}
+
+class Discussion <<entity>> {
+  +topic: String
+  +participants: Set<Character>
+  +join(character: Character)
+  +leave(character: Character)
+}
+
+class SceneState <<value object>> {
+  +spaceShip: SpaceShip
+  +characters: List<Character>
+}
+
+class CelestialObject <<value object>> {
+  +name: String
+}
+
+class Book <<value object>> {
+  +title: String
+  +owner: Character
+}
+
+class FlightActivity <<value object>> {
+  +type: FlightActivityType
+}
+
+class CharacterActivity <<value object>> {
+  +type: CharacterActivityType
+}
+
+class Drink <<value object>> {
+  +name: String
+  +type: DrinkType
+}
+
+enum SpaceShipLocation <<enum>> {
+  BRIDGE_UNDER_PALM
+  BRIDGE_CORNER
+  CABIN
+}
+
+enum FlightActivityType <<enum>> {
+  FLYING
+  STAYING
+}
+
+enum CharacterActivityType <<enum>> {
+  READING
+  RESTING
+  DRINKING
+}
+
+enum DrinkType <<enum>> {
+  PAN_GALACTIC_GARGLE_BLASTER
+  TEA
+  WATER
+  COFFEE
+}
+
+enum BodyState <<enum>> {
+  NORMAL
+  RELAXED
+  ENERGIZED
+  DRUNK
+}
+
+class DomainModelFactory <<service>> {
+  +createHitchhikerScene(): SceneState
+}
+
+SceneState *-- SpaceShip
+SceneState *-- "0..*" Character
+
+SpaceShip --> FlightActivity
+SpaceShip --> "0..*" CelestialObject : distance to
+
+Character --> CharacterActivity
+Character --> SpaceShipLocation
+Character --> Book : reads
+Character --> Drink : drinks
+Character --> BodyState
+
+Discussion --> "2..*" Character : participants
+Discussion --> Character : join/leave
+
+Drink --> DrinkType
+Book --> Character : owner
+
+DomainModelFactory ..> SceneState : creates
+DomainModelFactory ..> Discussion : creates
+DomainModelFactory ..> Book : creates
+DomainModelFactory ..> Drink : creates
+@enduml

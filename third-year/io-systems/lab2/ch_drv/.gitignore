@@ -1,0 +1,31 @@
+# Kernel module build artifacts
+*.o
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.symvers
+*.order
+
+# Module build system files
+Module.symvers
+modules.order
+
+*.cmd
+.tmp_versions/
+*.markers
+
+build/
+output/
+
+# Dependency files
+*.d
+*~
+*.swp
+*.swo
+.DS_Store
+.vscode/
+.idea/
+*.log
+*.out
+a.out

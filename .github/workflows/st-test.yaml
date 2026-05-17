@@ -1,0 +1,37 @@
+name: Software Testing Test
+
+on:
+  push:
+    branches:
+      - "software-testing"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: third-year/software-testing/lab1/lab1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        run: ./gradlew --no-daemon test
+
+      - name: Mark as success
+        if: ${{ success() }}
+        run: echo "[Tests passed]" >> $GITHUB_STEP_SUMMARY
+
+      - name: Mark as failed
+        if: ${{ failure() }}
+        run: echo "[Tests failed]" >> $GITHUB_STEP_SUMMARY

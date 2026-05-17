@@ -1,0 +1,13 @@
+qemu-system-riscv64 \
+    -machine virt \
+    -nographic \
+    -m 5G \
+    -smp 1 \
+    -bios ./build/opensbi/fw_jump.bin \
+    -kernel ./build/uboot/uboot.elf \
+    -device virtio-rng-pci \
+    -drive file=./build/ubuntu.img,format=raw,if=virtio \
+    -device virtio-net-device,netdev=net \
+    -netdev user,id=net,hostfwd=tcp::2222-:22 \
+    -fsdev local,id=fsdev0,path=./ch_drv,security_model=passthrough \
+    -device virtio-9p-pci,fsdev=fsdev0,mount_tag=ch_drv

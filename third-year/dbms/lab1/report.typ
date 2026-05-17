@@ -1,0 +1,589 @@
+#set page(
+  paper: "a4",
+  margin: (left: 25mm, right: 15mm, top: 20mm, bottom: 20mm),
+)
+
+#set text(
+  font: "JetBrains Mono",
+  size: 11pt,
+)
+
+#set par(
+  leading: 1.4em,
+  justify: true,
+)
+
+#set heading(numbering: "1.")
+
+#let organization = "ФГБОУ высшего профессионального образования «Санкт-Петербургский национальный исследовательский университет информационных технологий, механики и оптики»"
+#let faculty = "Факультет программной инженерии и компьютерной техники (ФПИиКТ)"
+
+#let work_title = "Дисциплина «РСХД»"
+
+#let student_name = "Малышев Михаил Александрович"
+#let group = "Группа P3311"
+
+#let teacher_name = "Заболотняя Ольга Михайловна"
+
+#let year = "2026"
+
+#align(center)[
+  #v(10mm)
+  #text(weight: "bold")[#organization]
+  #v(3mm)
+  #faculty
+  #v(25mm)
+
+  #text(weight: "bold", size: 16pt)[Отчёт по лабораторной работе №1]
+  #v(6mm)
+  #text(weight: "bold")[#work_title]
+  #v(2mm)
+]
+
+#v(30mm)
+
+#align(right)[
+  Выполнил: #student_name \
+  #group \
+  \
+  Преподаватель практики: #teacher_name
+]
+
+#v(25mm)
+
+#align(center)[
+  #year
+]
+
+#pagebreak()
+
+= Лабораторная работа №1
+
+== Условие
+
+Цель работы - на выделенном узле создать и сконфигурировать новый кластер БД `Postgres`, саму БД, табличные пространства и новую роль, а также произвести наполнение базы в соответствии с заданием. Отчёт по работе должен содержать все команды по настройке, скрипты, а также измененные строки конфигурационных файлов.
+
+Способ подключения к узлу из сети Интернет через `helios`:
+
+```sh
+$ ssh -J sXXXXXX@helios.cs.ifmo.ru:2222 postgresY@pgZZZ
+```
+
+Способ подключения к узлу из сети факультета:
+
+```sh
+$ ssh postgresY@pgZZZ
+```
+
+Номер выделенного узла `pgZZZ`, а также логин и пароль для подключения Вам выдаст преподаватель.
+
+Этап 1. Инициализация кластера БД
+
+- Директория кластера: `\$HOME/zas34`
+- Кодировка: `ANSI1251`
+- Локаль: `русская`
+- Параметры инициализации задать через аргументы команды
+
+Этап 2. Конфигурация и запуск сервера БД
+
+- Способы подключения:
+  1) `Unix-domain` сокет в режиме `peer`;
+  2) сокет `TCP/IP`, только `localhost`
+- Номер порта: `9066`
+- Способ аутентификации `TCP/IP` клиентов: `по паролю в открытом виде`
+- Остальные способы подключений запретить.
+- Настроить следующие параметры сервера БД:
+  - `max_connections`
+  - `shared_buffers`
+  - `temp_buffers`
+  - `work_mem`
+  - `checkpoint_timeout`
+  - `effective_cache_size`
+  - `fsync`
+  - `commit_delay`
+
+Параметры должны быть подобраны в соответствии со сценарием `OLTP`: 200 одновременных пользователей, 4 сессий на каждого; каждая сессия инициирует до 10 транзакций на запись размером 8КБ; обеспечить максимальную производительность.
+
+- Директория `WAL` файлов: `\$PGDATA/pg_wal`
+- Формат лог-файлов: `.csv`
+- Уровень сообщений лога: `ERROR`
+- Дополнительно логировать: контрольные точки и попытки подключения
+
+Этап 3. Дополнительные табличные пространства и наполнение базы
+
+- Создать новое табличное пространство для индексов: `\$HOME/grj79`
+- На основе `template1` создать новую базу: `uglygraylaw`
+- Создать новую роль, предоставить необходимые права, разрешить подключение к базе.
+- От имени новой роли (не администратора) произвести наполнение ВСЕХ созданных баз тестовыми наборами данных. ВСЕ табличные пространства должны использоваться по назначению.
+- Вывести список всех табличных пространств кластера и содержащиеся в них объекты.
+
+== Выполнение
+
+=== Этап 1. Инициализация кластера БД
+
+Установка переменных окружения:
+
+```sh
+$ export PGDATA="$HOME/zas34"
+```
+
+Создание директорий и инициализация кластера:
+
+```sh
+$ initdb -D "$PGDATA" -E=WIN1251 --locale=ru_RU.CP1251
+```
+
+Запуск сервера баз данных:
+
+```sh
+$ pg_ctl -D "$PGDATA" -l "$PGDATA/server.log" start
+```
+
+=== Этап 2. Конфигурация и запуск сервера БД
+
+==== Конфигурация порта, адреса прослушивания и способов аутентификации
+
+Откроем файл `postgresql.conf`:
+
+```sh
+$ vi $PGDATA/postgresql.conf
+```
+
+и найдём строку `port`:
+
+```vi
+/port
+```
+
+по умолчанию значение задокументировано и равно `5432`:
+
+```vi
+# port = 5432                             # (change requires restart)
+```
+
+Раскомментируем и установим значение в `9066`:
+
+```vi
+port = 9066                               # (change requires restart)
+```
+
+Аналогично сделаем и для `listen_addresses`. Найдём `listen_addresses`:
+
+```vi
+#listen_addresses = 'localhost'         # what IP address(es) to listen on;
+```
+
+Раскомментируем:
+
+```vi
+listen_addresses = 'localhost'          # what IP address(es) to listen on;
+```
+
+Для настроек способов аутентификации будем править файл `pg_hba.conf`. Посмотрим на конец этого файла:
+
+```sh
+$ tail -n 28 $PGDATA/pg_hba.conf
+# ----------------------------------
+# Put your actual configuration here
+# ----------------------------------
+#
+# If you want to allow non-local connections, you need to add more
+# "host" records.  In that case you will also need to make PostgreSQL
+# listen on a non-local interface via the listen_addresses
+# configuration parameter, or via the -i or -h command line switches.
+
+# CAUTION: Configuring the system for local "trust" authentication
+# allows any local user to connect as any PostgreSQL user, including
+# the database superuser.  If you do not trust all your local users,
+# use another authentication method.
+
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust
+# IPv6 local connections:
+host    all             all             ::1/128                 trust
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+local   replication     all                                     trust
+host    replication     all             127.0.0.1/32            trust
+host    replication     all             ::1/128                 trust
+```
+
+Помимо подключений через `Unix-domain` сокет в режиме `peer` и `TCP/IP` сокет через пароль, остальные способы подключений должны быть запрещены:
+
+```sh
+$ tail -n 11 $PGDATA/pg_hba.conf
+# "local" is for Unix domain socket connections only
+local   all             all                                     peer
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            password
+# IPv6 local connections:
+host    all             all             ::1/128                 password
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+#local   replication     all                                     trust
+#host    replication     all             127.0.0.1/32            trust
+#host    replication     all             ::1/128                 trust
+```
+
+Изменение порта и прослушивающего адреса требовало `restart` сервера. Выполним его:
+
+```sh
+$ pg_ctl -D "$PGDATA" restart
+```
+
+Проверим возможность подключения.
+
+Сначала через `Unix-domain` сокет:
+
+```sh
+$ psql -p 9066 -d postgres
+psql (16.4)
+Введите "help", чтобы получить справку.
+
+postgres=# \conninfo
+Вы подключены к базе данных "postgres" как пользователь "postgres1" через сокет в "/tmp", порт "9066".
+...
+```
+
+Через `TCP/IP` `v4`:
+
+```sh
+$ psql -h 127.0.0.1 -p 9066 -d postgres
+Пароль пользователя postgres1:
+psql: ошибка: подключиться к серверу "127.0.0.1", порту 9066 не удалось: ВАЖНО:  пользователь "postgres1" не прошёл проверку подлинности (по паролю)
+```
+
+Пароль ещё не задан. Требуется его задать. Выполним это, подключившись через `Unix`-сокет:
+
+```sh
+$ psql -p 9066 -d postgres
+psql (16.4)
+Введите "help", чтобы получить справку.
+
+postgres=# SELECT current_user;
+ current_user
+--------------
+ postgres1
+(1 строка)
+postgres=# ALTER ROLE postgres1 WITH PASSWORD '***';
+ALTER ROLE
+postgres=# \q
+```
+
+Попробуем заново:
+
+```sh
+$ psql -h 127.0.0.1 -p 9066 -d postgres
+Пароль пользователя postgres1:
+psql (16.4)
+Введите "help", чтобы получить справку.
+
+postgres=# \conninfo
+Вы подключены к базе данных "postgres" как пользователь "postgres1" (сервер "127.0.0.1", порт "9066").
+...
+```
+
+Теперь попытаемся подключиться по `IPv6`:
+
+```sh
+$ psql -h localhost -p 9066 -d postgres -U postgres1
+Пароль пользователя postgres1:
+psql (16.4)
+Введите "help", чтобы получить справку.
+
+postgres=# \conninfo
+Вы подключены к базе данных "postgres" как пользователь "postgres1" (сервер "localhost": адрес "::1", порт "9066").
+...
+```
+
+==== Настройка параметров сервера БД
+
+Сделаем это через `ALTER SYSTEM` из `sql`. В таком случае, параметры будут записаны в `postgresql.auto.conf`, который имеет более слабый приоритет в сравнении с `postgresql.conf`, но подходит для конфигурации дополнительных параметров:
+
+```sh
+psql -p 9066 -d postgres -U postgres1
+psql (16.4)
+Введите "help", чтобы получить справку.
+
+postgres=#
+...
+```
+
+Директория `WAL`-файлов: `\$PGDATA/pg_wal` - указана стандартная. Ничего менять не стоит.
+
+Настроим логгирование:
+
+```sql
+# ALTER SYSTEM SET log_destination = 'csvlog';
+# ALTER SYSTEM SET logging_collector = 'on';
+# ALTER SYSTEM SET log_min_messages = 'ERROR';
+# ALTER SYSTEM SET log_connections = 'on';
+# \q
+```
+
+За контрольные точки отвечает параметр `log_checkpoints`. По умолчанию он включён, поэтому дополнительно включать я его не стал.
+
+Перезапустим сервер:
+
+```sh
+$ pg_ctl -D "$PGDATA" restart
+```
+
+Проверим внесённые параметры:
+
+```sql
+# SHOW log_destination; SHOW log_min_messages; SHOW log_connections; SHOW log_checkpoints; SHOW logging_collector;
+ log_destination
+-----------------
+ csvlog
+(1 строка)
+
+ log_min_messages
+------------------
+ error
+(1 строка)
+
+ log_connections
+-----------------
+ on
+(1 строка)
+
+ log_checkpoints
+-----------------
+ on
+(1 строка)
+
+ logging_collector
+-------------------
+ on
+(1 строка)
+```
+
+Проверим, появились ли логи:
+
+```sh
+$ ls -l "$PGDATA/log" | tail
+total 9
+-rw-------  1 postgres1 postgres 3393 27 февр. 07:51 postgresql-2026-02-27_074625.csv
+-rw-------  1 postgres1 postgres  244 27 февр. 07:46 postgresql-2026-02-27_074625.log
+```
+
+Попробуем подключиться и посмотрим логи:
+
+```sh
+$ tail -n 5 "$PGDATA/log/"*.csv
+2026-02-27 07:51:25.574 MSK,,,22795,,69a121a1.590b,1,,2026-02-27 07:46:25 MSK,,0,СООБЩЕНИЕ,00000,"начата контрольная точка: time",,,,,,,,,"","checkpointer",,0
+2026-02-27 07:51:25.676 MSK,,,22795,,69a121a1.590b,2,,2026-02-27 07:46:25 MSK,,0,СООБЩЕНИЕ,00000,"контрольная точка завершена: записано буферов: 3 (0.0%); добавлено файлов WAL 0, удалено: 0, переработано: 0; запись=0.001 сек., синхр.=0.049 сек., всего=0.103 сек.; синхронизировано_файлов=2, самая_долгая_синхр.=0.044 сек., средняя=0.025 сек.; расстояние=0 kB, ожидалось=0 kB; lsn=0/154A6E8, lsn redo=0/154A6B0",,,,,,,,,"","checkpointer",,0
+2026-02-27 07:53:24.668 MSK,,,23254,"[local]",69a12344.5ad6,1,"",2026-02-27 07:53:24 MSK,,0,СООБЩЕНИЕ,00000,"принято подключение: узел=[local]",,,,,,,,,"","not initialized",,0
+2026-02-27 07:53:24.669 MSK,"postgres1","postgres",23254,"[local]",69a12344.5ad6,2,"authentication",2026-02-27 07:53:24 MSK,3/30,0,СООБЩЕНИЕ,00000,"соединение аутентифицировано: идентификатор=""postgres1"" метод=peer (/var/db/postgres1/zas34/pg_hba.conf:117)",,,,,,,,,"","client backend",,0
+2026-02-27 07:53:24.669 MSK,"postgres1","postgres",23254,"[local]",69a12344.5ad6,3,"authentication",2026-02-27 07:53:24 MSK,3/30,0,СООБЩЕНИЕ,00000,"подключение авторизовано: пользователь=postgres1 база=postgres приложение=psql",,,,,,,,,"","client backend",,0
+```
+
+Контрольные точки и подключения записываются в формате `csv` - всё соответствует требуемым параметрам.
+
+Перейдём к настройке параметров `OLTP`. Для начала узнаем, сколько физической памяти доступно на сервере. Несмотря на то, что процесс работает внутри `jail`, параметры `sysctl` будут соответствовать хосту:
+
+```sh
+$ sysctl -ad | grep hw.physmem
+hw.physmem: Amount of physical memory (in bytes)
+$ sysctl hw.physmem
+hw.physmem: 137381593088
+```
+
+Что означает, что на сервере установлено 128 Гб ОЗУ. Эта информация понадобится для выставления некоторых параметров.
+
+Подключаемся:
+
+```sh
+$ psql -p 9066 -d postgres -U postgres1
+```
+
+```sql
+# ALTER SYSTEM SET max_connections = '800';
+# ALTER SYSTEM SET shared_buffers = '3GB';
+# ALTER SYSTEM SET temp_buffers = '16MB';
+# ALTER SYSTEM SET work_mem = '4MB';
+# ALTER SYSTEM SET checkpoint_timeout = '5min';
+# ALTER SYSTEM SET effective_cache_size = '9GB';
+# ALTER SYSTEM SET fsync = 'on';
+# ALTER SYSTEM SET commit_delay = '100';
+```
+
+Поясним каждый параметр.
+
+Сценарий нагрузки из задания:
+
+- 200 одновременных пользователей
+- 4 сессии на каждого пользователя
+- каждая сессия инициирует до 10 транзакций на запись
+- размер записи: 8 КБ
+
+===== `max_connections = 800`
+
+Максимальное число одновременных подключений к серверу БД.
+
+*Расчёт:* по условию нагрузки:
+- пользователей: `200`
+- сессий на пользователя: `4`
+  **=> подключений:** `200 * 4 = 800`
+
+Значение выставлено ровно по рассчитанному максимуму из сценария, чтобы сервер не отказывал в соединениях при пиковой нагрузке.
+
+===== `shared_buffers = 3GB`
+
+Объём буферного кэша сервера БД (кэш страниц таблиц/индексов внутри самого сервера БД).
+
+> Если вы используете выделенный сервер с объёмом ОЗУ 1 ГБ и более, разумным начальным значением shared_buffers будет 25% от объёма памяти. Существуют варианты нагрузки, при которых эффективны будут и ещё большие значения shared_buffers, но так как PostgreSQL использует и кеш операционной системы, выделять для shared_buffers более 40% ОЗУ вряд ли будет полезно. При увеличении shared_buffers обычно требуется соответственно увеличить max_wal_size, чтобы растянуть процесс записи большого объёма новых или изменённых данных на более продолжительное время.
+
+OLTP характеризуется большим числом коротких транзакций и повторяющимися обращениями к часто используемым данным. Кэширование снижает количество обращений к диску и повышает TPS.
+
+`3GB` - максимальное значение, при котором сервер успешно стартует. Попытка увеличить выше приводит к невозможности запуска.
+
+Содержимое лога при большом параметра `shared_buffers`:
+
+```csv
+$ pg_ctl -D "$PGDATA" restart
+ожидание завершения работы сервера.... готово
+сервер остановлен
+ожидание запуска сервера....2026-02-27 08:20:06.424 MSK [25295] ВАЖНО:  не удалось получить анонимную разделяемую память: Cannot allocate memory
+2026-02-27 08:20:06.424 MSK [25295] ПОДСКАЗКА:  Эта ошибка обычно возникает, когда PostgreSQL запрашивает сегмент разделяемой памяти, превышая
+объём доступной физической либо виртуальной памяти или огромных страниц. Для уменьшения запроса (текущий размер: 35177439232 Б) можно снизить использование разделяемой памяти, возможно, уменьшив shared_buffers или max_connections.
+2026-02-27 08:20:06.424 MSK [25295] СООБЩЕНИЕ:  система БД выключена
+ прекращение ожидания
+pg_ctl: не удалось запустить сервер
+Изучите протокол выполнения.
+```
+
+===== `temp_buffers = 16MB`
+
+Максимальный объём памяти, выделяемой для временных буферов в каждом сеансе.
+
+Оценка верхней границы (все 800 сессий одновременно используют временные таблицы):
+- `16 MB * 800 = 12800 MB ~= 12.5 GB`
+
+===== `work_mem = 4MB`
+
+Максимальный объём памяти на операции сортировки/хеширования (ORDER BY, DISTINCT). `work_mem` выделяется на операцию, и один запрос может использовать несколько таких операций.
+
+Оценка верхней границы (если считать по 1 операции на сессию):
+- `4 MB * 800 = 3200 MB ~= 3.1 GB`
+
+Если в среднем 2 операции на запрос, то:
+- `... * 2 = 6400 MB ~= 6.25 GB`
+
+Было выбрано значение по умолчанию.
+
+===== `checkpoint_timeout = 5min`
+
+Максимальный интервал между checkpoint'ами WAL.
+
+Checkpoint - момент, когда СУБД сбрасывает грязные страницы на диск. Частые checkpoints создают пики I/O и могут ухудшать производительность записи. При OLTP с постоянными записью/коммитами важно, чтобы WAL/dirty pages не накапливались слишком долго.
+
+===== `effective_cache_size = 9GB`
+
+Оценка суммарного кэша, доступного для чтения данных (кэш ОС + `shared_buffers`), является подсказкой планировщику запросов. Повышает вероятность выбора индексных планов, когда ожидается, что данные/индексы будут в кэше.
+
+Расчёт:
+- `shared_buffers = 3GB`
+- буду считать, что ОС сможет закэшировать дополнительно несколько гигабайт часто используемых данных
+
+Эвристика: `3 * 3GB = 9GB`.
+
+===== `fsync = on`
+
+Принудительная синхронизация записи (WAL/данных) на диск.
+
+OLTP предполагает, что подтверждённая транзакция (COMMIT) не теряется при сбое.
+
+`fsync=off` может ускорить запись, но допускает потерю данных и обычно считается недопустимым для транзакционных систем. Подходит, к примеру, для копирования данных из источника истины.
+
+===== `commit_delay = 100`
+
+Задержка (в микросекундах) перед выполнением fsync при COMMIT, чтобы сгруппировать несколько коммитов вместе.
+
+При высокой конкуренции множество транзакций проходят этап COMMIT почти одновременно. Небольшая задержка позволяет собрать несколько транзакций в один fsync, снижая число fsync-операций и повышая throughput.
+
+100 мкс почти не увеличивают задержку одной транзакции, но дают шанс на группировку коммитов при высокой параллельности.
+
+=== Этап 3. Дополнительные табличные пространства и наполнение базы
+
+Создадим новое табличное пространство для индексов:
+
+```sh
+$ mkdir -p "$HOME/grj79"
+$ psql -p 9066 -d postgres
+```
+
+```sql
+# CREATE TABLESPACE grj79 LOCATION '/var/db/postgres1/grj79';
+```
+
+Создадим базу данных:
+
+```sql
+# CREATE DATABASE uglygraylaw TEMPLATE template1;
+```
+
+Создадим новую роль и выдадим права:
+
+```sql
+# CREATE ROLE data_user LOGIN PASSWORD '***';
+# GRANT CONNECT ON DATABASE uglygraylaw TO data_user;
+# GRANT CONNECT ON DATABASE template1 TO data_user;
+# GRANT CREATE ON TABLESPACE grj79 TO data_user;
+# \c uglygraylaw
+# GRANT CREATE ON SCHEMA public TO data_user;
+```
+
+Подключимся к базе `uglygraylaw` и наполним тестовыми данными:
+
+```sql
+# CREATE TABLE test_data (
+    id bigserial PRIMARY KEY,
+    payload text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+# CREATE INDEX test_data_created_at_idx ON test_data (created_at) TABLESPACE grj79;
+# INSERT INTO test_data(payload) SELECT 'row_' || g FROM generate_series(1, 100000) AS g;
+```
+
+Выведем существующие tablespace:
+
+```sql
+# SELECT * FROM pg_tablespace;
+  oid  |  spcname   | spcowner |                    spcacl                     | spcoptions
+-------+------------+----------+-----------------------------------------------+------------
+  1663 | pg_default |       10 |                                               |
+  1664 | pg_global  |       10 |                                               |
+ 16388 | grj79      |       10 | {postgres1=C/postgres1,data_user=C/postgres1} |
+(3 строки)
+# \c uglygraylaw
+# SELECT t.spcname, c.relname
+FROM pg_class c
+JOIN pg_tablespace t ON c.reltablespace = t.oid
+WHERE c.relkind IN ('r','i');
+```
+
+== Вывод
+
+В ходе лабораторной работы был успешно создан и настроен кластер `PostgreSQL`.
+
+== Вопросы для подготовки к защите
+
+- Способы запуска и остановки сервера PosgreSQL, их отличия.
+- Какие параметры локали сервера БД можно настроить? На что они влияют? Как и где их переопределить?
+- Конфигурационные файлы сервера. Способы изменения и применения конфигурации.
+- Что такое табличное пространство? Зачем нужны дополнительные табличные пространства?
+- Зачем нужны template0 и template1?
+
+== Использованные ресурсы
+
+- #link("https://repo.postgrespro.ru/doc/pgsql/16.11/ru/postgres-A4.pdf")[Документация]
+- #link("https://www.interdb.jp/pg/index.html")[PostgreSQL Internal]
+- #link("https://medium.com/@jramcloud1/04-postgresql-17-performance-tuning-checkpoints-explained-4972e78f4e56")[Настройка параметра `checkpoint`]
+- #link("https://medium.com/@jramcloud1/07-postgresql-17-performance-tuning-understanding-vacuum-in-detail-4914a06073fe")[Настройка параметра `temp_buffers`]
