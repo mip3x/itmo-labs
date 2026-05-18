@@ -1,0 +1,9 @@
+x,eps
+NaN,1.0E-6
+Infinity,1.0E-6
+-Infinity,1.0E-6
+1.0,0.0
+1.0,-1.0E-6
+1.0,NaN
+1.0,Infinity
+1.0,-Infinity

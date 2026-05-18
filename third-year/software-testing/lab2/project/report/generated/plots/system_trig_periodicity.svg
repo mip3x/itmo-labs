@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+<rect width="100%" height="100%" fill="#fcfbf7"/>
+<rect x="20" y="20" width="1060" height="480" rx="18" fill="#fffef8" stroke="#d6cfbf" stroke-width="1.5"/>
+<text x="550" y="28" text-anchor="middle" font-family="JetBrains Mono" font-size="20" fill="#3a3127">system(x), periodicity check</text>
+<rect x="80" y="40" width="990" height="360" fill="#fffdfa" stroke="#e5dece" stroke-width="1"/>
+<line x1="80" y1="400.00" x2="1070" y2="400.00" stroke="#ebe4d6" stroke-width="1"/>
+<text x="70" y="404.00" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-10.00</text>
+<line x1="80" y1="340.00" x2="1070" y2="340.00" stroke="#ebe4d6" stroke-width="1"/>
+<text x="70" y="344.00" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-6.67</text>
+<line x1="80" y1="280.00" x2="1070" y2="280.00" stroke="#ebe4d6" stroke-width="1"/>
+<text x="70" y="284.00" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-3.33</text>
+<line x1="80" y1="220.00" x2="1070" y2="220.00" stroke="#ebe4d6" stroke-width="1"/>
+<text x="70" y="224.00" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#6d6254">0.00</text>
+<line x1="80" y1="160.00" x2="1070" y2="160.00" stroke="#ebe4d6" stroke-width="1"/>
+<text x="70" y="164.00" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#6d6254">3.33</text>
+<line x1="80" y1="100.00" x2="1070" y2="100.00" stroke="#ebe4d6" stroke-width="1"/>
+<text x="70" y="104.00" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#6d6254">6.67</text>
+<line x1="80" y1="40.00" x2="1070" y2="40.00" stroke="#ebe4d6" stroke-width="1"/>
+<text x="70" y="44.00" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#6d6254">10.00</text>
+<line x1="80.00" y1="40" x2="80.00" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="80.00" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-7.50</text>
+<line x1="203.75" y1="40" x2="203.75" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="203.75" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-6.56</text>
+<line x1="327.50" y1="40" x2="327.50" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="327.50" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-5.63</text>
+<line x1="451.25" y1="40" x2="451.25" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="451.25" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-4.69</text>
+<line x1="575.00" y1="40" x2="575.00" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="575.00" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-3.75</text>
+<line x1="698.75" y1="40" x2="698.75" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="698.75" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-2.81</text>
+<line x1="822.50" y1="40" x2="822.50" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="822.50" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-1.88</text>
+<line x1="946.25" y1="40" x2="946.25" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="946.25" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-0.94</text>
+<line x1="1070.00" y1="40" x2="1070.00" y2="400" stroke="#ebe4d6" stroke-width="1"/>
+<text x="1070.00" y="420" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#6d6254">-0.00</text>
+<line x1="80" y1="220.00" x2="1070" y2="220.00" stroke="#615548" stroke-width="1.5"/>
+<polyline points="111.68,46.46 114.32,91.09 116.96,126.46 119.60,154.59 122.24,177.02 124.88,194.95 127.52,209.32 130.16,220.84 132.80,230.09 135.44,237.52 138.08,243.49 140.72,248.28 143.36,252.12 146.00,255.20 148.64,257.67 151.28,259.65 153.92,261.24 156.56,262.53 159.20,263.58 161.84,264.46 164.48,265.21 167.12,265.87 169.76,266.49 172.40,267.09 175.04,267.71 177.68,268.37 180.32,269.11 182.96,269.94 185.60,270.92 188.24,272.06 190.88,273.40 193.52,274.98 196.16,276.87 198.80,279.12 201.44,281.80 204.08,285.02 206.72,288.91 209.36,293.64 212.00,299.45 214.64,306.67 217.28,315.77 219.92,327.50 222.56,343.01 225.20,364.24 227.84,394.75" fill="none" stroke="#bf5b39" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="256.88,45.63 259.52,64.14 262.16,77.56 264.80,87.52 267.44,95.01 270.08,100.66 272.72,104.87 275.36,107.94 278.00,110.07 280.64,111.39 283.28,112.02 285.92,112.01 288.56,111.43 291.20,110.30 293.84,108.65 296.48,106.47 299.12,103.76 301.76,100.52 304.40,96.72 307.04,92.32 309.68,87.28 312.32,81.56 314.96,75.08 317.60,67.78 320.24,59.55 322.88,50.29" fill="none" stroke="#bf5b39" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="544.64,390.05 547.28,370.01 549.92,352.81 552.56,337.97 555.20,325.10 557.84,313.89 560.48,304.07 563.12,295.41 565.76,287.75 568.40,280.93 571.04,274.81 573.68,269.30 576.32,264.29 578.96,259.72 581.60,255.50 584.24,251.58 586.88,247.89 589.52,244.40 592.16,241.06 594.80,237.81 597.44,234.63 600.08,231.46 602.72,228.26 605.36,224.98 608.00,221.58 610.64,217.99 613.28,214.15 615.92,209.96 618.56,205.33 621.20,200.12 623.84,194.16 626.48,187.22 629.12,178.96 631.76,168.91 634.40,156.37 637.04,140.21 639.68,118.58 642.32,88.09 644.96,41.91" fill="none" stroke="#bf5b39" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="676.64,394.30 679.28,383.55 681.92,375.35 684.56,369.04 687.20,364.20 689.84,360.52 692.48,357.80 695.12,355.89 697.76,354.68 700.40,354.10 703.04,354.09 705.68,354.61 708.32,355.65 710.96,357.19 713.60,359.22 716.24,361.77 718.88,364.84 721.52,368.46 724.16,372.66 726.80,377.49 729.44,383.01 732.08,389.27 734.72,396.36" fill="none" stroke="#bf5b39" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="943.28,84.67 945.92,121.36 948.56,150.52 951.20,173.77 953.84,192.36 956.48,207.24 959.12,219.17 961.76,228.75 964.40,236.45 967.04,242.62 969.68,247.58 972.32,251.56 974.96,254.75 977.60,257.31 980.24,259.36 982.88,261.01 985.52,262.34 988.16,263.43 990.80,264.33 993.44,265.10 996.08,265.77 998.72,266.39 1001.36,266.99 1004.00,267.60 1006.64,268.26 1009.28,268.98 1011.92,269.80 1014.56,270.75 1017.20,271.86 1019.84,273.17 1022.48,274.71 1025.12,276.55 1027.76,278.73 1030.40,281.34 1033.04,284.47 1035.68,288.24 1038.32,292.82 1040.96,298.44 1043.60,305.40 1046.24,314.17 1048.88,325.42 1051.52,340.22 1054.16,360.36 1056.80,389.04" fill="none" stroke="#bf5b39" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="138.08" cy="243.49" r="4.5" fill="#2a6f97" stroke="#fffdfa" stroke-width="1.5"/>
+<line x1="138.08" y1="243.49" x2="156.08" y2="226.49" stroke="#2a6f97" stroke-width="1.2"/>
+<text x="156.08" y="231.49" text-anchor="start" font-family="JetBrains Mono" font-size="10" fill="#2a6f97">x=-7.07</text>
+<circle cx="967.04" cy="242.62" r="4.5" fill="#2a6f97" stroke="#fffdfa" stroke-width="1.5"/>
+<line x1="967.04" y1="242.62" x2="949.04" y2="259.62" stroke="#2a6f97" stroke-width="1.2"/>
+<text x="949.04" y="264.62" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#2a6f97">x=-0.79</text>
+<text x="575" y="508" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#4c4338">x</text>
+<text x="22" y="220" transform="rotate(-90 22 220)" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#4c4338">y</text>
+<text x="1066" y="508" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#8c7f71">Y clipped to [-10.00; 10.00]</text>
+</svg>
