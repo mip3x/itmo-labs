@@ -1,6 +1,9 @@
+#include "kernel.h"
 #include "common.h"
 
 extern char __bss[], __bss_end[], __stack_top[];
+
+struct cpu cpus[NCPU];
 
 void display_sbi_impl_version() {
     struct sbiret result = sbi_call(0, 0, 0, 0, 0, 0, F_SBI_GET_IMPL_VERSION, BASE_EXTENSION);
@@ -29,8 +32,8 @@ void display_hart_status() {
 }
 
 void stop_hart() {
-    // uint32_t hart_id = READ_CSR(mstatus);
-    // printf("Stopping hart id %d...\n", hart_id);
+    uint32_t hart_id = mycpu()->hartid;
+    printf("Stopping hart id #%d...\n", hart_id);
 
     sbi_call(0, 0, 0, 0, 0, 0, F_HART_STOP, EXTENSION_HART_MGMT);
 }
@@ -78,6 +81,16 @@ void handle_menu_choice() {
 }
 
 void kernel_main(void) {
+    uint32_t hartid = 0;
+    __asm__ __volatile__("mv %0, a0" : "=r"(hartid));
+    __asm__ __volatile__("mv tp, %0" :: "r"(&cpus[hartid]));
+
+    // memset is before saving hartid because cpus in .bss section
+    memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
+
+    cpus[hartid].hartid = hartid;
+    printf("hart id #%d started\n", hartid);
+
     for (;;) {
         display_menu();
         handle_menu_choice();
@@ -88,9 +101,7 @@ __attribute__((section(".text.boot")))
 __attribute__((naked))
 void boot(void) {
     __asm__ __volatile__(
-        "mv sp, %[stack_top]\n" // Устанавливаем указатель стека
+        "la sp, __stack_top\n" // Устанавливаем указатель стека
         "j kernel_main\n"       // Переходим к функции main ядра
-        :
-        : [stack_top] "r" (__stack_top) // Передаём верхний адрес стека в виде %[stack_top]
     );
 }
