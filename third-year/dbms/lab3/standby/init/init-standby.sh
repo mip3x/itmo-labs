@@ -15,12 +15,9 @@ pg_ctl stop -D "$PGDATA"
 rm -rf "$PGDATA"/*
 echo "Data directory cleaned up"
 
-# Perform base backup
-PGPASSWORD='replicator_password' pg_basebackup -h primary -D /var/lib/postgresql/data -U replicator -v -P --wal-method=stream
+# Perform base backup and write standby.signal + primary_conninfo
+PGPASSWORD='replicator_password' pg_basebackup -h primary -D "$PGDATA" -U replicator -v -P --wal-method=stream -R
 echo "Base backup completed"
-
-# Create standby.signal file
-touch "$PGDATA/standby.signal"
 
 # Set permissions
 chown -R postgres:postgres "$PGDATA"

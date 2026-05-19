@@ -187,6 +187,8 @@ networks:
 │   │   └── init-primary.sh
 │   └── scripts
 │       ├── init-db.sql
+│       ├── lab-entrypoint.sh
+│       ├── request-rejoin-as-standby.sh
 │       ├── read_client.sh
 │       └── write_client.sh
 └── standby
@@ -197,6 +199,8 @@ networks:
     ├── init
     │   └── init-standby.sh
     └── scripts
+        ├── lab-entrypoint.sh
+        ├── request-rejoin-as-standby.sh
         └── read_client.sh
 ```
 
@@ -218,7 +222,11 @@ COPY scripts/* /home/scripts/
 COPY init/init-primary.sh /docker-entrypoint-initdb.d/init-primary.sh
 RUN chmod +x /home/scripts/read_client.sh
 RUN chmod +x /home/scripts/write_client.sh
+RUN chmod +x /home/scripts/request-rejoin-as-standby.sh
+RUN chmod +x /home/scripts/lab-entrypoint.sh
 RUN chmod +x /docker-entrypoint-initdb.d/init-primary.sh
+ENTRYPOINT ["/home/scripts/lab-entrypoint.sh"]
+CMD ["postgres"]
 ```
 
 По варианту должен использоваться режим трансляции логов. Это значит, что основной сервер будет постоянно асинхронно передавать резервному серверу журныла изменений `WAL`. Из документации:
@@ -258,14 +266,13 @@ echo "Configuration files copied!"
 ```conf
 listen_addresses = '*'
 wal_level = replica
-wal_keep_size = 64MB
 max_wal_senders = 10
-archive_mode = on
-archive_command = 'echo "dummy command, archive_command called"'
+wal_keep_size = 64MB
+hot_standby = on
+wal_log_hints = on
 log_connections = on
 log_disconnections = on
 log_duration = on
-wal_log_hints = on
 ```
 
 Последняя строка разрешает пользователю `replicator` подключаться к БД `replication` с любого адреса `docker`-сети по паролю
@@ -292,13 +299,17 @@ COPY conf/* /etc/postgresql/
 COPY scripts/* /home/scripts/
 COPY init/init-standby.sh /docker-entrypoint-initdb.d/init-standby.sh
 RUN chmod +x /home/scripts/read_client.sh
+RUN chmod +x /home/scripts/request-rejoin-as-standby.sh
+RUN chmod +x /home/scripts/lab-entrypoint.sh
 RUN chmod +x /docker-entrypoint-initdb.d/init-standby.sh
+ENTRYPOINT ["/home/scripts/lab-entrypoint.sh"]
+CMD ["postgres"]
 ```
 
 \
 *init-standby.sh*
 
-До запуска кластера делаем `pg_basebackup` с основного узла, после чего создаём сигнальный файл, который переводит сервер в режим ожидания
+До запуска кластера делаем `pg_basebackup` с основного узла. Ключ `-R` создаёт `standby.signal` и записывает параметры подключения к основному серверу в `postgresql.auto.conf`, поэтому вручную копировать каталог данных или прописывать `primary_conninfo` не требуется.
 
 ```sh
 #!/bin/bash
@@ -318,12 +329,9 @@ pg_ctl stop -D "$PGDATA"
 rm -rf "$PGDATA"/*
 echo "Data directory cleaned up"
 
-# Perform base backup
-PGPASSWORD='replicator_password' pg_basebackup -h primary -D /var/lib/postgresql/data -U replicator -v -P --wal-method=stream
+# Perform base backup and write standby.signal + primary_conninfo
+PGPASSWORD='replicator_password' pg_basebackup -h primary -D "$PGDATA" -U replicator -v -P --wal-method=stream -R
 echo "Base backup completed"
-
-# Create standby.signal file
-touch "$PGDATA/standby.signal"
 
 # Set permissions
 chown -R postgres:postgres "$PGDATA"
@@ -339,20 +347,21 @@ pg_ctl -D "$PGDATA" start
 
 `hot_standby` позволяет выполнять запросы на чтение данных с резервного сервера
 
-`primary_conninfo` задаёт параметры подключения
+Параметры подключения к основному серверу записываются командой `pg_basebackup -R` в `postgresql.auto.conf`.
 
 \
 *postgresql.conf*
 
 ```conf
 listen_addresses = '*'
+wal_level = replica
+max_wal_senders = 10
+wal_keep_size = 64MB
 hot_standby = on
-primary_conninfo = 'host=primary port=5432 user=replicator password=replicator_password'
 wal_log_hints = on
 log_connections = on
 log_disconnections = on
 log_duration = on
-wal_log_hints = on
 ```
 
 \
@@ -627,42 +636,49 @@ test=# select * from users;
 \
 == Этап 3. Восстановление
 
-Удалим "мусорный" файл:
+После `failover` резервный узел `standby` стал новым основным сервером. Прежний `primary` нельзя актуализировать копированием файлов поверх существующего `PGDATA`: у него старая timeline, а после переполнения диска каталог данных мог остаться в неконсистентном состоянии. Поэтому штатный способ восстановления - остановить PostgreSQL на старом основном узле, очистить его `PGDATA` и заново подключить его как резервный через `pg_basebackup` от актуального основного сервера.
+
+Так как в Docker-контейнере процесс PostgreSQL является главным процессом контейнера, прямой запуск `pg_ctl stop` из recovery-скрипта завершает контейнер. Поэтому восстановление сделано в два шага:
+
+- `request-rejoin-as-standby.sh` сохраняет параметры нового основного сервера в `/tmp/rejoin-as-standby.conf` и останавливает PostgreSQL.
+- После автоматического перезапуска контейнера `lab-entrypoint.sh` видит этот файл, до запуска PostgreSQL очищает `PGDATA`, выполняет `pg_basebackup -R` и запускает узел уже как standby.
+
+Скрипт заявки на восстановление:
 
 ```sh
-root@a097e6d07e04:/# cd $PGDATA
-root@a097e6d07e04:/var/lib/postgresql/data# rm -f fill_disk
-root@a097e6d07e04:/var/lib/postgresql/data# df -h /var/lib/postgresql/data
-Filesystem      Size  Used Avail Use% Mounted on
-tmpfs           512M   79M  434M  16% /var/lib/postgresql/data
+#!/bin/bash
+
+set -euo pipefail
+
+SOURCE_HOST="${1:?usage: request-rejoin-as-standby.sh SOURCE_HOST [SOURCE_PORT]}"
+SOURCE_PORT="${2:-5432}"
+REQUEST_FILE="/tmp/rejoin-as-standby.conf"
+PGDATA="${PGDATA:-/var/lib/postgresql/data}"
+
+cat > "$REQUEST_FILE" <<EOF
+SOURCE_HOST=$SOURCE_HOST
+SOURCE_PORT=$SOURCE_PORT
+EOF
+
+pg_ctl -D "$PGDATA" -m fast stop
 ```
 
-Перенесём бэкап со `standby`:
+На прежнем основном узле выполняем:
 
 ```sh
-❯ docker exec -it primary bash
-root@a097e6d07e04:/# su postgres
-postgres@a097e6d07e04:/$ pg_basebackup -P -X stream -c fast -h standby -U replicator -D ~/backup
-Password:
-31505/31505 kB (100%), 1/1 tablespace
-postgres@985c770e9298:~$ cp -a backup/. ~/data/
+docker exec -it -u postgres primary /home/scripts/request-rejoin-as-standby.sh standby
 ```
 
-Выйдем из контейнера `primary`, войдём в `standby`:
-
-Выйдем из `standby` и пересоздадим контейнер:
+Проверим, что `primary` теперь работает как резервный сервер и получил данные, записанные после переключения:
 
 ```sh
-❯ docker compose stop standby
-[+] stop 1/1
- ✔ Container standby Stopped
-❯ docker compose up -d standby --build
-❯ docker exec -it standby bash
-root@f917b1776964:/# psql -U postgres -d test
-psql (18.3 (Debian 18.3-1.pgdg13+1))
-Type "help" for help.
+❯ docker exec -it primary psql -U postgres -d test -c "SELECT pg_is_in_recovery();"
+ pg_is_in_recovery
+-------------------
+ t
+(1 row)
 
-test=# select * from users;
+❯ docker exec -it primary psql -U postgres -d test -c "SELECT * FROM users;"
  id |      name
 ----+-----------------
   1 | Alice
@@ -674,7 +690,35 @@ test=# select * from users;
 (6 rows)
 ```
 
-Да, данные были взяты с `primary`. Выполним проверки записи/чтения
+Чтобы вернуть исходное распределение ролей, выполняем контролируемое обратное переключение. Сначала продвигаем восстановленный узел `primary`:
+
+```sh
+docker exec -it -u postgres primary /usr/lib/postgresql/18/bin/pg_ctl promote -D /var/lib/postgresql/data
+```
+
+Затем пересобираем `standby` уже от `primary`:
+
+```sh
+docker exec -it -u postgres standby /home/scripts/request-rejoin-as-standby.sh primary
+```
+
+Итоговая проверка ролей:
+
+```sh
+❯ docker exec -it primary psql -U postgres -d test -c "SELECT pg_is_in_recovery();"
+ pg_is_in_recovery
+-------------------
+ f
+(1 row)
+
+❯ docker exec -it standby psql -U postgres -d test -c "SELECT pg_is_in_recovery();"
+ pg_is_in_recovery
+-------------------
+ t
+(1 row)
+```
+
+После этого исходная конфигурация восстановлена: `primary` снова принимает запись, а `standby` получает изменения по потоковой репликации. Выполним проверки записи/чтения
 
 #figure(
   image("img/reads_writes2.png"),
