@@ -23,7 +23,6 @@ rectangle "aviasales.ru" {
 
   package "Направления" {
     usecase "Подбор направления\nна карте цен" as UC05
-    usecase "Получение ответа\nнейросети" as AiHint
   }
 
   package "Журнал" {
@@ -43,5 +42,4 @@ UC05 <.. UC01 : <<extend>>
 UC01 <.. BuyTicket : <<extend>>
 UC04 <.. BuyTicket : <<extend>>
 UC03 <.. BookHotel : <<extend>>
-UC05 <.. AiHint : <<extend>>
 @enduml
