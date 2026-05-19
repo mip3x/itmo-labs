@@ -1,0 +1,48 @@
+services:
+  primary:
+    container_name: primary
+    build:
+      context: ./primary
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - PGENCODING=UTF8
+      - PGLOCALE=en_US.UTF8
+      - PGUSERNAME=postgres
+      - POSTGRES_PASSWORD=postgres
+    tmpfs:
+      - /var/lib/postgresql/data:size=512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    networks:
+      - pg_net
+
+  standby:
+    container_name: standby
+    build:
+      context: ./standby
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    depends_on:
+      primary:
+        condition: service_healthy
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - PGENCODING=UTF8
+      - PGLOCALE=en_US.UTF8
+      - PGUSERNAME=postgres
+      - POSTGRES_PASSWORD=postgres
+    tmpfs:
+      - /var/lib/postgresql/data:size=512m
+    networks:
+      - pg_net
+
+networks:
+  pg_net:
+    driver: bridge
