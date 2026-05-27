@@ -65,6 +65,22 @@
 ip.flags.mf == 1 || ip.frag_offset > 0 || icmp
 ```
 
+Использованные команды:
+
+```text
+ping -c 4 -s 100 se.ifmo.ru
+ping -c 4 -s 500 se.ifmo.ru
+ping -c 4 -s 1000 se.ifmo.ru
+ping -c 4 -s 1500 se.ifmo.ru
+ping -c 4 -s 2000 se.ifmo.ru
+ping -c 4 -s 3000 se.ifmo.ru
+ping -c 4 -s 5000 se.ifmo.ru
+ping -c 4 -s 10000 se.ifmo.ru
+ping -c 4 -s 15000 se.ifmo.ru
+ping -c 4 -s 20000 se.ifmo.ru
+ping -c 4 -t 10 se.ifmo.ru
+```
+
 == Общий вид захваченного трафика
 
 #figure(
@@ -156,6 +172,32 @@ IP-адрес источника исходящих запросов — `192.16
 #figure(
   image("ping_fragments_graph.png", width: 90%),
   caption: [График зависимости количества фрагментов от размера ping-пакета]
+)
+
+5. Как изменить поле TTL с помощью утилиты ping?
+
+В Linux поле TTL изменяется ключом `-t`. В работе использовалась команда:
+
+```text
+ping -c 4 -t 10 se.ifmo.ru
+```
+
+После этого в IPv4-заголовке исходящего ICMP-пакета поле `Time to Live` равно `10`.
+
+#figure(
+  image("ping_ttl_10.png", width: 100%),
+  caption: [ICMP-пакет с TTL = 10]
+)
+
+6. Что содержится в поле данных ping-пакета?
+
+Как я понял, это вся полезная нагрузка `IP`-пакета: то есть `ICMP`-заголовок (8 байт) и полезная нагрузка `ICMP`-заголовка.
+
+В поле `ICMP Data` содержится timestamp и последовательность тестовых байтов (`ICMP Data` как раз будет равна размеру, переданному как аргумент команды `ping`). Эти данные возвращаются обратно в `Echo Reply`, чтобы отправитель мог сопоставить ответ с запросом и измерить время передачи.
+
+#figure(
+  image("ping_icmp_data.png", width: 100%),
+  caption: [Поле ICMP Data в ping-пакете]
 )
 
 = Вывод
