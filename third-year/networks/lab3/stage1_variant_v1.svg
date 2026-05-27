@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420">
+  <rect width="1000" height="420" fill="white"/>
+  <text x="50" y="155" font-family="Times New Roman, serif" font-size="54" font-weight="700">В1)</text>
+  <ellipse cx="270" cy="135" rx="120" ry="75" fill="white" stroke="#2f5597" stroke-width="8"/>
+  <ellipse cx="790" cy="135" rx="120" ry="75" fill="white" stroke="#2f5597" stroke-width="8"/>
+  <ellipse cx="530" cy="325" rx="120" ry="75" fill="white" stroke="#2f5597" stroke-width="8"/>
+  <rect x="465" y="75" width="130" height="120" fill="white" stroke="black" stroke-width="5"/>
+  <line x1="390" y1="135" x2="465" y2="135" stroke="#4472c4" stroke-width="7"/>
+  <line x1="595" y1="135" x2="670" y2="135" stroke="#4472c4" stroke-width="7"/>
+  <line x1="530" y1="195" x2="530" y2="250" stroke="#4472c4" stroke-width="7"/>
+  <text x="195" y="153" font-family="Times New Roman, serif" font-size="54">Сеть 1</text>
+  <text x="715" y="153" font-family="Times New Roman, serif" font-size="54">Сеть 2</text>
+  <text x="455" y="345" font-family="Times New Roman, serif" font-size="54">Сеть 3</text>
+  <text x="478" y="150" font-family="Times New Roman, serif" font-size="54">Мш1</text>
+</svg>
