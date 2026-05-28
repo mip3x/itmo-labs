@@ -200,6 +200,68 @@ ping -c 4 -t 10 se.ifmo.ru
   caption: [Поле ICMP Data в ping-пакете]
 )
 
+= Анализ трафика утилиты traceroute
+
+По умолчанию в Linux `traceroute` использует UDP-датаграммы на маловероятные порты. В руководстве это описано так:
+
+```text
+Probe packets are udp datagrams with so-called "unlikely" destination ports.
+The "unlikely" port of the first probe is 33434, then for each next probe it
+is incremented by one.
+```
+
+В данной работе использовался ключ `-I`, чтобы отправлять ICMP Echo Request и сравнить результат с трафиком `ping`.
+
+Для анализа маршрута использовалась команда:
+
+```text
+traceroute -I -n se.ifmo.ru
+```
+
+Ключ `-I` включает отправку ICMP Echo Request, ключ `-n` отключает DNS-разрешение имён узлов.
+
+#figure(
+  image("traceroute_full_screen.png", width: 100%),
+  caption: [Общий вид ICMP-трафика traceroute]
+)
+
+#figure(
+  image("traceroute_request_ttl10.png", width: 100%),
+  caption: [Исходящий ICMP-пакет traceroute с TTL = 10]
+)
+
+== Ответы на вопросы
+
+1. Сколько байт содержится в заголовке IP? Сколько байт содержится в поле данных?
+
+В ICMP-пакетах `traceroute` IPv4-заголовок занимает `20` байт, так как поле `Header Length` равно `5` словам по 4 байта. Общая длина IP-пакета равна `60` байт, поэтому поле данных IP-пакета занимает `40` байт.
+
+#figure(
+  image("traceroute_ping_length.png", width: 100%),
+  caption: [Длина IPv4-заголовка и общая длина IP-пакета traceroute]
+)
+
+2. Как и почему изменяется поле TTL в следующих друг за другом ICMP-пакетах traceroute?
+
+`traceroute` отправляет серии ICMP-пакетов с увеличивающимся TTL: сначала `1`, затем `2`, `3` и так далее. Каждый маршрутизатор уменьшает TTL на `1`. Когда TTL становится равным нулю, маршрутизатор отбрасывает пакет и возвращает ICMP-сообщение `Time-to-live exceeded`. Так определяется каждый следующий узел маршрута.
+
+3. Чем отличаются ICMP-пакеты traceroute от ICMP-пакетов ping?
+
+`ping` отправляет ICMP Echo Request с обычным TTL и ждёт Echo Reply от конечного узла. `traceroute` отправляет ICMP Echo Request с постепенно увеличивающимся TTL, чтобы получать ответы не только от конечного сервера, но и от промежуточных маршрутизаторов.
+
+4. Чем отличаются полученные пакеты ICMP reply от ICMP error и зачем нужны оба типа ответов?
+
+`ICMP reply` приходит от конечного узла и означает, что пакет дошёл до цели. `ICMP error`, например `Time-to-live exceeded`, приходит от промежуточного маршрутизатора и означает, что TTL закончился до достижения цели. Ошибки нужны для построения маршрута, а reply — для определения конца маршрута.
+
+5. Что изменится в работе traceroute, если убрать ключ `-n`? Какой дополнительный трафик будет генерироваться?
+
+Без ключа `-n` программа будет пытаться получить доменные имена для IP-адресов промежуточных узлов. Из-за этого появится дополнительный DNS-трафик, обычно обратные DNS-запросы `PTR`.
+
+#figure(
+  image("traceroute_full_screen_with_dns.png", width: 100%),
+  caption: [Дополнительный DNS-трафик при запуске traceroute без ключа -n]
+)
+
 = Вывод
 
 ICMP передаётся внутри IPv4-пакета как его полезная нагрузка. Фрагментация определяется по полям `More fragments`, `Fragment Offset` и `Identification`.
