@@ -27,6 +27,7 @@ class HomePage(
     fun open(baseUrl: String): HomePage {
         driver.get(baseUrl)
         visible(originInput)
+        acceptCookiesIfPresent()
         return this
     }
 
