@@ -1,30 +1,63 @@
 package ru.mip3x.selenium.pages
 
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.support.ui.WebDriverWait
 import java.time.Duration
 
 class HomePage(
     driver: WebDriver,
     timeout: Duration,
 ) : BasePage(driver, timeout) {
-    private val fromInput = "//input[@data-test-id='origin-input']"
-    private val toInput = "//input[@data-test-id='destination-input']"
+    companion object {
+        private const val AUTOCOMPLETE_POLLING_MILLIS = 100L
+    }
+
+    private val originInput = "//input[@data-test-id='origin-input']"
+    private val destinationInput = "//input[@data-test-id='destination-input']"
+    private val autocompleteOption = "//*[@role='option']"
+
+    private fun selectCity(input: String, city: String) {
+        type(input, city)
+
+        runCatching {
+                wait
+                .pollingEvery(Duration.ofMillis(AUTOCOMPLETE_POLLING_MILLIS))
+                .until {
+                    driver.findElements(xpath(autocompleteOption))
+                        .firstOrNull { it.isDisplayed && it.text.contains(city, ignoreCase = true) }
+                        ?.let {
+                            it.click()
+                            true
+                        } ?: false
+                }
+        }
+    }
 
     fun isOpened(): Boolean {
-        return hasVisible(fromInput)
+        return hasVisible(originInput)
     }
 
-    fun fromValue(): String {
-        return visible(fromInput).getAttribute("value") ?: ""
+    fun originValue(): String {
+        return visible(originInput).getAttribute("value") ?: ""
     }
 
-    fun toValue(): String {
-        return visible(toInput).getAttribute("value") ?: ""
+    fun destinationValue(): String {
+        return visible(destinationInput).getAttribute("value") ?: ""
+    }
+
+    fun setOrigin(city: String): HomePage {
+        selectCity(originInput, city)
+        return this
+    }
+
+    fun setDestination(city: String): HomePage {
+        selectCity(destinationInput, city)
+        return this
     }
 
     fun open(baseUrl: String): HomePage {
         driver.get(baseUrl)
-        visible(fromInput)
+        visible(originInput)
         return this
     }
 

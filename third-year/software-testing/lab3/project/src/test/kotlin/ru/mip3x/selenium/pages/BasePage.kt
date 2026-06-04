@@ -1,6 +1,7 @@
 package ru.mip3x.selenium.pages
 
 import org.openqa.selenium.By
+import org.openqa.selenium.Keys
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
@@ -27,10 +28,11 @@ abstract class BasePage(
     }
 
     protected fun type(xpath: String, value: String) {
-        visible(xpath).apply {
-            clear()
-            sendKeys(value)
-        }
+        val element = clickable(xpath)
+        element.click()
+        element.sendKeys(Keys.chord(Keys.CONTROL, "a"))
+        element.sendKeys(Keys.DELETE)
+        element.sendKeys(value)
     }
 
     protected fun hasVisible(xpath: String): Boolean =
