@@ -14,6 +14,7 @@ abstract class BasePage(
     protected val timeout: Duration,
 ) {
     protected val wait = WebDriverWait(driver, timeout)
+    private val acceptCookiesButton = "//*[@data-test-id='accept-cookies-button']"
 
     protected fun xpath(value: String): By = By.xpath(value)
 
@@ -37,6 +38,18 @@ abstract class BasePage(
 
     protected fun hasVisible(xpath: String): Boolean =
         runCatching { visible(xpath).isDisplayed }.getOrDefault(false)
+
+    protected fun waitFor(condition: () -> Boolean): Boolean =
+        runCatching { wait.until { condition() } }.getOrDefault(false)
+
+    protected fun acceptCookiesIfPresent() {
+        runCatching {
+            val button = driver.findElements(xpath(acceptCookiesButton)).firstOrNull { it.isDisplayed }
+                ?: return
+
+            button.click()
+        }
+    }
 
     protected fun scrollTo(xpath: String) {
         val element = visible(xpath)

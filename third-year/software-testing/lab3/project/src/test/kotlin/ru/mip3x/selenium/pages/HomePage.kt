@@ -1,8 +1,11 @@
 package ru.mip3x.selenium.pages
 
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.support.ui.WebDriverWait
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.Select
 import java.time.Duration
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class HomePage(
     driver: WebDriver,
@@ -12,25 +15,19 @@ class HomePage(
         private const val AUTOCOMPLETE_POLLING_MILLIS = 100L
     }
 
-    private val originInput = "//input[@data-test-id='origin-input']"
-    private val destinationInput = "//input[@data-test-id='destination-input']"
+    private val originInput = "//*[@data-test-id='origin-input']"
+    private val destinationInput = "//*[@data-test-id='destination-input']"
     private val autocompleteOption = "//*[@role='option']"
+    private val departureDateButton = "//*[@data-test-id='start-date-field']"
+    private val returnDateButton = "//*[@data-test-id='end-date-field']"
+    private val searchButton = "//*[@data-test-id='form-submit']"
+    private val anyDateCell = "//*[starts-with(@data-test-id,'date-')]"
+    private val calendarActionButton = "//*[@data-test-id='calendar-action-button']"
 
-    private fun selectCity(input: String, city: String) {
-        type(input, city)
-
-        runCatching {
-                wait
-                .pollingEvery(Duration.ofMillis(AUTOCOMPLETE_POLLING_MILLIS))
-                .until {
-                    driver.findElements(xpath(autocompleteOption))
-                        .firstOrNull { it.isDisplayed && it.text.contains(city, ignoreCase = true) }
-                        ?.let {
-                            it.click()
-                            true
-                        } ?: false
-                }
-        }
+    fun open(baseUrl: String): HomePage {
+        driver.get(baseUrl)
+        visible(originInput)
+        return this
     }
 
     fun isOpened(): Boolean {
@@ -55,10 +52,47 @@ class HomePage(
         return this
     }
 
-    fun open(baseUrl: String): HomePage {
-        driver.get(baseUrl)
-        visible(originInput)
+    fun setRoute(origin: String, destination: String): HomePage {
+        setOrigin(origin)
+        setDestination(destination)
         return this
+    }
+
+    fun selectRoundTripDates(departureDate: LocalDate, returnDate: LocalDate): HomePage {
+        openCalendar(departureDateButton)
+        pickDay(departureDate)
+        click(returnDateButton)
+        pickDay(returnDate)
+        confirmCalendar()
+        return this
+    }
+
+    fun searchFlights(): FlightResultsPage {
+        val originalWindow = driver.windowHandle
+        val urlBefore = driver.currentUrl
+
+        click(searchButton)
+
+        wait.until {
+            driver.windowHandles.size > 1 || driver.currentUrl != urlBefore
+        }
+
+        if (driver.windowHandles.size > 1) {
+            driver.switchTo().window(driver.windowHandles.first { it != originalWindow })
+        }
+
+        return FlightResultsPage(driver, timeout)
+    }
+
+    fun searchRoundTrip(
+        from: String,
+        to: String,
+        departureDate: LocalDate,
+        returnDate: LocalDate,
+    ): FlightResultsPage {
+        return setRoute(from, to)
+            .selectRoundTripDates(departureDate, returnDate)
+            .searchFlights()
     }
 
     fun openHotels(): HotelsSearchPage {
@@ -82,15 +116,60 @@ class HomePage(
         return PriceMapPage(driver, timeout)
     }
 
-    fun searchRoundTrip(from: String, to: String, departureDateLabel: String, returnDateLabel: String): FlightResultsPage {
-        type("(//input[not(@type='hidden')])[1]", from)
-        click("//*[contains(normalize-space(.), '$from')][1]")
-        type("(//input[not(@type='hidden')])[2]", to)
-        click("//*[contains(normalize-space(.), '$to')][1]")
-        click("//*[contains(@aria-label, '$departureDateLabel') or contains(normalize-space(.), '$departureDateLabel')][1]")
-        click("//*[contains(@aria-label, '$returnDateLabel') or contains(normalize-space(.), '$returnDateLabel')][1]")
-        click("//*[self::button or self::a][contains(normalize-space(.), 'Найти')]")
-        return FlightResultsPage(driver, timeout)
+    private fun selectCity(input: String, city: String) {
+        type(input, city)
+
+        runCatching {
+            wait
+                .pollingEvery(Duration.ofMillis(AUTOCOMPLETE_POLLING_MILLIS))
+                .until {
+                    driver.findElements(xpath(autocompleteOption))
+                        .firstOrNull { it.isDisplayed && it.text.contains(city, ignoreCase = true) }
+                        ?.let {
+                            it.click()
+                            true
+                        } ?: false
+                }
+        }
+    }
+
+    private fun openCalendar(button: String) {
+        wait.until {
+            runCatching {
+                click(button)
+                driver.findElements(xpath(anyDateCell)).any { it.isDisplayed }
+            }.getOrDefault(false)
+        }
+    }
+
+    private fun pickDay(target: LocalDate) {
+        selectMonthIfPresent(target)
+
+        val dateId = "date-${target.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}"
+        val dayButton = wait.until(
+            ExpectedConditions.elementToBeClickable(
+                xpath("//*[@data-test-id='$dateId']/ancestor::button[1]")
+            )
+        )
+
+        dayButton.click()
+    }
+
+    private fun selectMonthIfPresent(target: LocalDate) {
+        driver.findElements(xpath("//*[@data-test-id='select-month']"))
+            .firstOrNull()
+            ?.let {
+                runCatching {
+                    Select(it).selectByValue(target.format(DateTimeFormatter.ofPattern("yyyy-MM")))
+                }
+            }
+    }
+
+    private fun confirmCalendar() {
+        runCatching {
+            wait.until(ExpectedConditions.elementToBeClickable(xpath(calendarActionButton)))
+                .click()
+        }
     }
 
     private fun switchToLastWindow() {

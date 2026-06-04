@@ -26,6 +26,10 @@ abstract class BaseSeleniumTest {
         return driver
     }
 
+    protected fun start(): WebDriver {
+        return start(config.browsers.first())
+    }
+
     companion object {
         @JvmStatic
         fun browsers(): Stream<Arguments> =

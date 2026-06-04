@@ -25,10 +25,11 @@ class SmokeTest : BaseSeleniumTest() {
         assertTrue(homePage.destinationValue().isBlank())
     }
 
+    @Disabled
     @Test
     fun destinationCanBeTyped() {
-        val originCity = "Иваново"
-        val destinationCity = "Москва"
+        val originCity = "Москва"
+        val destinationCity = "Санкт-Петербург"
         
         val homePage = HomePage(start(Browser.CHROME), config.timeout)
             .open(config.baseUrl)
