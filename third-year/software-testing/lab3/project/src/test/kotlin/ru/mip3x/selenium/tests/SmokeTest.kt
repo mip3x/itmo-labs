@@ -12,4 +12,13 @@ class SmokeTest : BaseSeleniumTest() {
             .open(config.baseUrl)
         assertTrue(homePage.isOpened())
     }
+
+    @Test
+    fun searchFormHasRouteInputs() {
+        val homePage = HomePage(start(Browser.CHROME), config.timeout)
+            .open(config.baseUrl)
+
+        assertTrue(homePage.fromValue().isNotBlank())
+        assertTrue(homePage.toValue().isBlank())
+    }
 }

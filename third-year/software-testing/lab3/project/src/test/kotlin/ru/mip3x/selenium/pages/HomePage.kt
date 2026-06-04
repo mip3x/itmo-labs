@@ -8,15 +8,24 @@ class HomePage(
     timeout: Duration,
 ) : BasePage(driver, timeout) {
     private val fromInput = "//input[@data-test-id='origin-input']"
+    private val toInput = "//input[@data-test-id='destination-input']"
+
+    fun isOpened(): Boolean {
+        return hasVisible(fromInput)
+    }
+
+    fun fromValue(): String {
+        return visible(fromInput).getAttribute("value") ?: ""
+    }
+
+    fun toValue(): String {
+        return visible(toInput).getAttribute("value") ?: ""
+    }
 
     fun open(baseUrl: String): HomePage {
         driver.get(baseUrl)
         visible(fromInput)
         return this
-    }
-
-    fun isOpened(): Boolean {
-        return hasVisible(fromInput)
     }
 
     fun openHotels(): HotelsSearchPage {
