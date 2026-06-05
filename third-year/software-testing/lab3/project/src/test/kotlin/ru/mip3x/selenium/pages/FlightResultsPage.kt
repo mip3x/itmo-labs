@@ -262,6 +262,7 @@ class FlightResultsPage(
     private fun currentMaxPriceFilterValue(): Int {
         return driver.findElement(xpath(priceSlider))
             .getAttribute("aria-valuenow")
+            .orEmpty()
             .toInt()
     }
 

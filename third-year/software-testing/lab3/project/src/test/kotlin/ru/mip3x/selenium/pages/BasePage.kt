@@ -24,8 +24,23 @@ abstract class BasePage(
     protected fun clickable(xpath: String): WebElement =
         wait.until(ExpectedConditions.elementToBeClickable(xpath(xpath)))
 
+    protected fun clickable(xpath: String, timeout: Duration): WebElement =
+        WebDriverWait(driver, timeout).until(ExpectedConditions.elementToBeClickable(xpath(xpath)))
+
     protected fun click(xpath: String) {
         clickable(xpath).click()
+    }
+
+    protected fun click(xpath: String, timeout: Duration) {
+        clickable(xpath, timeout).click()
+    }
+
+    protected fun jsClick(xpath: String) {
+        jsClick(clickable(xpath))
+    }
+
+    protected fun jsClick(element: WebElement) {
+        (driver as JavascriptExecutor).executeScript("arguments[0].click();", element)
     }
 
     protected fun type(xpath: String, value: String) {

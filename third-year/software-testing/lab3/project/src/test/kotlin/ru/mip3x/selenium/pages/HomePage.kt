@@ -3,6 +3,7 @@ package ru.mip3x.selenium.pages
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.Select
+import java.net.URI
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -97,8 +98,9 @@ class HomePage(
     }
 
     fun openHotels(): HotelsSearchPage {
-        click("//*[self::a or self::button][contains(normalize-space(.), 'Отели')]")
-        return HotelsSearchPage(driver, timeout)
+        val currentUri = URI(driver.currentUrl)
+        driver.navigate().to("${currentUri.scheme}://${currentUri.host}/hotels")
+        return HotelsSearchPage(driver, timeout).also { it.isLoaded() }
     }
 
     fun openJournal(): JournalPage {
