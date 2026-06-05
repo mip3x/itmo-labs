@@ -97,6 +97,19 @@ class HomePage(
             .searchFlights()
     }
 
+    fun openDirectionPage(
+        from: String,
+        to: String,
+        routePath: String,
+    ): DirectionPage {
+        setRoute(from, to)
+
+        val currentUri = URI(driver.currentUrl)
+        driver.navigate().to("${currentUri.scheme}://${currentUri.host}$routePath")
+
+        return DirectionPage(driver, timeout)
+    }
+
     fun openHotels(): HotelsSearchPage {
         val currentUri = URI(driver.currentUrl)
         driver.navigate().to("${currentUri.scheme}://${currentUri.host}/hotels")

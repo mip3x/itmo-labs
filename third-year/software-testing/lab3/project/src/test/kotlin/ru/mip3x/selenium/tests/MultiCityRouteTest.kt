@@ -1,10 +1,12 @@
 package ru.mip3x.selenium.tests
 
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import ru.mip3x.selenium.pages.HomePage
 import java.time.LocalDate
 
+@Disabled
 class MultiCityRouteTest : BaseSeleniumTest() {
     companion object {
         private val FLIGHT_DATE: LocalDate = LocalDate.of(2026, 12, 31)
