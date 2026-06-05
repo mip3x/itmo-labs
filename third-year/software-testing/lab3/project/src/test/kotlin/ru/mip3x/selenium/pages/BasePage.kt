@@ -53,6 +53,10 @@ abstract class BasePage(
 
     protected fun scrollTo(xpath: String) {
         val element = visible(xpath)
+        scrollTo(element)
+    }
+
+    protected fun scrollTo(element: WebElement) {
         (driver as JavascriptExecutor).executeScript("arguments[0].scrollIntoView({block: 'center'});", element)
     }
 }

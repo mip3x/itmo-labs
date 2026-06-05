@@ -147,13 +147,17 @@ class HomePage(
         selectMonthIfPresent(target)
 
         val dateId = "date-${target.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}"
-        val dayButton = wait.until(
-            ExpectedConditions.elementToBeClickable(
-                xpath("//*[@data-test-id='$dateId']/ancestor::button[1]")
-            )
-        )
+        val dayButton = "//*[@data-test-id='$dateId']/ancestor::button[1]"
 
-        dayButton.click()
+        wait.until {
+            runCatching {
+                val element = wait.until(ExpectedConditions.elementToBeClickable(xpath(dayButton)))
+
+                scrollTo(element)
+                element.click()
+                true
+            }.getOrDefault(false)
+        }
     }
 
     private fun selectMonthIfPresent(target: LocalDate) {
