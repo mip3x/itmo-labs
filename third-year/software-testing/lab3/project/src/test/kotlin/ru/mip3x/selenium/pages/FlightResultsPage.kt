@@ -1,6 +1,7 @@
 package ru.mip3x.selenium.pages
 
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.interactions.Actions
 import java.time.Duration
 
 class FlightResultsPage(
@@ -10,7 +11,15 @@ class FlightResultsPage(
     private val ticketPreview = "//*[@data-test-id='ticket-preview']"
     private val ticketBadge = "//*[starts-with(@data-test-id,'ticket-preview-badge')]"
     private val buyButton = "//*[starts-with(@data-test-id,'proposal-') and contains(@data-test-id,'-button')]"
+    private val baggageFilter = "//*[@data-test-id='boolean-filter-baggage']"
+    private val priceFilterGroup = "//*[@data-test-id='filter-group-price_side_group']"
+    private val priceSlider = "//*[@data-test-id='dynamic-filter-instance-price']//*[@role='slider']"
+    private val ticketPrice = ".//*[@data-test-id='price']"
     private val closedAirportWarningText = "//*[@data-test-id='text' and contains(., 'Симферополя') and contains(., 'закрыты')]"
+    private val ticketBaggageInfo = "//*[@data-test-id='ticket-preview']//*[contains(normalize-space(.), 'багаж') or contains(normalize-space(.), 'Багаж') or contains(normalize-space(.), 'кг')]"
+    private val baggageGroup = "//*[@data-test-id='boolean-filter-baggage']/ancestor::*[contains(normalize-space(.), 'Багаж')][1]"
+    private val baggageAmountPlusButton = "$baggageGroup//*[@data-test-id='increase-button']"
+    private val baggageAmountValue = "$baggageGroup//*[@data-test-id='stepper-value']"
 
     fun waitForResults(): FlightResultsPage {
         waitFor { ticketsVisible() }
@@ -57,25 +66,210 @@ class FlightResultsPage(
     }
 
     fun enableBaggageFilter(): FlightResultsPage {
-        click("//*[self::label or self::button][contains(normalize-space(.), 'багаж') or contains(normalize-space(.), 'Багаж')]")
+        click(baggageFilter)
+        waitFor { ticketsVisible() }
         return this
     }
 
-    fun selectBaggageAmount(label: String): FlightResultsPage {
-        click("//*[self::label or self::button][contains(normalize-space(.), '$label')]")
+    fun selectBaggageWeight(label: String): FlightResultsPage {
+        clickBaggageFilterRow(label)
+        waitFor { ticketsVisible() }
+        return this
+    }
+
+    fun selectBaggageAmount(amount: Int): FlightResultsPage {
+        repeat(amount - 1) {
+            click(baggageAmountPlusButton)
+        }
+
+        waitFor {
+            driver.findElements(xpath(baggageAmountValue))
+                .any { it.isDisplayed && it.text.contains("$amount шт") }
+        }
+        waitFor { ticketsVisible() }
         return this
     }
 
     fun selectDepartureTime(label: String): FlightResultsPage {
-        click("//*[self::label or self::button][contains(normalize-space(.), '$label')]")
+        clickFilter(label)
+        waitFor { ticketsVisible() }
         return this
     }
 
     fun hasBaggageInfo(): Boolean {
-        return hasVisible("//*[contains(normalize-space(.), 'багаж') or contains(normalize-space(.), 'Багаж') or contains(normalize-space(.), 'кг')]")
+        return waitFor {
+            driver.findElements(xpath(ticketBaggageInfo)).any { it.isDisplayed }
+        }
+    }
+
+    fun areTicketsVisible(): Boolean {
+        return waitFor { ticketsVisible() }
+    }
+
+    fun allTicketsHaveBaggageAmount(amount: Int): Boolean {
+        return waitFor {
+            val tickets = visibleTicketTexts()
+
+            tickets.isNotEmpty() && tickets.all { ticket ->
+                val baggageAmounts = Regex("""(\d+)\s*шт""")
+                    .findAll(ticket)
+                    .mapNotNull { it.groupValues[1].toIntOrNull() }
+                    .toList()
+
+                ticket.contains("багаж", ignoreCase = true) &&
+                    baggageAmounts.any { it >= amount }
+            }
+        }
+    }
+
+    fun averageTicketPrice(): Double {
+        val prices = wait.until {
+            val currentPrices = visibleTicketPrices()
+
+            currentPrices.ifEmpty { null }
+        }
+
+        return prices.orEmpty().average()
+    }
+
+    fun averageTicketPriceIsGreaterThan(price: Double): Boolean {
+        return waitFor {
+            val currentPrice = averageTicketPrice()
+
+            !currentPrice.isNaN() && currentPrice > price
+        }
+    }
+
+    fun allTicketsHaveBaggageWeightAtLeast(weight: Int): Boolean {
+        return waitFor {
+            val tickets = visibleTicketTexts()
+
+            tickets.isNotEmpty() && tickets.all { ticket ->
+                val baggageWeights = Regex("""Багаж\s+(\d+)\s*кг""", RegexOption.IGNORE_CASE)
+                    .findAll(ticket)
+                    .mapNotNull { it.groupValues[1].toIntOrNull() }
+                    .toList()
+
+                baggageWeights.any { it >= weight }
+            }
+        }
+    }
+
+    fun allDepartureTimesAreBetween(startHour: Int, endHour: Int): Boolean {
+        return waitFor {
+            val tickets = visibleTicketTexts()
+
+            tickets.isNotEmpty() && tickets.all { ticketText ->
+                val times = departureTimes(ticketText)
+
+                times.isNotEmpty() && times.all { hour -> hour in startHour until endHour }
+            }
+        }
+    }
+
+    fun reduceMaxPriceWithSlider(): FlightResultsPage {
+        wait.until {
+            runCatching {
+                scrollTo(priceFilterGroup)
+                click(priceFilterGroup)
+                val slider = clickable(priceSlider)
+
+                Actions(driver)
+                    .clickAndHold(slider)
+                    .moveByOffset(-205, 0)
+                    .release()
+                    .perform()
+                true
+            }.getOrDefault(false)
+        }
+
+        waitFor { ticketsVisible() }
+        return this
+    }
+
+    fun maxTicketPrice(): Int {
+        return visibleTicketPrices().maxOrNull() ?: 0
+    }
+
+    fun maxTicketPriceIsLessThan(price: Int): Boolean {
+        return waitFor {
+            val currentPrice = maxTicketPrice()
+
+            currentPrice > 0 && currentPrice < price
+        }
     }
 
     private fun ticketsVisible(): Boolean {
         return driver.findElements(xpath(ticketPreview)).any { it.isDisplayed }
+    }
+
+    private fun visibleTicketTexts(): List<String> {
+        return driver.findElements(xpath(ticketPreview))
+            .filter { it.isDisplayed }
+            .map { it.text }
+    }
+
+    private fun visibleTicketPrices(): List<Int> {
+        return driver.findElements(xpath(ticketPreview))
+            .mapNotNull { ticket ->
+                runCatching {
+                    if (!ticket.isDisplayed) {
+                        return@runCatching null
+                    }
+
+                    ticket.findElement(xpath(ticketPrice))
+                        .text
+                        .replace(Regex("[^\\d]"), "")
+                        .toIntOrNull()
+                }.getOrNull()
+            }
+    }
+
+    private fun departureTimes(ticketText: String): List<Int> {
+        return Regex("""\b(\d{2}):(\d{2})\b""")
+            .findAll(ticketText)
+            .mapIndexedNotNull { index, match ->
+                if (index % 2 == 0) match.groupValues[1].toIntOrNull() else null
+            }
+            .toList()
+    }
+
+    private fun clickBaggageFilterRow(label: String) {
+        val labels = listOf(label, label.removePrefix("от "), label.removePrefix("От ")).distinct()
+
+        wait.until {
+            runCatching {
+                val element = labels.firstNotNullOfOrNull { text ->
+                    val row =
+                        "$baggageGroup//*[contains(normalize-space(.), '$text')]/ancestor-or-self::*[self::label or self::button or @role='button' or @role='radio'][1]"
+                    val textElement = "$baggageGroup//*[contains(normalize-space(.), '$text')]"
+
+                    driver.findElements(xpath(row)).firstOrNull { it.isDisplayed }
+                        ?: driver.findElements(xpath(textElement)).firstOrNull { it.isDisplayed }
+                } ?: return@runCatching false
+
+                element.click()
+                true
+            }.getOrDefault(false)
+        }
+    }
+
+    private fun clickFilter(label: String) {
+        val labels = listOf(label, label.removePrefix("от "), label.removePrefix("От ")).distinct()
+
+        wait.until {
+            runCatching {
+                val element = labels.firstNotNullOfOrNull { text ->
+                    val interactiveElement =
+                        "//*[contains(normalize-space(.), '$text') and not(ancestor::*[@data-test-id='ticket-preview']) and not(ancestor::a)]/ancestor-or-self::*[self::label or self::button or @role='button' or @role='checkbox'][1]"
+
+                    driver.findElements(xpath(interactiveElement)).firstOrNull { it.isDisplayed }
+                }
+                    ?: return@runCatching false
+
+                element.click()
+                true
+            }.getOrDefault(false)
+        }
     }
 }
