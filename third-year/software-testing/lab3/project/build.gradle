@@ -1,0 +1,82 @@
+plugins {
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.24'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.10.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.2"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.10.2"
+
+    testImplementation "org.seleniumhq.selenium:selenium-java:4.25.0"
+    testImplementation "io.github.bonigarcia:webdrivermanager:5.9.2"
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+application {
+    mainClass = 'ru.mip3x.app.MainKt'
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += "-XX:+EnableDynamicAgentLoading"
+
+    systemProperty "baseUrl", System.getProperty("baseUrl", "https://www.aviasales.ru")
+    systemProperty "browsers", System.getProperty("browsers", "chrome")
+    systemProperty "headless", System.getProperty("headless", "false")
+
+    testLogging {
+        events "passed", "failed", "skipped"
+        showStandardStreams = true
+    }
+}
+
+tasks.register("chromeTest", Test) {
+    group = "verification"
+    description = "Runs Selenium functional tests in Chrome"
+    useJUnitPlatform()
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    systemProperty "baseUrl", System.getProperty("baseUrl", "https://www.aviasales.ru")
+    systemProperty "browsers", "chrome"
+    systemProperty "headless", System.getProperty("headless", "false")
+    testLogging {
+        events "passed", "failed", "skipped"
+        showStandardStreams = true
+    }
+}
+
+tasks.register("firefoxTest", Test) {
+    group = "verification"
+    description = "Runs Selenium functional tests in Firefox"
+    useJUnitPlatform()
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    systemProperty "baseUrl", System.getProperty("baseUrl", "https://www.aviasales.ru")
+    systemProperty "browsers", "firefox"
+    systemProperty "headless", System.getProperty("headless", "false")
+    testLogging {
+        events "passed", "failed", "skipped"
+        showStandardStreams = true
+    }
+}
+
+tasks.register("allBrowsersTest") {
+    group = "verification"
+    description = "Runs Selenium functional tests in Chrome and Firefox"
+    dependsOn "chromeTest", "firefoxTest"
+}

@@ -1,0 +1,45 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam dpi 180
+skinparam nodesep 45
+skinparam ranksep 55
+
+actor "Пользователь" as User
+
+rectangle "aviasales.ru" {
+  package "Авиабилеты" {
+    usecase "Поиск и выбор\nавиабилета туда-обратно" as UC01
+    usecase "Фильтрация результатов\nпоиска авиабилетов" as UC02
+    usecase "Составление\nсложного маршрута" as UC04
+    usecase "Переход к покупке\nбилета" as BuyTicket
+  }
+
+  package "Отели" {
+    usecase "Поиск и бронирование\nотеля гостем" as UC03
+    usecase "Переход к бронированию\nномера" as BookHotel
+  }
+
+  package "Направления" {
+    usecase "Подбор направления\nна карте цен" as UC05
+  }
+
+  package "Журнал" {
+    usecase "Поиск статьи\nв журнале" as UC06
+  }
+}
+
+User --> UC01
+User --> UC02
+User --> UC03
+User --> UC04
+User --> UC05
+User --> UC06
+
+UC01 <.. UC02 : <<extend>>
+UC05 <.. UC01 : <<extend>>
+UC01 <.. BuyTicket : <<extend>>
+UC04 <.. BuyTicket : <<extend>>
+UC03 <.. BookHotel : <<extend>>
+@enduml
