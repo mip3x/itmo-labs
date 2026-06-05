@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import ru.mip3x.selenium.pages.HomePage
 import java.time.LocalDate
 
-@Disabled
 class HotelsTest : BaseSeleniumTest() {
     companion object {
         private val CHECK_IN_DATE: LocalDate = LocalDate.of(2026, 12, 24)

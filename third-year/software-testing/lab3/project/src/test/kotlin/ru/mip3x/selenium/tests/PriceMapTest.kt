@@ -1,6 +1,7 @@
 package ru.mip3x.selenium.tests
 
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import ru.mip3x.selenium.pages.HomePage
 
