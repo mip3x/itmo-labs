@@ -120,8 +120,13 @@ class HomePage(
     }
 
     fun openPriceMap(): PriceMapPage {
-        click("//*[contains(normalize-space(.), 'Карта цен')]/ancestor-or-self::*[self::a or self::button][1]")
-        return PriceMapPage(driver, timeout)
+        runCatching {
+            click("//*[@data-test-id='price-map-banner-button']")
+        }.getOrElse {
+            click("//*[contains(normalize-space(.), 'Карта цен')]/ancestor-or-self::*[self::a or self::button][1]")
+        }
+
+        return PriceMapPage(driver, timeout).also { it.isVisible() }
     }
 
     private fun selectCity(input: String, city: String) {
