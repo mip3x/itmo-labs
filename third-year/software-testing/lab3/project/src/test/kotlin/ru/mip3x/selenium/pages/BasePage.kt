@@ -59,4 +59,17 @@ abstract class BasePage(
     protected fun scrollTo(element: WebElement) {
         (driver as JavascriptExecutor).executeScript("arguments[0].scrollIntoView({block: 'center'});", element)
     }
+
+    protected fun isInViewport(element: WebElement): Boolean {
+        return (driver as JavascriptExecutor).executeScript(
+            """
+            const rect = arguments[0].getBoundingClientRect();
+            return rect.bottom > 0 &&
+                rect.right > 0 &&
+                rect.top < window.innerHeight &&
+                rect.left < window.innerWidth;
+            """.trimIndent(),
+            element,
+        ) as Boolean
+    }
 }

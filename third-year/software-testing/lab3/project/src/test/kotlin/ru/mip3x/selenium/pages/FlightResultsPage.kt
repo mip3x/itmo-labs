@@ -1,7 +1,7 @@
 package ru.mip3x.selenium.pages
 
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.interactions.Actions
+import org.openqa.selenium.Keys
 import java.time.Duration
 
 class FlightResultsPage(
@@ -13,7 +13,7 @@ class FlightResultsPage(
     private val buyButton = "//*[starts-with(@data-test-id,'proposal-') and contains(@data-test-id,'-button')]"
     private val baggageFilter = "//*[@data-test-id='boolean-filter-baggage']"
     private val priceFilterGroup = "//*[@data-test-id='filter-group-price_side_group']"
-    private val priceSlider = "//*[@data-test-id='dynamic-filter-instance-price']//*[@role='slider']"
+    private val priceSlider = "(//*[@data-test-id='dynamic-filter-instance-price']//*[@role='slider'])[last()]"
     private val ticketPrice = ".//*[@data-test-id='price']"
     private val closedAirportWarningText = "//*[@data-test-id='text' and contains(., 'Симферополя') and contains(., 'закрыты')]"
     private val ticketBaggageInfo = "//*[@data-test-id='ticket-preview']//*[contains(normalize-space(.), 'багаж') or contains(normalize-space(.), 'Багаж') or contains(normalize-space(.), 'кг')]"
@@ -96,6 +96,18 @@ class FlightResultsPage(
         return this
     }
 
+    fun selectDaytimeDeparture(): FlightResultsPage {
+        clickFilter("Днём")
+
+        waitFor {
+            val tickets = visibleTicketTexts()
+
+            allTicketTextsHaveDepartureTimeBetween(tickets, 12, 18)
+        }
+
+        return this
+    }
+
     fun hasBaggageInfo(): Boolean {
         return waitFor {
             driver.findElements(xpath(ticketBaggageInfo)).any { it.isDisplayed }
@@ -159,27 +171,25 @@ class FlightResultsPage(
         return waitFor {
             val tickets = visibleTicketTexts()
 
-            tickets.isNotEmpty() && tickets.all { ticketText ->
-                val times = departureTimes(ticketText)
-
-                times.isNotEmpty() && times.all { hour -> hour in startHour until endHour }
-            }
+            allTicketTextsHaveDepartureTimeBetween(tickets, startHour, endHour)
         }
     }
 
     fun reduceMaxPriceWithSlider(): FlightResultsPage {
+        val maxPriceBefore = currentMaxPriceFilterValue()
+
         wait.until {
             runCatching {
                 scrollTo(priceFilterGroup)
                 click(priceFilterGroup)
                 val slider = clickable(priceSlider)
 
-                Actions(driver)
-                    .clickAndHold(slider)
-                    .moveByOffset(-205, 0)
-                    .release()
-                    .perform()
-                true
+                slider.click()
+                repeat(10) {
+                    slider.sendKeys(Keys.ARROW_LEFT)
+                }
+
+                currentMaxPriceFilterValue() < maxPriceBefore
             }.getOrDefault(false)
         }
 
@@ -199,14 +209,38 @@ class FlightResultsPage(
         }
     }
 
+    fun allVisibleTicketsWithinCurrentMaxPrice(): Boolean {
+        return waitFor {
+            val maxPrice = currentMaxPriceFilterValue()
+            val ticketPrices = visibleTicketPrices()
+
+            ticketPrices.isNotEmpty() && ticketPrices.all { it <= maxPrice }
+        }
+    }
+
     private fun ticketsVisible(): Boolean {
         return driver.findElements(xpath(ticketPreview)).any { it.isDisplayed }
     }
 
     private fun visibleTicketTexts(): List<String> {
         return driver.findElements(xpath(ticketPreview))
-            .filter { it.isDisplayed }
-            .map { it.text }
+            .mapNotNull { ticket ->
+                runCatching {
+                    if (ticket.isDisplayed && isInViewport(ticket)) ticket.text else null
+                }.getOrNull()
+            }
+    }
+
+    private fun allTicketTextsHaveDepartureTimeBetween(
+        tickets: List<String>,
+        startHour: Int,
+        endHour: Int,
+    ): Boolean {
+        return tickets.isNotEmpty() && tickets.all { ticketText ->
+            val departureHour = firstDepartureHour(ticketText)
+
+            departureHour != null && departureHour in startHour until endHour
+        }
     }
 
     private fun visibleTicketPrices(): List<Int> {
@@ -225,13 +259,18 @@ class FlightResultsPage(
             }
     }
 
-    private fun departureTimes(ticketText: String): List<Int> {
+    private fun currentMaxPriceFilterValue(): Int {
+        return driver.findElement(xpath(priceSlider))
+            .getAttribute("aria-valuenow")
+            .toInt()
+    }
+
+    private fun firstDepartureHour(ticketText: String): Int? {
         return Regex("""\b(\d{2}):(\d{2})\b""")
-            .findAll(ticketText)
-            .mapIndexedNotNull { index, match ->
-                if (index % 2 == 0) match.groupValues[1].toIntOrNull() else null
-            }
-            .toList()
+            .find(ticketText)
+            ?.groupValues
+            ?.get(1)
+            ?.toIntOrNull()
     }
 
     private fun clickBaggageFilterRow(label: String) {

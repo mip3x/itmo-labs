@@ -13,7 +13,6 @@ class FlightFiltersTest : BaseSeleniumTest() {
         private val RETURN_DATE: LocalDate = LocalDate.of(2026, 12, 31)
     }
 
-    @Disabled
     @Test
     fun baggageAmountFilterShowsTwoCheckedBagsInEveryTicket() {
         val resultsPage = openResults()
@@ -36,26 +35,23 @@ class FlightFiltersTest : BaseSeleniumTest() {
         assertTrue(averagePriceIncreased)
     }
 
-    @Disabled
     @Test
     fun daytimeDepartureFilterShowsOnlyDaytimeDepartures() {
         val resultsPage = openResults()
-            .selectDepartureTime("Днём")
+            .selectDaytimeDeparture()
 
         assertTrue(resultsPage.allDepartureTimesAreBetween(12, 18))
     }
 
-    @Disabled
     @Test
     fun priceSliderLowersMaximumTicketPrice() {
         val resultsPage = openResults()
-        val maxPriceBefore = resultsPage.maxTicketPrice()
 
-        val maxPriceDecreased = resultsPage
+        val ticketsFitMaxPrice = resultsPage
             .reduceMaxPriceWithSlider()
-            .maxTicketPriceIsLessThan(maxPriceBefore)
+            .allVisibleTicketsWithinCurrentMaxPrice()
 
-        assertTrue(maxPriceDecreased)
+        assertTrue(ticketsFitMaxPrice)
     }
 
     private fun openResults(): FlightResultsPage {

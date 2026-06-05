@@ -75,22 +75,8 @@ tasks.register("firefoxTest", Test) {
     }
 }
 
-tasks.register("allBrowsersTest", Test) {
+tasks.register("allBrowsersTest") {
     group = "verification"
-    description = "Runs Selenium functional tests in Chrome and Firefox in parallel"
-    useJUnitPlatform()
-
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-
-    systemProperty "baseUrl", System.getProperty("baseUrl", "https://www.aviasales.ru")
-    systemProperty "browsers", "chrome,firefox"
-    systemProperty "headless", System.getProperty("headless", "false")
-    systemProperty "junit.jupiter.execution.parallel.enabled", "true"
-    systemProperty "junit.jupiter.execution.parallel.mode.default", "concurrent"
-    systemProperty "junit.jupiter.execution.parallel.mode.classes.default", "concurrent"
-    testLogging {
-        events "passed", "failed", "skipped"
-        showStandardStreams = true
-    }
+    description = "Runs Selenium functional tests in Chrome and Firefox"
+    dependsOn "chromeTest", "firefoxTest"
 }
