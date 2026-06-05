@@ -110,8 +110,13 @@ class HomePage(
     }
 
     fun openMultiCitySearch(): MultiCitySearchPage {
-        click("//*[self::a or self::button][contains(normalize-space(.), 'сложный маршрут') or contains(normalize-space(.), 'Сложный маршрут')]")
-        return MultiCitySearchPage(driver, timeout)
+        runCatching {
+            click("//*[@data-test-id='switch-to-multiwayform']")
+        }.getOrElse {
+            click("//*[self::a or self::button][contains(normalize-space(.), 'сложный маршрут') or contains(normalize-space(.), 'Сложный маршрут')]")
+        }
+
+        return MultiCitySearchPage(driver, timeout).also { it.isLoaded() }
     }
 
     fun openPriceMap(): PriceMapPage {
