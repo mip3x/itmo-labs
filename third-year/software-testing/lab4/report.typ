@@ -23,7 +23,7 @@
 #let work_name = "Нагрузочное и стресс-тестирование"
 #let work_variant = "Вариант №5"
 
-#let student_name = "* * *"
+#let student_name = "Малышев Михаил Александрович"
 #let group = "Группа P3311"
 #let teacher_name = "Наумова Надежда Александровна"
 #let year = "2026"
