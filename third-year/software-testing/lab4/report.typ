@@ -73,7 +73,7 @@
 
 \
 *Ссылка на Pull Request:*
-#link("https://github.com/mip3x/itmo-labs/pull/55")
+#link("https://github.com/mip3x/itmo-labs/pull/59")
 
 
 
