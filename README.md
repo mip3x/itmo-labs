@@ -4,3 +4,4 @@
 - [I-ый курс](./first-year)
 - [II-ой курс](./second-year)
 - [III-ий курс](./third-year)
+- [IV-ый курс](./fourth-year)
