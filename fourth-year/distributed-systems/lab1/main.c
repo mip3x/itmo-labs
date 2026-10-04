@@ -204,6 +204,15 @@ int main(int argc, char *argv[]) {
             return ERR_SEND_MULTICAST;
     }
 
+    if (receive_from_children(&process, DONE) != 0)
+        return ERR_RECEIVE_FROM_CHILDREN;
+
+    if (process.id != PARENT_ID) {
+        snprintf(text, sizeof(text),
+                log_received_all_done_fmt, (int)process.id);
+        log_event(event_log, text);
+    }
+
     if (process.id == PARENT_ID) {
         for (uint8_t i = 0; i < child_processes; i++) {
             pid_t result;
