@@ -1,9 +1,15 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
 
 #include "ipc.h"
 #include "process.h"
+
+#define ERR_FCNTL -1
+#define ERR_READ_EXACT -2
+#define ERR_INVALID_HEADER -3
+#define ERR_ZERO_ACTIVE -4
 
 /** Send a message to the process specified by id.
  *
@@ -123,6 +129,56 @@ int receive(void * self, local_id from, Message * msg) {
  *
  * @return 0 on success, any non-zero value on error
  */
-int receive_any(void * self, Message * msg) {
-    return 0;
+ int receive_any(void *self, Message *msg) {
+    Process *process = (Process*)self;
+
+    while (1) {
+        int active = 0;
+
+        for (local_id from = 0; from < process->total_processes; from++) {
+            if (from == process->id)
+                continue;
+
+            int fd = process->pipes[from][process->id][0];
+            if (fd == -1)
+                continue;
+
+            int flags = fcntl(fd, F_GETFL);
+            if (flags == -1)
+                return ERR_FCNTL;
+
+            if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+                return ERR_FCNTL;
+
+            char *header = (char *)&msg->s_header;
+            ssize_t result = read(fd, header, 1);
+            int read_error = errno;
+
+            if (fcntl(fd, F_SETFL, flags) == -1)
+                return ERR_FCNTL;
+
+            if (result == -1) {
+                if (read_error == EAGAIN || read_error == EWOULDBLOCK || read_error == EINTR) {
+                    active = 1;
+                    continue;
+                }
+
+                return -1;
+            }
+
+            if (result == 0)
+                continue;
+
+            if (read_exact(fd, header + 1, sizeof(MessageHeader) - 1) != 0)
+                return ERR_READ_EXACT;
+
+            if (msg->s_header.s_magic != MESSAGE_MAGIC || msg->s_header.s_payload_len > MAX_PAYLOAD_LEN)
+                return ERR_INVALID_HEADER;
+
+            return read_exact(fd, msg->s_payload, msg->s_header.s_payload_len);
+        }
+
+        if (!active)
+            return ERR_ZERO_ACTIVE;
+    }
 }

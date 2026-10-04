@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -153,7 +154,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    Message msg = {0};
+    Message msg;
+    memset(&msg, 0, sizeof(msg));
     char text[256];
 
     msg.s_header.s_magic = MESSAGE_MAGIC;
