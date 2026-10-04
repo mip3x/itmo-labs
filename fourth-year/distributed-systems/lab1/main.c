@@ -1,3 +1,5 @@
+#include <errno.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +13,8 @@
 #define ERR_WRONG_ARGS 1
 #define ERR_FOPEN 2
 #define ERR_PIPE 3
+#define ERR_FORK 4
+#define ERR_WAIT 5
 
 #define WRITE_MODE "w"
 
@@ -77,6 +81,65 @@ int main(int argc, char *argv[]) {
         }
     }
     fclose(pipe_log);
+
+    // flush output so not to save it in child processes
+    fflush(stdout);
+
+    for (uint8_t id = 1; id < total_processes; id++) {
+        pid_t pid = fork();
+
+        if (pid == -1) {
+            fprintf(stderr, "fork syscall err\n");
+            return ERR_FORK;
+        }
+
+        if (pid == 0) {
+            // child
+            process.id = (local_id)id;
+            break;
+        }
+        // parent just spins further
+    }
+
+    // close redundant pipe ends
+    // if you are writer -> no need to read from this descriptor
+    // if you are receiver -> no need to write to this descriptor
+    for (uint8_t from = 0; from < total_processes; from++) {
+        for (uint8_t to = 0; to < total_processes; to++) {
+            if (from == to)
+                continue;
+
+            if (process.id != to) {
+                close(process.pipes[from][to][0]);
+                process.pipes[from][to][0] = -1;
+            }
+
+            if (process.id != from) {
+                close(process.pipes[from][to][1]);
+                process.pipes[from][to][1] = -1;
+            }
+        }
+    }
+
+    printf("Local ID=%d, PID=%ld, parent PID=%ld\n",
+        process.id, (long)getpid(), (long)getppid()
+    );
+
+    if (process.id == PARENT_ID) {
+        for (uint8_t i = 0; i < child_processes; i++) {
+            pid_t result;
+
+            do {
+                // wait for child to finish
+                result = wait(NULL);
+            } while (result == -1 && errno == EINTR);
+
+            if (result == -1) {
+                fprintf(stderr, "wait syscall err\n");
+                return ERR_WAIT;
+            }
+        }
+    }
 
     return OK;
 }
