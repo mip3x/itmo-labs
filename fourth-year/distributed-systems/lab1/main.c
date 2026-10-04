@@ -20,6 +20,7 @@
 #define ERR_SEND_MULTICAST 6
 #define ERR_RECEIVE_FROM_CHILDREN 7
 #define ERR_FINISH_WORK_CHILD 8
+#define ERR_INVALID_HEADER 9
 
 #define WRITE_MODE "w"
 
@@ -170,7 +171,7 @@ int main(int argc, char *argv[]) {
                           (int)getppid());
                         
         if (length < 0 || length >= MAX_PAYLOAD_LEN)
-            return 1;
+            return ERR_INVALID_HEADER;
 
         msg.s_header.s_type = STARTED;
         msg.s_header.s_payload_len = (uint16_t)length;
