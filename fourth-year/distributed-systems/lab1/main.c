@@ -8,6 +8,7 @@
 #include "common.h"
 #include "ipc.h"
 #include "process.h"
+#include "pa1.h"
 
 #define OK 0
 #define ERR_WRONG_ARGS 1
@@ -15,8 +16,30 @@
 #define ERR_PIPE 3
 #define ERR_FORK 4
 #define ERR_WAIT 5
+#define ERR_SEND_MULTICAST 6
+#define ERR_RECEIVE_FROM_CHILDREN 7
+#define ERR_FINISH_WORK_CHILD 8
 
 #define WRITE_MODE "w"
+
+static void log_event(FILE *file, const char *text) {
+    fputs(text, stdout);
+    fputs(text, file);
+}
+
+static int receive_from_children(Process *process, MessageType type) {
+    Message msg;
+
+    for (local_id from = 1; from < process->total_processes; from++) {
+        if (from == process->id)
+            continue;
+
+        if (receive(process, from, &msg) != 0 || msg.s_header.s_type != type)
+            return -1;
+    }
+
+    return 0;
+}
 
 void print_usage_msg(const char* binary_file_name) {
     fprintf(stderr, "Usage: %s -p X\nX - number of child processes\n", binary_file_name);
@@ -32,14 +55,12 @@ int main(int argc, char *argv[]) {
 
     if (strcmp(argv[1], "-p") == 0) {
         child_processes = atoi(argv[2]);
-        printf("Got %u child processes\n", child_processes);
     } else {
         print_usage_msg(argv[0]);
         return ERR_WRONG_ARGS;
     }
 
     unsigned int total_processes = child_processes + 1;
-    printf("Total processes: %u\n", total_processes);
 
     // create parent process
     Process process = {
@@ -82,6 +103,17 @@ int main(int argc, char *argv[]) {
     }
     fclose(pipe_log);
 
+    FILE *event_log = fopen(events_log, WRITE_MODE);
+    if (event_log == NULL) {
+        fprintf(stderr, "fopen events.log\n");
+        return ERR_FOPEN;
+    }
+    // switching off bufferization
+    // so writes will not be going through cache
+    // they will go direct to file & terminal
+    setbuf(event_log, NULL);
+    setbuf(stdout, NULL);
+
     // flush output so not to save it in child processes
     fflush(stdout);
 
@@ -121,9 +153,56 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    printf("Local ID=%d, PID=%ld, parent PID=%ld\n",
-        process.id, (long)getpid(), (long)getppid()
-    );
+    Message msg = {0};
+    char text[256];
+
+    msg.s_header.s_magic = MESSAGE_MAGIC;
+    msg.s_header.s_local_time = 0;
+
+    // send START MSG from children
+    if (process.id != PARENT_ID) {
+        int length = snprintf(msg.s_payload, MAX_PAYLOAD_LEN,
+                          log_started_fmt,
+                          (int)process.id,
+                          (int)getpid(),
+                          (int)getppid());
+                        
+        if (length < 0 || length >= MAX_PAYLOAD_LEN)
+            return 1;
+
+        msg.s_header.s_type = STARTED;
+        msg.s_header.s_payload_len = (uint16_t)length;
+
+        log_event(event_log, msg.s_payload);
+
+        if (send_multicast(&process, &msg) != 0)
+            return ERR_SEND_MULTICAST;
+    }
+
+    // child receives all other START MSGS
+    if (receive_from_children(&process, STARTED) != 0)
+        return ERR_RECEIVE_FROM_CHILDREN;
+
+    // child sends DONE msg to all other procs
+    if (process.id != PARENT_ID) {
+        snprintf(text, sizeof(text),
+                log_received_all_started_fmt, (int)process.id);
+        log_event(event_log, text);
+
+        int length = snprintf(msg.s_payload, MAX_PAYLOAD_LEN,
+                            log_done_fmt, (int)process.id);
+
+        if (length < 0 || length >= MAX_PAYLOAD_LEN)
+            return ERR_FINISH_WORK_CHILD;
+
+        msg.s_header.s_type = DONE;
+        msg.s_header.s_payload_len = (uint16_t)length;
+
+        log_event(event_log, msg.s_payload);
+
+        if (send_multicast(&process, &msg) != 0)
+            return ERR_SEND_MULTICAST;
+    }
 
     if (process.id == PARENT_ID) {
         for (uint8_t i = 0; i < child_processes; i++) {
@@ -140,6 +219,17 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
+    // clear all resources
+    for (uint8_t from = 0; from < total_processes; from++) {
+        for (uint8_t to = 0; to < total_processes; to++) {
+            for (int end = 0; end < 2; ++end) {
+                if (process.pipes[from][to][end] != -1)
+                    close(process.pipes[from][to][end]);
+            }
+        }
+    }
+    fclose(event_log);;
 
     return OK;
 }

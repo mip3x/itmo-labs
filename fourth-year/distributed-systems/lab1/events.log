@@ -1,0 +1,9 @@
+Process 1 (pid 193786, parent 193785) has STARTED
+Process 2 (pid 193787, parent 193785) has STARTED
+Process 3 (pid 193788, parent 193785) has STARTED
+Process 1 received all STARTED messages
+Process 2 received all STARTED messages
+Process 3 received all STARTED messages
+Process 1 has DONE its work
+Process 2 has DONE its work
+Process 3 has DONE its work
