@@ -1,5 +1,9 @@
-#include "ipc.h"
+#include <errno.h>
 #include <stdio.h>
+#include <unistd.h>
+
+#include "ipc.h"
+#include "process.h"
 
 /** Send a message to the process specified by id.
  *
@@ -10,6 +14,27 @@
  * @return 0 on success, any non-zero value on error
  */
 int send(void * self, local_id dst, const Message * msg) {
+    Process* process = (Process*)self;
+
+    int fd = process->pipes[process->id][dst][1];
+    size_t total = sizeof(MessageHeader) + msg->s_header.s_payload_len;
+    size_t sent = 0;
+
+    const char *data = (const char*)msg;
+    while (sent < total) {
+        ssize_t result = write(fd, data + sent, total - sent);
+        if (result == -1) {
+            if (errno == EINTR)
+                continue;
+            return -1;
+        }
+
+        if (result == 0)
+            return -1;
+
+        sent += (size_t)result;
+    }
+
     return 0;
 }
 
@@ -26,6 +51,15 @@ int send(void * self, local_id dst, const Message * msg) {
  * @return 0 on success, any non-zero value on error
  */
 int send_multicast(void * self, const Message * msg) {
+    Process* process = (Process*)self;
+
+    for (local_id dst = 0; dst < process->total_processes; dst++) {
+        if (dst == process->id)
+            continue;
+
+        if (send(self, dst, msg) != 0)
+            return -1;
+    }
     
     return 0;
 }
