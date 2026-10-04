@@ -64,6 +64,28 @@ int send_multicast(void * self, const Message * msg) {
     return 0;
 }
 
+// reads data in a cycle
+static int read_exact(int fd, void * buffer, size_t size) {
+    char *data = buffer;
+    size_t received = 0;
+
+    while (received < size) {
+        ssize_t result = read(fd, data + received, size - received);
+        if (result == -1) {
+            if (errno == EINTR)
+                continue;
+            return -1;
+        }
+
+        if (result == 0)
+            return -1;
+
+        received += (size_t)result;
+    }
+
+    return 0;
+}
+
 //------------------------------------------------------------------------------
 
 /** Receive a message from the process specified by id.
@@ -77,7 +99,16 @@ int send_multicast(void * self, const Message * msg) {
  * @return 0 on success, any non-zero value on error
  */
 int receive(void * self, local_id from, Message * msg) {
-    return 0;
+    Process *process = (Process*)self;
+    int fd = process->pipes[from][process->id][0];
+
+    if (read_exact(fd, &msg->s_header, sizeof(MessageHeader)) != 0)
+        return -1;
+
+    if (msg->s_header.s_magic != MESSAGE_MAGIC || msg->s_header.s_payload_len > MAX_PAYLOAD_LEN)
+        return -1;
+
+    return read_exact(fd, msg->s_payload, msg->s_header.s_payload_len);
 }
 
 //------------------------------------------------------------------------------
