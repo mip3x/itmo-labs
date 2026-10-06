@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
             return ERR_SEND_MULTICAST;
     }
 
-    // child receives all other START MSGS
+    // receive all other START MSGS (also from parent)
     if (receive_from_children(&process, STARTED) != 0)
         return ERR_RECEIVE_FROM_CHILDREN;
 
@@ -207,6 +207,7 @@ int main(int argc, char *argv[]) {
             return ERR_SEND_MULTICAST;
     }
 
+    // receive all other DONE MSGS (also from parent)
     if (receive_from_children(&process, DONE) != 0)
         return ERR_RECEIVE_FROM_CHILDREN;
 
