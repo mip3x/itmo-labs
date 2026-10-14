@@ -1,0 +1,58 @@
+#set page(
+  paper: "a4",
+  margin: (left: 25mm, right: 15mm, top: 20mm, bottom: 20mm),
+)
+
+#set text(
+  font: "JetBrains Mono",
+  size: 11pt,
+)
+
+#set par(
+  leading: 1.4em,
+  justify: true,
+)
+
+= 2.1
+
+== 1. Сколько всего спанов (Spans) содержит эта трасса?
+
+13
+
+== 2. С помощью какого HTTP-заголовка контекст трассировки (traceparent) передался из service-a-gateway в service-b-orders? (Подсказка: раскройте атрибуты HTTP-спана в Jaeger). Само значение поля traceparent не отображается в JaegerUI, самостоятельно найдите способ узнать его значение и опишите использованный способ.
+
+00-72dfdd1295727774d1bf4a6c32bbaaec-e92c5fea705fdb02-01
+
+== 3. Сколько времени занял непосредственный `SQL`-запрос `SELECT * FROM orders...` к PostgreSQL?
+
+Duration: 642μs
+
+#image("img/2.1.png", width: 100%)
+
+= 2.2
+
+== 1. На каком конкретно сервисе и компоненте происходит задержка?
+
+service-b-orders, на обработке HTTP-запроса GET /process-order
+
+== 2. Является ли причиной задержки медленный SQL-запрос к PostgreSQL или обработка кода внутри самого Node.js-приложения? Приведите доказательство из таймлайна спанов.
+
+С обработкой кода: спан GET /process-order длится 2с, db-heavy-query занимает 1,04 мс и находится в конце таймлайна
+
+#image("img/2.2.2.png", width: 100%)
+
+= 2.3
+
+== 1. Какой сервис сгенерировал ошибку?
+
+service-b-orders
+
+== 2. Раскройте спан со статусом Error. Какой текст исключения (exception.message) записан в логах спана?
+
+Payment gateway timeout error
+
+== 3. Дошел ли запрос до базы данных PostgreSQL в случае возникновения этой ошибки?
+
+нет, не дошёл, отсутствуют спаны db-heavy-query, pg-pool.connect
+
+#image("img/2.3.png", width: 100%)
