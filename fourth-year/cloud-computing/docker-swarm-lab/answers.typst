@@ -1,0 +1,165 @@
+#set page(paper: "a4", margin: (left: 25mm, right: 15mm, top: 20mm, bottom: 20mm))
+#set text(font: "JetBrains Mono", size: 11pt, lang: "ru")
+#set par(leading: 1.4em, justify: true)
+
+= Практическая работа 4. Docker Swarm
+
+= 0. Подготовка и развёртывание
+
+Конфигурация стека:
+#raw(read("docker-stack.yml"), lang: "yaml", block: true)
+
+Выполнены:
+```sh
+docker swarm init --advertise-addr 127.0.0.1
+docker stack deploy -c docker-stack.yml web-stack
+```
+
+Вывод `docker stack services web-stack`:
+```sh
+❯ docker stack services web-stack
+ID             NAME            MODE         REPLICAS   IMAGE                PORTS
+g24qedqhj8km   web-stack_web   replicated   3/3        python:3.11-alpine   *:8080->5678/tcp
+```
+
+Вывод `docker service ps --no-trunc web-stack_app-node`:
+```sh
+❯ docker service ps --no-trunc web-stack_app-node
+no such service: web-stack_app-node
+```
+
+Произошла ошибка. Дело в названии: настоящее название из .yml: `web`, а не `app-node`. Выполним команду заново с новым названием:
+```sh
+❯ docker service ps --no-trunc web-stack_web     
+ID                          NAME              IMAGE                                                                                        NODE      DESIRED STATE   CURRENT STATE           ERROR     PORTS
+rx5v3e7j2akecdcbju19gpr9a   web-stack_web.1   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 7 minutes ago             
+nkqhdi3m4apcgr3bsw3fkbd2x   web-stack_web.2   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 7 minutes ago             
+jdcnx0n4fd6mkaaf3bxdht024   web-stack_web.3   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 7 minutes ago  
+```
+
+= 1. Routing Mesh и балансировка
+
+Наблюдения:
+```sh
+❯ for i in {1..10}; do
+  curl --max-time 5 -sS http://localhost:8080
+done
+Hello from Swarm! Container ID: d04d479dcc8c | Slot: 2
+Hello from Swarm! Container ID: b62679ea4d42 | Slot: 1
+Hello from Swarm! Container ID: b45715cc3733 | Slot: 3
+Hello from Swarm! Container ID: d04d479dcc8c | Slot: 2
+Hello from Swarm! Container ID: b62679ea4d42 | Slot: 1
+Hello from Swarm! Container ID: b45715cc3733 | Slot: 3
+Hello from Swarm! Container ID: d04d479dcc8c | Slot: 2
+Hello from Swarm! Container ID: b62679ea4d42 | Slot: 1
+Hello from Swarm! Container ID: b45715cc3733 | Slot: 3
+Hello from Swarm! Container ID: d04d479dcc8c | Slot: 2
+```
+
+Вывод: циклическое чередование по слотам и id: 2->1->3->2->1->3->...
+
+Следовательно, алгоритм балансировки по умолчанию - `round-robin`.
+
+= 2. Динамическое масштабирование
+
+```sh
+❯ docker service scale web-stack_web=6
+web-stack_web scaled to 6
+overall progress: 6 out of 6 tasks
+1/6: running   [==================================================>]
+2/6: running   [==================================================>]
+3/6: running   [==================================================>]
+4/6: running   [==================================================>]
+5/6: running   [==================================================>]
+6/6: running   [==================================================>]
+verify: Service web-stack_web converged
+```
+
+```sh
+❯ docker service ps --no-trunc web-stack_web
+ID                          NAME              IMAGE                                                                                        NODE      DESIRED STATE   CURRENT STATE            ERROR     PORTS
+rx5v3e7j2akecdcbju19gpr9a   web-stack_web.1   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 24 minutes ago
+nkqhdi3m4apcgr3bsw3fkbd2x   web-stack_web.2   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 24 minutes ago
+mkecx3w83sna2d9p1gmrit74m   web-stack_web.3   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 44 seconds ago
+d43o45hzv3lx7fo6jgmiluppu   web-stack_web.4   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 45 seconds ago
+ppcp6kj8ej8uwf1qhnatf1qvb   web-stack_web.5   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 45 seconds ago
+m9r2u78jugynbjv5p3vv0eawd   web-stack_web.6   python:3.11-alpine@sha256:79440cc1dfa86a5f98d67efcd219726a8e9d8083cc0aafd27c7bef5976c38868   arch      Running         Running 45 seconds ago
+```
+
+На скриншоте все 6 задач находятся в состоянии `Running`;
+желаемое состояние (`DESIRED STATE`) также `Running`.
+Промежуточные состояния: `Pending`, `Preparing` и `Starting`.
+
+#image("img/scaling-up.png", width: 100%)
+
+
+```sh
+❯ docker stack services web-stack
+
+ID             NAME            MODE         REPLICAS   IMAGE                PORTS
+g24qedqhj8km   web-stack_web   replicated   2/2        python:3.11-alpine   *:8080->5678/tcp
+
+~
+❯ docker service ps web-stack_web
+ID             NAME              IMAGE                NODE      DESIRED STATE   CURRENT STATE            ERROR     PORTS
+rx5v3e7j2ake   web-stack_web.1   python:3.11-alpine   arch      Running         Running 28 minutes ago
+nkqhdi3m4apc   web-stack_web.2   python:3.11-alpine   arch      Running         Running 28 minutes ago
+```
+
+#image("img/scaling-down.png", width: 100%)
+
+Промежуточные состояния: `Shutdown`, `Complete`.
+
+= 3. Самовосстановление после сбоя
+
+Восстановить желаемое число реплик:
+```sh
+docker service scale web-stack_web=3
+```
+
+Мониторинг состояния:
+```sh
+watch -n 1 docker service ps web-stack_web
+```
+
+Список реплик:
+```sh
+❯ docker ps | grep web-stack
+e00841499c9c   python:3.11-alpine   "python -u -c 'impor…"   About a minute ago   Up About a minute             web-stack_web.3.he00i961tx7kfip7l48lr6pun
+b62679ea4d42   python:3.11-alpine   "python -u -c 'impor…"   35 minutes ago       Up 35 minutes                 web-stack_web.1.rx5v3e7j2akecdcbju19gpr9a
+d04d479dcc8c   python:3.11-alpine   "python -u -c 'impor…"   35 minutes ago       Up 35 minutes                 web-stack_web.2.nkqhdi3m4apcgr3bsw3fkbd2x
+```
+
+Удалю `e00841499c9c`:
+```sh
+❯ docker rm -f e00841499c9c
+e00841499c9c
+```
+
+Вывод мониторинга:
+```sh
+Every 1.0s: docker service ps web-stack_web                                                               arch: Wed 28 Oct 2026 09:28:46 PM MSK
+                                                                                                                                  in 0.026s (0)
+ID             NAME                  IMAGE                NODE      DESIRED STATE   CURRENT STATE            ERROR                         PORT
+S
+rx5v3e7j2ake   web-stack_web.1       python:3.11-alpine   arch      Running         Running 38 minutes ago
+nkqhdi3m4apc   web-stack_web.2       python:3.11-alpine   arch      Running         Running 38 minutes ago
+i6ln9gwn6te0   web-stack_web.3       python:3.11-alpine   arch      Running         Running 1 second ago
+he00i961tx7k    \_ web-stack_web.3   python:3.11-alpine   arch      Shutdown        Failed 6 seconds ago     "task: non-zero exit (137)"
+```
+
+Проверка:
+```sh
+❯ docker ps | grep web-stack
+989bf83984e6   python:3.11-alpine   "python -u -c 'impor…"   2 minutes ago    Up 2 minutes              web-stack_web.3.i6ln9gwn6te0v69mk9p4lmrao
+b62679ea4d42   python:3.11-alpine   "python -u -c 'impor…"   40 minutes ago   Up 40 minutes             web-stack_web.1.rx5v3e7j2akecdcbju19gpr9a
+d04d479dcc8c   python:3.11-alpine   "python -u -c 'impor…"   40 minutes ago   Up 40 minutes             web-stack_web.2.nkqhdi3m4apcgr3bsw3fkbd2x
+```
+
+Весь сценарий получается таковым: работало 3 реплики (3 контейнера), контейнер `e00841499c9c` удалён. Его задача `he00i961tx7k` получает состояние `Failed` с ошибкой `task: non-zero exit (137)`, ее desired state = Shutdown. Swarm обнаруживает расхождение между желаемым количеством реплик (3) и фактическим (2). Петля согласования автоматически создаёт новую задачу `i6ln9gwn6te0` в том же слоте .3. Задача переходит в `Running`, восстанавливая 3 рабочие реплики.
+
+= 4. Индивидуальный опыт и трудности
+
+Трудность была только с названием сервиса - описана в 0ом этапе.
+
+Про `Desired State`: декларированный подход упрощает масштабирование и восстановление сервиса после сбоя, не нужно контролировать замену. Легче изменять количество реплик. При использовании docker run удалённый контейнер пришлось бы создавать заново самостоятельно. Swarm автоматически восстанавливает реплику, поскольку поддерживает заданное количество контейнеров. Также, удобнее для CI/CD: нужно меньше писать кода для развёртывания (вместо скрипта просто yaml), легче diff читать.
