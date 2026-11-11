@@ -1,0 +1,298 @@
+#set page(paper: "a4", margin: (left: 25mm, right: 15mm, top: 20mm, bottom: 20mm))
+#set text(font: "JetBrains Mono", size: 11pt, lang: "ru")
+#set par(leading: 1.4em, justify: true)
+
+= Kubernetes: readinessProbe и livenessProbe
+
+= 0. Подготовка кластера
+
+Установлен k3s:
+```sh
+curl -sfL https://get.k3s.io | sh -
+```
+
+Проверка кластера:
+```text
+❯ kubectl get nodes
+NAME   STATUS   ROLES           AGE   VERSION
+arch   Ready    control-plane   16s   v1.37.2+k3s1
+```
+
+Узел `arch` находится в состоянии `Ready` и выполняет роль control-plane.
+
+= 1. Развёртывание приложения
+
+Применён манифест из задания:
+```text
+❯ kubectl apply -f app-deployment.yaml
+deployment.apps/health-demo created
+service/health-service created
+
+❯ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+health-demo-678566f79c-45kb6   1/1     Running   0          48s
+health-demo-678566f79c-djjc4   1/1     Running   0          48s
+```
+
+Обе реплики запущены и готовы, перезапусков нет. Readiness:
+`/healthz`, initialDelaySeconds = 5, periodSeconds = 3,
+failureThreshold = 2. Liveness: `/healthz`, initialDelaySeconds = 10,
+periodSeconds = 5, failureThreshold = 3.
+
+Проброшен порт:
+```text
+❯ kubectl port-forward svc/health-service 8080:80
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+```
+
+После исправления HTTP-ответа выполнено обновление:
+```text
+❯ kubectl apply -f app-deployment.yaml
+deployment.apps/health-demo configured
+service/health-service unchanged
+
+❯ kubectl rollout status deployment/health-demo
+Waiting for deployment "health-demo" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "health-demo" rollout to finish: 1 old replicas are pending termination...
+deployment "health-demo" successfully rolled out
+```
+
+Повторяющиеся строки ожидания сокращены. Старый `port-forward`
+остановлен и запущен заново после обновления Pod.
+
+После исправления выполнены шесть запросов: все завершились
+с HTTP 200 без тайм-аутов. Фрагмент вывода:
+```text
+21:17:19
+health-demo-6f458447bc-s6w6q
+ HTTP 200
+21:17:20
+health-demo-6f458447bc-s6w6q
+ HTTP 200
+21:17:21
+health-demo-6f458447bc-s6w6q
+ HTTP 200
+```
+
+= 2. Проверка readinessProbe
+
+Первая попытка: Pod потерял готовность, оставаясь запущенным
+без перезапуска на момент снимка:
+
+#figure(
+  image("img/vpnkm_not_ready.png", width: 100%),
+  caption: [Первая попытка: vpnkm в состоянии READY 0/1, RESTARTS 0.],
+)
+
+В повторном, кратковременном эксперименте выполнены команды:
+```sh
+POD=health-demo-6f458447bc-vpnkm
+kubectl exec "$POD" -- curl -s http://localhost:8080/make-not-ready
+sleep 7
+kubectl exec "$POD" -- curl -s http://localhost:8080/make-ready
+```
+
+На Pod `health-demo-6f458447bc-vpnkm` вызван `/make-not-ready`,
+после паузы — `/make-ready`. В мониторинге зафиксировано:
+```text
+NAME                           READY   STATUS    RESTARTS        AGE
+health-demo-6f458447bc-s6w6q   1/1     Running   0               13m
+health-demo-6f458447bc-vpnkm   1/1     Running   1 (9m13s ago)   13m
+health-demo-6f458447bc-vpnkm   0/1     Running   1 (9m33s ago)   13m
+health-demo-6f458447bc-vpnkm   1/1     Running   1 (9m39s ago)   13m
+```
+
+Проверка готовности прошла: Pod перешёл из `1/1` в `0/1`,
+затем вернулся в `1/1`. На протяжении эксперимента он оставался
+`Running`, а счётчик RESTARTS не изменился (1 до и после).
+Следовательно, восстановление готовности произошло без нового
+перезапуска контейнера. Единица в RESTARTS осталась от предыдущей попытки.
+
+По наблюдениям в терминале, до сбоя запросы через Service распределялись между двумя Pod. После потери готовности Pod `vpnkm` трафик направлялся только на оставшийся готовый Pod `s6w6q`. После восстановления готовности запросы снова поступали на обе реплики. 
+
+= 3. Проверка livenessProbe
+
+Для имитации потери жизнеспособности выполнено:
+```sh
+kubectl exec health-demo-6f458447bc-vpnkm -- curl -s http://localhost:8080/make-not-alive
+kubectl get pods -w
+```
+
+Вручную состояние не восстанавливалось. Сначала Pod потерял
+готовность (`0/1`), затем счётчик RESTARTS увеличился с 1 до 2.
+После перезапуска контейнер вернулся в `1/1`:
+```text
+NAME                           READY   STATUS    RESTARTS       AGE
+health-demo-6f458447bc-vpnkm   0/1     Running   1 (13m ago)    17m
+health-demo-6f458447bc-vpnkm   0/1     Running   2 (0s ago)     18m
+health-demo-6f458447bc-vpnkm   1/1     Running   2 (12s ago)    18m
+```
+
+#figure(
+  image("img/restarts_1_to_2.png", width: 100%),
+  caption: [Readiness-тест без рестарта и последующий liveness-тест с ростом RESTARTS с 1 до 2.],
+)
+
+Причина подтверждена событиями:
+```sh
+kubectl describe pod health-demo-6f458447bc-vpnkm
+```
+
+Ключевые сообщения из раздела Events (время и повторения опущены,
+длинные строки перенесены для читаемости):
+```text
+Warning  Unhealthy  kubelet
+  Readiness probe failed:
+  HTTP probe failed with statuscode: 500
+
+Warning  Unhealthy  kubelet
+  Liveness probe failed:
+  HTTP probe failed with statuscode: 500
+
+Normal   Killing    kubelet
+  Container web-app failed liveness probe,
+  will be restarted
+
+Normal   Created    kubelet  Container created
+Normal   Started    kubelet  Container started
+```
+
+#figure(
+  image("img/describe.png", width: 100%),
+  caption: [События kubelet: провалы проверок и автоматический перезапуск контейнера.],
+)
+
+Событие `Killing` подтверждает причину перезапуска — провал
+livenessProbe. Events агрегируют также предыдущие попытки;
+текущий перезапуск подтверждён ростом RESTARTS с 1 до 2.
+Имя Pod осталось прежним: перезапущен контейнер внутри Pod.
+После сброса состояния приложения восстановилось `READY 1/1`
+без ручного вызова `/make-ready`.
+
+= 4. Индивидуальный опыт и исправления
+
+== Неверный kubeconfig
+
+`kubectl` обращался к `https://10.128.0.27` и выдавал
+`context deadline exceeded`, хотя служба k3s была запущена.
+Запрос с явным конфигом k3s вернул `arch Ready`:
+```sh
+sudo kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml get nodes --request-timeout=10s
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+После выбора конфига обычный `kubectl get nodes` заработал.
+
+== Исправление обработчика /hostname
+
+Через port-forward curl получал имя Pod и HTTP 200, но не завершал
+запрос за секунду:
+```text
+health-demo-678566f79c-djjc4
+curl: (28) Operation timed out after 1001 milliseconds with 29 bytes received
+ HTTP 200
+```
+
+`curl -v` показал HTTP/1.0 без Content-Length. Тот же запрос
+внутри Pod завершался без ошибки; переход на IPv4 тайм-ауты
+не устранил. Для HTTP/1.0 отсутствие Content-Length допустимо,
+если соединение закрывается, но через port-forward клиент
+не всегда дожидался завершения ответа.
+
+В `app-deployment.yaml` изменён только обработчик `/hostname`.
+Раньше тело записывалось без указания длины:
+```python
+self.send_response(200)
+self.end_headers()
+self.wfile.write((host + '\n').encode())
+```
+
+После исправления:
+```python
+body = (host + '\n').encode()
+self.send_response(200)
+self.send_header('Content-Length', str(len(body)))
+self.end_headers()
+self.wfile.write(body)
+```
+
+Content-Length задаёт длину закодированного тела в байтах:
+curl может определить конец ответа без ожидания закрытия соединения.
+Обработчики здоровья и параметры probes не менялись.
+
+После `kubectl apply` и успешного `kubectl rollout status`
+port-forward запущен заново, поскольку Deployment заменил Pod.
+Шесть контрольных запросов завершились с HTTP 200 без тайм-аутов
+(раздел 1). Точная причина задержки закрытия соединения
+внутри port-forward отдельно не установлена.
+
+== PowerShell и Zsh
+
+Цикл из ТЗ использует PowerShell (`Invoke-RestMethod`, `Write-Host`,
+`Start-Sleep`). Для Zsh он переписан на `curl` и `sleep`:
+```sh
+while true; do
+  date +%T
+  curl --max-time 1 -sS -w ' HTTP %{http_code}\n' \
+    http://127.0.0.1:8080/hostname
+  sleep 0.5
+done
+```
+Сохранены тайм-аут 1 секунда и пауза 500 мс.
+
+== Port-forward и проверка Service
+
+`kubectl port-forward svc/health-service 8080:80` выбирает один Pod
+и направляет запросы непосредственно ему. Он не балансирует трафик
+и не переключается при потере готовности выбранного Pod.
+
+Поэтому в повторном эксперименте curl запущен внутри Pod-клиента
+и обращается к настоящему адресу Service:
+```sh
+kubectl exec health-demo-6f458447bc-s6w6q -- sh -c '
+while true; do
+  curl --max-time 1 -sS -w " HTTP %{http_code}\n" \
+    http://health-service/hostname
+  sleep 0.5
+done'
+```
+
+Путь: клиент внутри Pod → DNS/ClusterIP `health-service:80` →
+готовая реплика на порту 8080. Pod-клиент не обязательно является
+получателем запроса. Каждая итерация создаёт новое соединение;
+строгое чередование реплик не требуется.
+
+== Общий эндпоинт двух проверок
+
+Обе probes используют `/healthz`, зависящий от ready и alive.
+При первой длительной неготовности контейнер автоматически
+перезапустился: RESTARTS вырос с 0 до 1. Поэтому readiness-тест
+повторён с восстановлением через `/make-ready` после короткой паузы.
+В повторной попытке RESTARTS остался равным 1.
+
+= 5. Сравнительный вывод
+
+В production нужны обе проверки: readinessProbe управляет допуском
+к пользовательскому трафику, а livenessProbe восстанавливает приложение,
+которое не может восстановиться самостоятельно. Только liveness
+недостаточно: процесс может быть жив, но ещё загружать данные или
+временно не иметь доступа к необходимой зависимости. Без readiness
+такая реплика продолжит получать запросы и возвращать ошибки.
+Readiness отключает её от новых соединений через Service без рестарта
+и возвращает в обслуживание после восстановления. В нашем эксперименте
+это проявилось переходом `1/1 → 0/1 → 1/1` при неизменном RESTARTS
+и временным направлением трафика на вторую реплику.
+
+Только readiness тоже недостаточно: она исключит зависшее приложение
+из трафика, но не перезапустит его. Такая реплика может оставаться
+неготовой неограниченно долго, снижая доступную мощность сервиса.
+Liveness обнаруживает невосстановимый сбой и инициирует рестарт:
+в эксперименте RESTARTS вырос с 1 до 2, после чего восстановилось
+`READY 1/1`. Критерии проверок следует разделять: временная недоступность
+внешней зависимости обычно должна влиять на readiness, а не запускать
+бесполезные рестарты всех реплик через liveness. Общий `/healthz` из ТЗ
+смешивает эти причины — это проявилось при первой длительной
+неготовности. Вместе правильно настроенные проверки отключают
+неработоспособную реплику от трафика и при необходимости автоматически
+восстанавливают её; мгновенное отсутствие всех ошибок при этом
+не гарантируется из-за времени обнаружения сбоя и обновления маршрутов.
