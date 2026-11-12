@@ -267,7 +267,7 @@ ping -c 4 -W 2 192.168.99.11
 #figure(image("img/25-windows-itmo-ru.png", width: 100%), caption: [Сайт ИТМО в Windows при использовании NAT]) <fig-win-nat-web>
 #figure(image("img/27-ubuntu-itmo-ru.png", width: 100%), caption: [Сайт ИТМО в Ubuntu при использовании NAT]) <fig-ubuntu-nat-web>
 
-Согласно руководству Oracle по сетевым режимам (источник 3), совпадение адресов не вызывает конфликта: обычный режим NAT создаёт отдельную изолированную сеть для каждого адаптера ВМ. Общая локальная сеть между ВМ при этом не образуется. Ping адреса 10.0.2.15 из любой из этих систем обращался бы к ней самой и не являлся бы проверкой связи с другой ВМ. Прямая связь между ВМ по этим адресам в данной конфигурации не обеспечивается; это объяснение устройства режима, а не результат отдельного межмашинного ping.
+Согласно руководству Oracle по сетевым режимам [1], совпадение адресов не вызывает конфликта: обычный режим NAT создаёт отдельную изолированную сеть для каждого адаптера ВМ. Общая локальная сеть между ВМ при этом не образуется. Ping адреса 10.0.2.15 из любой из этих систем обращался бы к ней самой и не являлся бы проверкой связи с другой ВМ. Прямая связь между ВМ по этим адресам в данной конфигурации не обеспечивается; это объяснение устройства режима, а не результат отдельного межмашинного ping.
 
 == Общая сеть NAT Network
 Создана сеть NatNetwork с префиксом 10.45.33.0/24 и включённым DHCP (см. @fig-natnetwork-config). Обе ВМ подключены к этой сети.
@@ -328,7 +328,7 @@ Windows выключена, объём оперативной памяти ув�
 
 = Общая папка и буфер обмена
 == Подключение общей папки
-Общие папки реализуются средствами Guest Additions (источник 4). В обеих ВМ настроена общая папка public, соответствующая каталогу /home/mip3x/public на хосте Arch Linux. Включено автоматическое монтирование, доступ Full (см. @fig-win-shared-settings и @fig-ubuntu-shared-settings). Фактическое имя каталога записано строчными буквами.
+Общие папки реализуются средствами Guest Additions [2]. В обеих ВМ настроена общая папка public, соответствующая каталогу /home/mip3x/public на хосте Arch Linux. Включено автоматическое монтирование, доступ Full (см. @fig-win-shared-settings и @fig-ubuntu-shared-settings). Фактическое имя каталога записано строчными буквами.
 
 #figure(image("img/41-windows-shared-folder.png", width: 100%), caption: [Настройка общей папки Windows]) <fig-win-shared-settings>
 #figure(image("img/42-ubuntu-shared-folder.png", width: 100%), caption: [Настройка общей папки Ubuntu]) <fig-ubuntu-shared-settings>
@@ -411,7 +411,3 @@ VBoxManage showvminfo "WS_MMA_ubuntu"
 + Настроена общая папка хоста public с автоматическим монтированием. Один и тот же файл с текстом «Hello from host» прочитан в Windows и Ubuntu.
 + Подготовлены два скрипта запуска ВМ. Обе машины успешно запущены через VBoxManage; их работа подтверждена списком runningvms, параметры Ubuntu получены командой showvminfo.
 + Зафиксированы отличия от полного задания: вместо МойОфис установлен PuTTY, в итоговой конфигурации Ubuntu аудио включено, буфер обмена и Drag and Drop отключены. Эти действия не представлены как выполненные требования.
-
-#heading(numbering: none)[Литература]
-+ Oracle. Virtual Networking // Oracle VirtualBox User Guide, Release 7.2. URL: https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/networkingdetails.html (дата обращения: 15.10.2026).
-+ Oracle. Guest Additions // Oracle VirtualBox User Guide, Release 7.2. URL: https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/guestadditions.html (дата обращения: 15.10.2026).
