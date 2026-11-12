@@ -55,5 +55,8 @@ jobs:
       - name: Test
         run: cabal test all --test-show-details=direct
 
+      - name: Test Python
+        run: python3 -B -m unittest discover -s python -v
+
       - name: Run application
         run: cabal run lab1
