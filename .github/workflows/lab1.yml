@@ -1,0 +1,62 @@
+name: Functional programming lab 1
+
+on:
+  push:
+    paths:
+      - "third-year/functional-programming/lab1/**"
+      - ".github/workflows/lab1.yml"
+  pull_request:
+    paths:
+      - "third-year/functional-programming/lab1/**"
+      - ".github/workflows/lab1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+
+    defaults:
+      run:
+        working-directory: third-year/functional-programming/lab1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "9.6.7"
+          cabal-version: "3.12.1.0"
+
+      - name: Install development tools
+        run: |
+          cabal update
+          cabal install hlint-3.8 ormolu-0.7.4.0
+          echo "$HOME/.cabal/bin" >> "$GITHUB_PATH"
+
+      - name: Check formatting
+        run: |
+          ormolu --mode check \
+            src/Problem2.hs \
+            src/Problem19.hs \
+            app/Main.hs \
+            test/Main.hs
+
+      - name: Lint
+        run: hlint src app test
+
+      - name: Build
+        run: cabal build all --enable-tests
+
+      - name: Test
+        run: cabal test all --test-show-details=direct
+
+      - name: Test Python
+        run: python3 -B -m unittest discover -s python -v
+
+      - name: Run application
+        run: cabal run lab1
