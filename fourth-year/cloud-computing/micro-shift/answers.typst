@@ -1,0 +1,127 @@
+#set page(paper: "a4", margin: (left: 25mm, right: 15mm, top: 20mm, bottom: 20mm))
+#set text(font: "JetBrains Mono", size: 11pt, lang: "ru")
+#set par(leading: 1.4em, justify: true)
+#show raw.where(block: true): set text(size: 8pt)
+
+= Практическая работа 6. MicroShift
+
+Цель: изучить управление ресурсами контейнеров, OOMKilled,
+классы QoS и квоты namespace. Стенд: Arch Linux, Docker,
+MINC и kubectl.
+
+= 1. Подготовка стенда
+
+Кластер создан командой:
+```sh
+minc create -p docker --disable-overlay-cache
+minc generate-kubeconfig -p docker
+kubectl create namespace edge-test
+```
+
+После настройки сети API заработал, контекст переключён на microshift:
+```text
+❯ kubectl get nodes
+NAME               STATUS   ROLES                         AGE    VERSION
+127.0.0.1.nip.io   Ready    control-plane,master,worker   2m8s   v1.32.8
+```
+
+= 2. Индивидуальный опыт и исправления
+
+- MINC по умолчанию обращался к отсутствующему Podman. Исправление:
+  явное указание `-p docker`.
+- Привилегированный контейнер влиял на консоль и раскладку хоста.
+  В контейнере замаскированы службы getty, logind и vconsole-setup.
+  Переключение раскладки восстановлено командой
+  `setxkbmap -layout us,ru -option grp:alt_shift_toggle`.
+- MicroShift завершался с ошибкой `no default routes found`:
+  контейнер не был подключён к сети. Подключению bridge мешал
+  занятый порт 6443. После освобождения порта выполнено
+  `docker network connect bridge microshift`. Появились eth0
+  и маршрут по умолчанию; служба MicroShift успешно перезапущена.
+- PodSecurity restricted отклонил исходный Pod. В манифест добавлены
+  `runAsNonRoot: true`, UID 10001, seccomp RuntimeDefault,
+  `allowPrivilegeEscalation: false` и сброс capabilities ALL.
+  После исправления API принял Pod.
+
+= 3. Нагрузка на память
+
+Программа memory-hog последовательно выделяет до 10 ГБ памяти.
+На хосте было доступно около 7,3 ГиБ RAM; у MINC ограничение
+памяти отсутствовало. Для локализации нагрузки тестовому контейнеру
+задан лимит 128Mi. Таким образом, конфигурация ограничивает память
+контейнера вместо намеренного исчерпания памяти всего узла.
+
+Применённый манифест:
+#raw(read("memory-hog.yaml"), lang: "yaml", block: true)
+
+При исчерпании лимита памяти и невозможности освободить память ядро
+может завершить процесс по OOM. В Kubernetes причиной завершения
+служит `Reason: OOMKilled`; один Exit Code 137 недостаточен для
+однозначного определения OOM.
+
+= 4. Requests, limits и QoS
+
+Конфигурация ресурсов для limited-pod:
+```yaml
+resources:
+  requests:
+    memory: 64Mi
+    cpu: 100m
+  limits:
+    memory: 128Mi
+    cpu: 500m
+```
+
+Эта конфигурация соответствует классу *Burstable*: requests
+и limits заданы, но не равны. Для Guaranteed необходимо равенство
+requests и limits CPU и памяти у всех контейнеров; BestEffort
+соответствует отсутствию таких запросов и ограничений.
+
+= 5. Квоты namespace
+
+Конфигурация ResourceQuota:
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: edge-env-quota
+  namespace: edge-test
+spec:
+  hard:
+    requests.cpu: "500m"
+    requests.memory: 256Mi
+    limits.cpu: "1"
+    limits.memory: 512Mi
+    pods: "3"
+```
+
+Расчёт для namespace с одним limited-pod и добавлением второго Pod,
+у которого requests.memory и limits.memory равны 400Mi:
+
+#table(
+  columns: 3,
+  [Ресурс], [Сумма после добавления], [Квота],
+  [requests.memory], [64 + 400 = 464Mi], [256Mi],
+  [limits.memory], [128 + 400 = 528Mi], [512Mi],
+)
+
+Обе суммы превышают квоту. Такая спецификация подлежит отклонению
+API с ошибкой `Forbidden: exceeded quota` до запуска контейнера.
+Квота учитывает объявленные ресурсы, а не фактическое потребление:
+свободная память узла не отменяет ограничение namespace.
+
+= 6. Вывод
+
+Requests используются планировщиком для размещения Pod и не являются
+верхней границей потребления. Limits ограничивают работающий
+контейнер, ResourceQuota -- суммы объявленных ресурсов namespace.
+Времени CPU можно выделять меньше: превышение CPU limit приводит
+к throttling и замедлению приложения. При нехватке памяти внутри
+лимита ядро может применить OOM-kill, если освобождение памяти
+не помогает. Это реактивный механизм, а не гарантированное
+мгновенное завершение при каждой попытке превышения.
+
+Для Edge-систем сочетание requests, limits и квот позволяет
+планировать размещение и ограничивать влияние ресурсоёмкого
+приложения на соседние сервисы. При настройке стенда также важны
+PodSecurity, доступность портов и изоляция устройств хоста.

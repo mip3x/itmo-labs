@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-hog-pod
+  namespace: edge-test
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: memory-eater
+      image: python:3.9-slim
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      command:
+        - python
+        - -c
+        - "import time; a = []; [a.append(' ' * 10**7) for i in range(1000)]; time.sleep(300)"
+      resources:
+        limits:
+          memory: 128Mi
