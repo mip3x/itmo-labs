@@ -29,8 +29,7 @@
 
 #let work_title = "Дисциплина «Администрирование систем и сетей»"
 
-#let student1_name = "Иван Иванович Иванов"
-#let student2_name = "Дмитрий Дмитриевич Дмитров"
+#let student_name = "Э Э э"
 
 #let group = "Группа P3411"
 
@@ -54,9 +53,8 @@
 #v(30mm)
 
 #align(right)[
-  Выполнили: \
-  #student1_name \
-  #student2_name \
+  Выполнил: \
+  #student_name \
   #group \
   \
   Желаемая оценка: 4 \
