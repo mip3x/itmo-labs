@@ -1,0 +1,8 @@
+# Explicit folds demonstrate the technique required by lab 1.
+- ignore:
+    name: Use sum
+    within:
+      - Problem2.sumEvenFibModular
+      - Problem2.sumEvenFibMap
+      - Problem2.sumEvenFibComprehension
+      - Problem2.sumEvenFibInfinite
