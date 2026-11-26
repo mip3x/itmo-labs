@@ -100,6 +100,13 @@ monthAfter n state
   | n == 0 = state
   | otherwise = monthAfter (n - 1) (nextMonthState state)
 
+monthAfterPattern ::
+  Integer ->
+  (Integer, Integer, Integer) ->
+  (Integer, Integer, Integer)
+monthAfterPattern 0 state = state
+monthAfterPattern n state = monthAfterPattern (n - 1) (nextMonthState state)
+
 monthsMap :: [(Integer, Integer, Integer)]
 monthsMap =
   map stateAt [0 .. (monthCount - 1)]
@@ -110,7 +117,7 @@ monthsMap =
     startState = nextYearState startYear (1900, 1, 0)
     monthCount = (limitYear - startYear + 1) * 12
 
-    stateAt n = monthAfter n startState
+    stateAt n = monthAfterPattern n startState
 
 countSundaysMap :: Integer
 countSundaysMap = foldr countOne 0 (filter isSundayStart monthsMap)
